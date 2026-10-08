@@ -2,10 +2,10 @@ importScripts("https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"
 
 firebase.initializeApp({apiKey:"AIzaSyD5_rgSQq1-ZlBH6GlkAmX88MvTId8bNog",authDomain:"stylist-36204.firebaseapp.com",projectId:"stylist-36204",storageBucket:"stylist-36204.firebasestorage.app",messagingSenderId:"622468889009",appId:"1:622468889009:web:0579e49d766c6e81a1a590",measurementId:"G-5LDNFHCC53"});
 
-const CACHE_VERSION="jts-shell-v4";
+const CACHE_VERSION="jts-shell-v5";
 const STATIC_LIMIT=120;
 const PAGE_LIMIT=20;
-const SHELL=["/","/order","/account","/offline","/manifest.webmanifest","/icon.svg","/icon-192.png","/icon-512.png"];
+const SHELL=["/","/order","/account","/offline","/manifest.webmanifest","/icon-192.png","/icon-512.png"];
 
 firebase.messaging().onBackgroundMessage((payload)=>{
  const title=payload.notification?.title||payload.data?.title||"JTS Styles";
