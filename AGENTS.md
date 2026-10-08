@@ -1,7 +1,7 @@
 # JOHN THE STYLIST BW — Agent Operating Contract
 
 ## Product
-John The Stylist Bw is a real customer-facing appointment PWA for a hairstylist/barber business in G West, Gaborone. It is not a demo or generic SaaS.
+John The Stylist Bw is a real customer-facing appointment PWA for a hairstylist/barber business in G West, Gaborone. It is a real customer-facing demo operation for John The Stylist Bw while the business prepares its paid live launch. It is not generic SaaS.
 
 Business:
 - John The Stylist Bw
@@ -185,12 +185,37 @@ The existing private customer conversation architecture may be retained and adap
 - do not weaken Storage/Firestore rules to make the UI work.
 
 ## PWA/offline
-Keep the installable PWA foundation. Customer-facing shell changes require the service-worker shell version to be bumped.
+The customer app is an installable PWA and should behave like a real app across supported browsers.
 
-Offline language must remain truthful:
-- a locally saved/requested item is not automatically business-confirmed;
+Installability:
+- manifest has a stable id and scope, standalone display, 192px + 512px PNG icons, shortcuts and install metadata;
+- production must be served over HTTPS;
+- Chromium browsers may expose the in-app install prompt through beforeinstallprompt;
+- iOS/iPadOS Safari does not expose beforeinstallprompt, so provide truthful Share → Add to Home Screen guidance;
+- service-worker shell changes require the cache version to be bumped;
+- app updates must support a waiting worker and an explicit refresh action rather than silently disrupting a customer.
+
+Offline:
+- Firebase Firestore uses persistent local cache/multi-tab persistence;
+- previously established guest sessions remain available offline through Firebase Auth persistence;
+- appointment writes are cached locally by Firestore and synchronize when connectivity returns;
+- do not await an offline Firestore write indefinitely in the customer UI;
+- save a private local booking copy so the tracking page can reopen the request on the same device;
+- service worker caches the public app shell, manifest, icons and static Next assets;
+- navigation uses network-first with /offline fallback;
+- API calls and private admin/customer data are not blindly cached;
+- a first-time visitor who has never established the guest Firebase session must reconnect once before a private backend booking can be created;
 - payment cannot be claimed offline;
 - live appointment status requires synchronized backend data.
+
+Push notifications:
+- /sw-jts.js is the Firebase Messaging + PWA service worker;
+- it uses the dedicated stylist-36204 Firebase configuration;
+- background notification clicks return to JTS customer/admin routes;
+- notification failure must never invalidate a saved booking or message;
+- the old BOEMO service worker is removed.
+
+Do not reintroduce BOEMO food/kitchen/pickup language into customer-facing PWA, offline or notification surfaces.
 
 ## Media/design
 Brand direction:
