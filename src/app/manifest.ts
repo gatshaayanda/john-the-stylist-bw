@@ -21,7 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: brand.icon192, sizes: "192x192", type: "image/png", purpose: "any" },
       { src: brand.icon512, sizes: "512x512", type: "image/png", purpose: "any" },
       { src: brand.icon512, sizes: "512x512", type: "image/png", purpose: "maskable" },
-      { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }
+
     ],
     shortcuts: [
       { name: "Book appointment", short_name: "Book", description: "Choose a service and request an appointment.", url: "/order", icons: [{ src: brand.icon192, sizes: "192x192", type: "image/png" }] },
