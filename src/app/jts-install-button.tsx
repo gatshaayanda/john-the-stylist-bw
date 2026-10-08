@@ -59,23 +59,26 @@ export default function JtsInstallButton(){
   setShowHelp(true);
  }
 
- if(installed||(!mobile&&!available))return null;
+ if(installed)return null;
 
  const embedded=browserContext!=="browser";
  const contextNames:Record<Exclude<BrowserContext,"embedded"|"browser">,string>={whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook",messenger:"Messenger",linkedin:"LinkedIn"};
  const contextName=browserContext in contextNames ? contextNames[browserContext as keyof typeof contextNames] : "this in-app browser";
+ const buttonLabel=available?"Install app":embedded?"Open in browser to install":ios?"How to install":"Install app";
 
  return <div className="jtsInstallWrap">
-  <button type="button" className="jtsInstallButton" onClick={()=>void install()} disabled={busy} aria-label="Install JTS Styles">
-   {busy?"Installing…":<><span aria-hidden="true">⌂</span> Install app</>}
+  <button type="button" className="jtsInstallButton" onClick={()=>void install()} disabled={busy} aria-label={buttonLabel}>
+   {busy?"Installing…":<><span aria-hidden="true">⌂</span> {buttonLabel}</>}
   </button>
   {showHelp&&<div className="pwaInstallHelp" role="dialog" aria-label="Install JTS Styles">
-   <strong>{embedded?"Open JTS Styles in your browser":"Install JTS Styles"}</strong>
+   <strong>{embedded?"Open JTS Styles in your browser":ios?"Add JTS Styles to your Home Screen":available?"Install JTS Styles":"Install JTS Styles"}</strong>
    {embedded
-    ? <span>You opened this link inside <b>{contextName}</b>. The app works here, but installation is handled by your normal browser. Use the <b>⋮</b> or <b>Share</b> menu and choose <b>Open in browser</b>, then install JTS Styles there.</span>
+    ? <span>You opened this link inside <b>{contextName}</b>. JTS Styles works here, but this browser may not expose the native install prompt. Use <b>Open in browser</b> from the app&apos;s menu, then install JTS Styles from Chrome, Edge or Safari.</span>
     : ios
-      ? <span>Tap your browser&apos;s <b>Share</b> button, then choose <b>Add to Home Screen</b>. If that option is not shown, open this page in Safari.</span>
-      : <span>Open your browser menu <b>⋮</b> and choose <b>Install app</b> or <b>Add to Home screen</b>. If you see an install option in the address bar, you can use that too.</span>}
+      ? <span>In Safari, tap <b>Share</b>, choose <b>Add to Home Screen</b>, then tap <b>Add</b>. If you are already in Safari, you can use that menu now.</span>
+      : available
+        ? <span>JTS Styles can install directly from this browser. Choose <b>Install</b> in the browser prompt.</span>
+        : <span>Installation is not available through this page&apos;s native prompt right now. Open the browser menu <b>⋮</b> and choose <b>Install app</b> or <b>Add to Home screen</b>.</span>}
    <button type="button" onClick={()=>setShowHelp(false)}>Got it</button>
   </div>}
  </div>;
