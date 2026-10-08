@@ -2,7 +2,7 @@ importScripts("https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"
 
 firebase.initializeApp({apiKey:"AIzaSyD5_rgSQq1-ZlBH6GlkAmX88MvTId8bNog",authDomain:"stylist-36204.firebaseapp.com",projectId:"stylist-36204",storageBucket:"stylist-36204.firebasestorage.app",messagingSenderId:"622468889009",appId:"1:622468889009:web:0579e49d766c6e81a1a590",measurementId:"G-5LDNFHCC53"});
 
-const CACHE_VERSION="jts-shell-v3";
+const CACHE_VERSION="jts-shell-v4";
 const STATIC_LIMIT=120;
 const PAGE_LIMIT=20;
 const SHELL=["/","/order","/account","/offline","/manifest.webmanifest","/icon.svg","/icon-192.png","/icon-512.png"];
@@ -54,7 +54,7 @@ self.addEventListener("fetch",event=>{
  }
  if(isNavigation){
   const isPrivate=url.pathname.startsWith("/account")||url.pathname.startsWith("/orders/")||url.pathname.startsWith("/admin");
-  event.respondWith(fetch(request).then(response=>{
+  event.respondWith(fetch(request).then(async response=>{
    if(response.ok&&!isPrivate){const cache=await caches.open(CACHE_VERSION);await cache.put(request,response.clone());const keys=await cache.keys();if(keys.length>PAGE_LIMIT+STATIC_LIMIT){await Promise.all(keys.slice(0,keys.length-(PAGE_LIMIT+STATIC_LIMIT)).map(key=>cache.delete(key)))}}
    return response;
   }).catch(async()=>await caches.match(request)||await caches.match("/offline")||Response.error()));
