@@ -11,7 +11,7 @@ function detectBrowserContext(ua:string):BrowserContext{
  if(value.includes("fban")||value.includes("fbav"))return "facebook";
  if(value.includes("messenger"))return "messenger";
  if(value.includes("linkedinapp"))return "linkedin";
- if(/; wv\\)|\\bwv\\b|\\bwebview\\b/.test(value))return "embedded";
+ if(/; wv\)|\bwv\b|\bwebview\b/.test(value))return "embedded";
  return "browser";
 }
 
