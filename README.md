@@ -1,30 +1,40 @@
-# BOEMO Joos Food Deals
+# John The Stylist Bw
 
-**BOEMO Joos Dealer — Good Food. Great Taste. Every Day!**
+**JTS Styles — hairstyling, colour, cuts and barbering in G West, Gaborone.**
 
-Mobile-first ordering and kitchen-operations PWA for a mobile kitchen serving around Botswana Accountancy College (BAC) and nearby student areas.
+Customer-first appointment PWA for John The Stylist Bw. The current site is a **demo operation** while the business prepares its paid live launch.
 
 ## Customer flow
-Home → Today's Food / Deals → Order Ahead → Pickup or Delivery → Confirmation
+Home → Services → Book appointment → Date/time → Name + WhatsApp → 50% deposit instructions → Appointment request
 
-Customers do not need an account to place an order.
+Customers do not need an account or password to request an appointment.
 
-## Current supplied menu
-- Monday: Ke Starch, Beetroot, Pumpkin, Chicken + Stew, Soup, Drink of Choice
-- Tuesday: Samp & Stew
-- Wednesday: Pap, Braai, Chicken, Morogo
-- Thursday: Dumplings & Chicken
-- Friday: Hot Dog & Fries
+## Current supplied services
+- Pixie Cut: BWP 350–400
+- Cut + Pixie Cut: BWP 200
+- Pure White (Bleach/Color): BWP 300
+- Cut + Bleach: BWP 250
 
-## Current supplied deals
-- Beggar & Chips: P30; Bring a Friend P25
-- Hot Dog: P25; Bring a Friend P20
-- Potatoes: P10
-- Cup Drink: P8; Bring a Friend 2 for P15
-- Still Water: P7; Bring a Friend 2 for P10
-- Sausage & Chips: P30
-- Combo Sausage + Chips + Drink: P40
-- Beggar + Chips + Drink: P40
+Other supplied specialties include precision cuts, tinting, bobs, pixie cuts, colour, bleaching, fades and special-event styles. Services without supplied prices are not silently made bookable.
+
+## Business
+- G West shops
+- Upstairs at Star Tattoos parlor and boutique, inside the salon with the purple door labelled “miss Emma”
+- 08:00–18:00
+- +267 78 053 564
+- 50% deposit via Orange Money: 75720306
+- Account name: John SHUMBA
+
+## PWA
+- Installable standalone web app with 192px and 512px icons.
+- Home-screen shortcuts for Book appointment and My appointments.
+- Chromium install prompt when supported.
+- iOS/iPadOS Safari Add to Home Screen guidance.
+- Service-worker cached public shell and static assets.
+- Offline page and offline status messaging.
+- Firestore persistent offline cache/queued writes for previously established guest sessions.
+- Background Firebase Cloud Messaging handled by the JTS service worker.
+- Customer-facing offline requests are never described as confirmed appointments or paid.
 
 ## Operations
 /admin is protected by Firebase Authentication plus admins/{uid} with role owner/staff.
@@ -39,6 +49,3 @@ npm run lint
 npm run build
 
 See AGENTS.md for the implementation contract.
-
-## Pickup notifications
-Customer and kitchen pickup reminders are implemented with Firebase Cloud Messaging and a scheduled Firebase function. Before production delivery is enabled, generate a Firebase Web Push/VAPID key under Firebase Console → Project settings → Cloud Messaging → Web Push certificates and set `NEXT_PUBLIC_FIREBASE_VAPID_KEY` in the BOEMO deployment. Deploy the Firebase functions with `firebase deploy --only functions,firestore:indexes` on the BOEMO Firebase project; scheduled functions require the Firebase Blaze plan. The app asks for notification permission only from the user's explicit settings action and supports 5, 10, 15, 20, 30, 45 and 60 minute pickup reminders.
