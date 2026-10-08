@@ -1,4 +1,4 @@
-name: Deploy BOEMO Firebase rules
+name: Deploy JTS Firebase rules
 
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: boemo-firebase-rules-deploy
+  group: jts-firebase-rules-deploy
   cancel-in-progress: false
 
 jobs:
@@ -43,10 +43,10 @@ jobs:
           umask 077
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-service-account.json"
 
-      - name: Deploy BOEMO Firestore and Storage rules
+      - name: Deploy JTS Firestore and Storage rules
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
-        run: firebase deploy --only firestore:rules,storage --project boemo-joos-food-deals --non-interactive
+        run: firebase deploy --only firestore:rules,storage --project stylist-36204 --non-interactive
 
       - name: Remove Firebase service account
         if: always()
