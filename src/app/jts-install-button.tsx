@@ -6,7 +6,7 @@ export default function JtsInstallButton(){
  const[available,setAvailable]=useState(false);
  const[installed,setInstalled]=useState(false);
  const[ios,setIos]=useState(false);
- const[busy,setBusy]=useState(false);
+ const[busy,setBusy]=useState(false),[showIos,setShowIos]=useState(false);
 
  useEffect(()=>{
   const standalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean((navigator as Navigator&{standalone?:boolean}).standalone));
@@ -43,7 +43,7 @@ export default function JtsInstallButton(){
  if(installed||(!available&&!ios))return null;
 
  if(ios&&!available){
-  return <button type="button" className="jtsInstallButton" onClick={()=>setIos(false)} aria-label="How to install JTS Styles on iPhone or iPad"><span aria-hidden="true">⌂</span> Install app</button>;
+  return <><button type="button" className="jtsInstallButton" onClick={()=>setShowIos(true)} aria-label="How to install JTS Styles on iPhone or iPad"><span aria-hidden="true">⌂</span> Install app</button>{showIos&&<div className="pwaIosInstall" role="dialog" aria-label="Install JTS Styles on iPhone or iPad"><strong>Install JTS Styles</strong><span>In Safari, tap Share, then <b>Add to Home Screen</b>.</span><button type="button" onClick={()=>setShowIos(false)}>Got it</button></div>}</>;
  }
 
  return <button type="button" className="jtsInstallButton" onClick={()=>void install()} disabled={busy} aria-label="Install JTS Styles">{busy?"Installing…":<><span aria-hidden="true">⌂</span> Install app</>}</button>;
