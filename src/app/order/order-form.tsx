@@ -1,84 +1,43 @@
 "use client";
 import Link from "next/link";
-import {FormEvent,useEffect,useMemo,useState} from "react";
-import {signInAnonymously,onAuthStateChanged,type User} from "firebase/auth";
-import {createFoodOrder,getCustomerProfile,getMenuItems,readCachedMenuItems,saveCustomerProfile,type MenuItem} from "@/lib/firebase/data";
+import {FormEvent,useMemo,useState} from "react";
+import {signInAnonymously} from "firebase/auth";
 import {auth} from "@/lib/firebase/client";
-import NotificationSettings from "@/components/NotificationSettings";
-function gaboroneDateKey(date=new Date()){const parts=new Intl.DateTimeFormat("en-US",{timeZone:"Africa/Gaborone",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(date);return `${parts.find(p=>p.type==="year")?.value}-${parts.find(p=>p.type==="month")?.value}-${parts.find(p=>p.type==="day")?.value}`}
-function weekdayForDate(dateKey:string){return new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:"Africa/Gaborone"}).format(new Date(`${dateKey}T12:00:00`))}
-function addGaboroneDays(dateKey:string,offset:number){const date=new Date(`${dateKey}T12:00:00`);date.setUTCDate(date.getUTCDate()+offset);return `${date.getUTCFullYear()}-${String(date.getUTCMonth()+1).padStart(2,"0")}-${String(date.getUTCDate()).padStart(2,"0")}`}
-function orderUnitPrice(item:MenuItem,quantity:number){return item.friendPrice!==undefined&&quantity>=2?item.friendPrice:item.price}
-function gaboroneNowDate(){return gaboroneDateKey()}function gaboroneNowTime(){const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Gaborone",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());const get=(type:string)=>parts.find(p=>p.type===type)?.value??"";return `${get("hour")}:${get("minute")}`}
-function gaboroneScheduledIso(value:string){return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)?value+":00+02:00":value}
-export default function OrderForm(){
- const today=gaboroneDateKey();
- const[menu,setMenu]=useState<MenuItem[]>([]),[menuLoaded,setMenuLoaded]=useState(false),[menuUnavailable,setMenuUnavailable]=useState(false);
- const[quantities,setQuantities]=useState<Record<string,number>>({}),[scheduledDate,setScheduledDate]=useState(""),[scheduledTime,setScheduledTime]=useState(""),[selectedDate,setSelectedDate]=useState(today);
- const[submitted,setSubmitted]=useState(false),[reference,setReference]=useState(""),[pendingSync,setPendingSync]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(""),[user,setUser]=useState<User|null>(null),[saved,setSaved]=useState({name:"",phone:"",location:"",notes:""});
- useEffect(()=>{const requested=new URLSearchParams(window.location.search).get("date");if(requested&&/^\d{4}-\d{2}-\d{2}$/.test(requested)&&requested>=today){setSelectedDate(requested);setScheduledDate(requested)}} , [today]);
- useEffect(()=>{const unsub=onAuthStateChanged(auth,async next=>{setUser(next);if(next){try{const profile=await getCustomerProfile(next.uid);if(profile)setSaved({name:profile.name,phone:profile.phone,location:profile.preferredDeliveryLocation,notes:profile.notes})}catch(error){console.warn("BOEMO customer profile unavailable",error)}}});void getMenuItems().then(setMenu).catch(()=>{const cached=readCachedMenuItems();if(cached.length){setMenu(cached);setMenuUnavailable(false)}else setMenuUnavailable(true)}).finally(()=>setMenuLoaded(true));return unsub},[]);
- const visibleMenu=useMemo(()=>{const legacyToday=menu.filter(item=>item.available&&item.section==="deal"&&item.category.trim().toLowerCase()==="deal"&&!item.id.startsWith("deal-"));const daily=menu.filter(item=>item.available&&item.section==="daily"&&(item.days??[]).includes(weekdayForDate(selectedDate)));const deals=menu.filter(item=>item.available&&(item.section==="deal"||(!item.section&&item.category.toLowerCase()==="deal"))&&!legacyToday.some(service=>service.id===item.id));return [...daily,...(selectedDate===today?legacyToday:[]),...deals].filter((item,index,array)=>array.findIndex(candidate=>candidate.id===item.id)===index)},[menu,selectedDate,today]);
- const nextPublishedDate=useMemo(()=>{for(let offset=1;offset<=7;offset++){const candidate=addGaboroneDays(selectedDate,offset);if(menu.some(item=>item.available&&item.section==="daily"&&(item.days??[]).includes(weekdayForDate(candidate))))return candidate}return null},[menu,selectedDate]);
+import {createFoodOrder} from "@/lib/firebase/data";
 
- const selected=useMemo(()=>menu.filter(item=>(quantities[item.id]??0)>0).map(item=>({...item,quantity:quantities[item.id]??0})),[menu,quantities]);
- const unavailableSelected=useMemo(()=>selected.filter(item=>!visibleMenu.some(availableItem=>availableItem.id===item.id)),[selected,visibleMenu]);
- const total=selected.filter(item=>!unavailableSelected.some(unavailable=>unavailable.id===item.id)).reduce((sum,item)=>sum+orderUnitPrice(item,item.quantity)*item.quantity,0);
- function change(id:string,delta:number){setQuantities(current=>({...current,[id]:Math.max(0,(current[id]??0)+delta)}))}
- function onScheduledDateChange(value:string){setScheduledDate(value);setSelectedDate(value)}
+const SERVICES=[
+ {id:"pixie-cut",name:"Pixie Cut",price:350,display:"P350–P400",detail:"Precision short cut"},
+ {id:"cut-pixie",name:"Cut + Pixie Cut",price:200,display:"P200",detail:"Cut and shape"},
+ {id:"pure-white",name:"Pure White",price:300,display:"P300",detail:"Bleach / colour"},
+ {id:"cut-bleach",name:"Cut + Bleach",price:250,display:"P250",detail:"Cut + bleach"}
+];
+const minDate=()=>{const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10)};
+const money=(value:number)=>"P"+value.toFixed(0);
+
+export default function OrderForm(){
+ const[serviceId,setServiceId]=useState(""),[date,setDate]=useState(""),[time,setTime]=useState(""),[name,setName]=useState(""),[phone,setPhone]=useState(""),[style,setStyle]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[submitted,setSubmitted]=useState(false),[reference,setReference]=useState("");
+ const service=useMemo(()=>SERVICES.find(item=>item.id===serviceId),[serviceId]);
+ const deposit=service?service.price*.5:0;
  async function submit(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();if(busy)return;if(!selected.length){setError(menuUnavailable||!visibleMenu.length?"No menu items are currently published for this date. Choose another published date or call BOEMO on 76425849 / 76769834.":"Choose at least one food item.");return}if(unavailableSelected.length){setError("One or more selected items are not published for "+weekdayForDate(selectedDate)+". Remove them or choose a date when they are available.");return}setBusy(true);setError("");
-  const form=new FormData(event.currentTarget),name=String(form.get("customerName")??"").trim(),phone=String(form.get("phone")??"").trim(),mode=String(form.get("mode")??"pickup") as "pickup"|"delivery",formDate=String(form.get("scheduledDate")??scheduledDate),formTime=String(form.get("scheduledTime")??scheduledTime),scheduledFor=gaboroneScheduledIso(formDate&&formTime?`${formDate}T${formTime}`:""),deliveryLocation=String(form.get("deliveryLocation")??"").trim(),instructions=String(form.get("instructions")??"").trim();
-  if(!name||!phone||!formDate||!formTime||!scheduledFor){setError("Please choose the date and time you need the order.");setBusy(false);return}
-  const scheduledMs=new Date(scheduledFor).getTime();if(!Number.isFinite(scheduledMs)||scheduledMs<Date.now()){setError("Choose a future time for your order.");setBusy(false);return}
-  if(mode==="delivery"&&!deliveryLocation){setError("Add your delivery location or landmark.");setBusy(false);return}
+  event.preventDefault();setError("");
+  if(!service||!date||!time||!name.trim()||!phone.trim()){setError("Choose a service, date, time, name and WhatsApp/phone number.");return}
+  const chosen=new Date(date+"T"+time+":00+02:00"),min=new Date(minDate()+"T00:00:00+02:00");
+  if(chosen<min){setError("Appointments need to be booked at least one day in advance.");return}
+  const hour=Number(time.slice(0,2));
+  if(hour<8||hour>18||(hour===18&&time.slice(3)!=="00")){setError("Choose a time between 08:00 and 18:00.");return}
+  setBusy(true);
   try{
-   let customer=user;
-   if(!customer)customer=(await signInAnonymously(auth)).user
-   const order={customerId:customer.uid,createdAt:new Date().toISOString(),customerName:name,phone,mode,scheduledFor,deliveryLocation,instructions,items:selected.map(({name,price,friendPrice,quantity})=>({name,price:orderUnitPrice({name,price,friendPrice} as MenuItem,quantity),quantity})),total,status:"New" as const};
-   const offline=!navigator.onLine;const{id,writePromise}=createFoodOrder(order);setReference(id);try{window.localStorage.setItem(`boemo-order-${id}`,JSON.stringify({...order,id}));window.localStorage.setItem(`boemo-pending-order-notification-${id}`,"1")}catch{}
-   // Customer profile persistence is a convenience, never a reason to reject an order.
-   // Firestore may deny/read-fail an empty profile while the order write itself is valid.
-   if(offline){void writePromise.catch(console.error);setPendingSync(true)}else{await writePromise;setPendingSync(false);try{const idToken=await customer.getIdToken();const notificationResponse=await fetch("/api/notifications/order-created",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+idToken},body:JSON.stringify({orderId:id})});if(notificationResponse.ok)window.localStorage.removeItem(`boemo-pending-order-notification-${id}`)}catch(notificationError){console.warn("BOEMO new-order notification request failed",notificationError)}}
-   if(customer){
-    const now=new Date().toISOString();
-    void getCustomerProfile(customer.uid)
-      .catch(profileError=>{console.warn("BOEMO customer profile read unavailable",profileError);return null})
-      .then(existing=>{
-       const profile={uid:customer.uid,name,email:customer.email??existing?.email??"",phone,preferredDeliveryLocation:deliveryLocation||existing?.preferredDeliveryLocation||"",notes:instructions||existing?.notes||"",createdAt:existing?.createdAt??now,updatedAt:now};
-       return saveCustomerProfile(profile);
-      })
-      .catch(profileError=>console.warn("BOEMO customer profile save unavailable",profileError));
-   }
-   setSubmitted(true);event.currentTarget.reset();
-  }catch(error){console.error("BOEMO order submission failed",error);setError("The order could not be confirmed online. Please check the connection and try again, or call BOEMO on 76425849 / 76769834.")}finally{setBusy(false)}
+   const user=(await signInAnonymously(auth)).user;
+   const result=createFoodOrder({
+    customerId:user.uid,createdAt:new Date().toISOString(),customerName:name.trim(),phone:phone.trim(),
+    mode:"pickup" as const,scheduledFor:chosen.toISOString(),
+    deliveryLocation:"G West shops — inside the salon with the purple door labelled “miss Emma”",
+    instructions:"APPOINTMENT REQUEST. Service: "+service.name+". Desired style: "+(style.trim()||"Not specified")+". Deposit required: "+money(deposit)+" (50%). Deposit method: Orange Money 75720306, account name John SHUMBA. Booking is a request, not confirmed until John confirms the slot and deposit.",
+    items:[{name:service.name,price:service.price,quantity:1}],total:service.price,status:"New" as const
+   });
+   await result.writePromise;setReference(result.id);setSubmitted(true);
+  }catch(err){console.error(err);setError("We couldn't send the booking request. Please check your connection or call John on +267 78 053 564.")}finally{setBusy(false)}
  }
- if(submitted)return (
-  <main className="orderPage">
-   <div className="orderWrap">
-    <div className="orderCard confirm">
-     <div className="confirmIcon">🍔</div>
-     <span className="kicker">{pendingSync?"Offline save":"Order submitted"}</span>
-     <h1>{pendingSync?"Saved on this phone.":"Order received."}</h1>
-     <p>{pendingSync?"Your order is waiting to synchronize. Reconnect this device so it can reach BOEMO. Until then, the kitchen has not received it.":"Your order was written to the BOEMO order queue. The kitchen can review it and contact you if needed."}</p>
-     <strong>Reference #{reference.slice(0,8).toUpperCase()}</strong>
-     <NotificationSettings/>
-     <div className="actions centered">
-      <div>
-       <p className="orderTruth"><strong>Your order is saved with BOEMO.</strong> You can follow it from <Link href="/account">My BOEMO</Link> when this guest session is available.</p>
-      </div>
-      <div>
-       <Link className="button buttonLight" href="/account">My BOEMO →</Link>
-       <p className="orderTruth">Opens your private order history and activity feed.</p>
-      </div>
-      <div>
-       <Link className="button buttonLight" href="/">Back to BOEMO →</Link>
-       <p className="orderTruth">Returns to the menu and deals. Your submitted order stays in the kitchen queue.</p>
-      </div>
-     </div>
-    </div>
-   </div>
-  </main>
- );
- return <main className="orderPage"><div className="orderWrap"><div className="orderHeader"><Link href="/" className="logo"><span className="logoMark">B</span><span>BOEMO</span></Link><Link href="/account" className="button buttonLight">My BOEMO</Link></div><div className="sectionHead"><div><span className="kicker">Order ahead</span><h1>{selectedDate===today?"Choose your food.":"Pre-order your food."}</h1><p>{selectedDate===today?"Order as a guest. Your name and contact details can be saved with BOEMO automatically for faster future orders.":"Planning for "+weekdayForDate(selectedDate)+". Menu & deals are set to this date, and the kitchen can see your scheduled order ahead of the food day."}</p></div></div><form onSubmit={submit} className="orderGrid"><div className="orderCard"><h2>Menu & deals</h2><div className="fieldGrid"><label>When do you need it?<input name="scheduledDate" type="date" min={gaboroneNowDate()} value={scheduledDate} onChange={event=>onScheduledDateChange(event.target.value)} required/></label><label>Time<input name="scheduledTime" type="time" min={scheduledDate===today?gaboroneNowTime():undefined} value={scheduledTime} onChange={event=>setScheduledTime(event.target.value)} required/></label></div>{!menuLoaded?<div className="emptyState">Loading the current BOEMO menu…</div>:visibleMenu.length?<div className="orderItems">{visibleMenu.map(item=>{const quantity=quantities[item.id]??0;const unitPrice=orderUnitPrice(item,quantity);return <article className="orderItem" key={item.id}><div><strong>{item.name}</strong><small>P{item.price.toFixed(item.price%1?1:0)}{item.friendPrice!==undefined?" · Bring a Friend P"+item.friendPrice.toFixed(item.friendPrice%1?2:0):""}</small>{item.friendPrice!==undefined&&quantity>=2&&<small className="friendPriceActive">Bring-a-Friend price active · P{unitPrice.toFixed(unitPrice%1?2:0)} each</small>}</div><div className="qty"><button type="button" onClick={()=>change(item.id,-1)} aria-label={"Remove "+item.name}>−</button><strong>{quantity}</strong><button type="button" onClick={()=>change(item.id,1)} aria-label={"Add "+item.name}>+</button></div></article>})}</div>:<div className="emptyState"><strong>{menuUnavailable?"The BOEMO menu could not be loaded.":"No menu items are published for "+weekdayForDate(selectedDate)+"."}</strong>{!menuUnavailable&&nextPublishedDate&&<div className="nextFoodCard"><span className="kicker">Next food day · {weekdayForDate(nextPublishedDate)}</span><strong>There&apos;s another food day coming.</strong><p>You can switch to {weekdayForDate(nextPublishedDate)} and pre-order now, so your request is already on the kitchen radar before the food day starts.</p><Link className="button buttonPrimary" href={"/order?date="+nextPublishedDate}>Order ahead for {weekdayForDate(nextPublishedDate)} →</Link></div>}{!menuUnavailable&&!nextPublishedDate&&<p>There is no future daily food published yet. Call BOEMO on 76425849 / 76769834 if you need help.</p>}<div className="contactRow"><a className="button buttonDark" href="tel:76425849">Call 76425849</a><a className="button buttonLight" href="tel:76769834">Call 76769834</a></div></div>}<p className="orderTruth">Only currently published, available menu items can be ordered here. Bring-a-Friend pricing is controlled by the BOEMO kitchen admin.</p>{selected.length>0&&<div className="orderSelectionSummary"><strong>Your order</strong>{selected.map(item=>{const unavailable=unavailableSelected.some(candidate=>candidate.id===item.id);return <div className={unavailable?"selectionUnavailable":"selectionLine"} key={item.id}><span>{item.quantity} × {item.name} · {unavailable?"Not available for "+weekdayForDate(selectedDate):"P"+(orderUnitPrice(item,item.quantity)*item.quantity).toFixed(2)}</span><button type="button" onClick={()=>setQuantities(current=>({...current,[item.id]:0}))}>Remove</button></div>})}{unavailableSelected.length>0&&<small className="selectionWarning">Changing the date does not erase your selection. Items that are not published for the chosen day stay here until you remove them or choose a compatible date.</small>}</div>}</div><div className="orderCard"><h2>Your details</h2><p className="orderTruth">No account is required. BOEMO uses a temporary guest session to keep this order private and trackable on this device.</p><div className="fieldGrid"><label>Name<input name="customerName" autoComplete="name" defaultValue={saved.name} required/></label><label>Phone / WhatsApp<input name="phone" type="tel" autoComplete="tel" defaultValue={saved.phone} required/></label><label>Order type<select name="mode" defaultValue="pickup"><option value="pickup">Pickup</option><option value="delivery">Delivery</option></select></label><label className="fieldFull">Delivery location / landmark <span>(required for delivery)</span><input name="deliveryLocation" defaultValue={saved.location} placeholder="BAC Library, main entrance..."/></label><label className="fieldFull">Instructions <span>(optional)</span><textarea name="instructions" defaultValue={saved.notes} placeholder="Call when outside, no onions, etc."/></label></div><div className="total"><span>Total</span><strong>P{total.toFixed(2)}</strong></div>{error&&<p role="alert" className="notice">{error}</p>}<button className="button buttonPrimary" type="submit" disabled={busy||!selected.length||unavailableSelected.length>0}>{busy?"Saving order…":"Place order"}</button></div></form></div></main>;
+ if(submitted)return <main className="jtsBookingPage"><div className="jtsContainer jtsBookingWrap"><Link href="/" className="jtsBack">← JTS Styles</Link><section className="jtsConfirmation"><span className="jtsEyebrow">REQUEST SENT</span><div className="jtsConfirmIcon">✓</div><h1>Your appointment request is in.</h1><p>John still needs to confirm the slot and receive the 50% deposit. Your reference is <strong>#{reference.slice(0,8).toUpperCase()}</strong>.</p><div className="jtsPaymentCard"><span>YOUR NEXT STEP</span><strong>Send {money(deposit)} via Orange Money</strong><p><b>75720306</b> · John SHUMBA</p><small>Then send your full name, requested date, preferred time and desired hairstyle by WhatsApp to +267 78 053 564.</small><a href="tel:+26778053564" className="jtsButton jtsButtonBlue">Contact John →</a></div><div className="jtsConfirmActions"><Link href="/" className="jtsButton jtsButtonGold">Back to JTS Styles</Link><Link href="/account" className="jtsGhost">View my booking</Link></div></section></div></main>;
+ return <main className="jtsBookingPage"><div className="jtsContainer jtsBookingWrap"><div className="jtsBookingTop"><Link href="/" className="jtsBack">← JTS Styles</Link><span>Booking · Guest first</span></div><div className="jtsBookingIntro"><span className="jtsEyebrow">BOOK AN APPOINTMENT</span><h1>Let's plan your look.</h1><p>Choose the service, then tell John when you want to come in. No account or password is required.</p></div><form onSubmit={submit} className="jtsBookingGrid"><section className="jtsBookingMain"><div className="jtsBookingStep"><span>01</span><div><h2>What are you having done?</h2><p>Start with the result you want. You can explain more below.</p></div></div><div className="jtsChoiceGrid">{SERVICES.map(item=><button type="button" key={item.id} className={"jtsChoice "+(serviceId===item.id?"selected":"")} onClick={()=>setServiceId(item.id)}><span>{item.detail}</span><strong>{item.name}</strong><b>{item.display}</b>{serviceId===item.id&&<i>✓</i>}</button>)}</div><div className="jtsBookingStep"><span>02</span><div><h2>When should John expect you?</h2><p>Appointments must be requested at least one day in advance.</p></div></div><div className="jtsDateGrid"><label>Date<span>Appointment date</span><input type="date" min={minDate()} value={date} onChange={e=>setDate(e.target.value)} required/></label><label>Time<span>08:00 – 18:00</span><input type="time" min="08:00" max="18:00" value={time} onChange={e=>setTime(e.target.value)} required/></label></div><div className="jtsBookingStep"><span>03</span><div><h2>Tell us about you.</h2><p>Only the details needed to identify your request and contact you.</p></div></div><div className="jtsFields"><label>Full name<input value={name} onChange={e=>setName(e.target.value)} autoComplete="name" required/></label><label>WhatsApp / phone<input value={phone} onChange={e=>setPhone(e.target.value)} type="tel" autoComplete="tel" required/></label><label>Desired hairstyle <em>optional</em><textarea value={style} onChange={e=>setStyle(e.target.value)} placeholder="e.g. short pixie, bright colour, similar to a photo..." rows={4}/></label></div>{error&&<p className="jtsFormError" role="alert">⚠ {error}</p>}<button className="jtsButton jtsButtonGold jtsSubmit" disabled={busy}>{busy?"Sending request…":"Request this appointment →"}</button></section><aside className="jtsBookingSide"><div className="jtsSummary"><span className="jtsEyebrow">YOUR REQUEST</span>{service?<><strong>{service.name}</strong><p>{date?new Date(date+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}):"Choose a date"}{time?" · "+time:""}</p><div className="jtsPriceRow"><span>Service</span><b>{money(service.price)}{service.id==="pixie-cut"?" from":""}</b></div><div className="jtsPriceRow"><span>50% deposit</span><b>{money(deposit)}</b></div></>:<p>Select a service to see your booking summary.</p>}</div><div className="jtsDepositCard"><span>SECURE YOUR SLOT</span><h3>50% deposit</h3><p>After you submit, send the deposit through Orange Money.</p><strong>75720306</strong><small>John SHUMBA</small></div><div className="jtsLocationMini"><span>G WEST SHOPS</span><strong>Purple door · “miss Emma”</strong><p>Upstairs at Star Tattoos parlor and boutique, inside the salon.</p><a href="tel:+26778053564">+267 78 053 564</a></div></aside></form></div></main>;
 }
