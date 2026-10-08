@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<rect width="512" height="512" rx="112" fill="#050505"/>
-<circle cx="256" cy="256" r="190" fill="none" stroke="#1CA8FF" stroke-width="8"/>
-<circle cx="256" cy="256" r="169" fill="none" stroke="#C7A45B" stroke-width="3"/>
-<text x="256" y="274" text-anchor="middle" fill="#F7F7F5" font-family="Georgia,serif" font-size="126" font-style="italic" font-weight="900">JTS</text>
-<path d="M365 116l58-30" stroke="#C7A45B" stroke-width="12" stroke-linecap="round"/>
-<circle cx="429" cy="82" r="9" fill="#1CA8FF"/>
-<text x="256" y="348" text-anchor="middle" fill="#E1C987" font-family="Arial,sans-serif" font-size="18" letter-spacing="7">STYLES</text>
-</svg>
