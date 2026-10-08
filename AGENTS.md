@@ -275,3 +275,10 @@ If an unexpected result appears:
 **STOP → inspect reality → compare against the last known-good checkpoint → repair the smallest necessary layer → verify again.**
 
 Do not rebuild the foundation merely because the product domain is changing. Reuse proven authentication, Firestore, PWA, customer communication and deployment patterns while replacing the business semantics carefully.
+
+
+### Install UX checkpoint
+- The customer-facing install action is a normal JTS header control, not a fixed floating button that can cover content or compete with booking actions.
+- Chromium installation uses one retained `beforeinstallprompt` event and calls `prompt()` directly from the explicit Install app button user gesture; the consumed event is cleared and `appinstalled` removes the control.
+- iPhone/iPad Safari does not receive a fake native prompt; the Install app control opens concise Share → Add to Home Screen guidance.
+- Unsupported browsers do not receive a dead install control.
