@@ -1,4 +1,4 @@
-name: BOEMO CI
+name: JTS Styles CI
 
 on:
   push:
