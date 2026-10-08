@@ -122,7 +122,7 @@ async function remindUser(uid:string,leadMinutes:number,order:ReminderOrder,admi
     ?customerName+" · "+items+" · "+timeText
     :"Hi "+customerName.split(/\s+/)[0]+", your pickup is at "+timeText+". "+items;
   const link=admin?"/admin":"/account";
-  const publicUrl=process.env.JTS Styles_PUBLIC_URL||"https://boemo-joos-food-deals.vercel.app";
+  const publicUrl=process.env.NEXT_PUBLIC_BASE_URL||"https://john-the-stylist-bw.vercel.app";
 
   const deliveryData={
     orderId:order.id,
@@ -251,7 +251,7 @@ async function sendTestNotification(uid:string,deviceToken:string):Promise<Notif
     notification:{title,body},
     data:{title,body,link,test:"true"},
     webpush:{
-      fcmOptions:{link:(process.env.JTS Styles_PUBLIC_URL||"https://boemo-joos-food-deals.vercel.app")+link},
+      fcmOptions:{link:(process.env.NEXT_PUBLIC_BASE_URL||"https://john-the-stylist-bw.vercel.app")+link},
       notification:{tag:"jts-test-notification",icon:"/icon.svg",badge:"/icon.svg"}
     }
   });
@@ -273,7 +273,7 @@ async function sendNewOrderNotifications(orderId:string,customerUid:string):Prom
   const customerName=(order.customerName||"customer").trim();
   const title="New order · "+customerName;
   const body=items+(typeof order.total==="number"?" · P"+order.total.toFixed(2):"")+" · "+(order.mode==="delivery"?"Delivery":"Pickup")+" "+timeText;
-  const publicUrl=process.env.JTS Styles_PUBLIC_URL||"https://boemo-joos-food-deals.vercel.app";
+  const publicUrl=process.env.NEXT_PUBLIC_BASE_URL||"https://john-the-stylist-bw.vercel.app";
   for(const adminDoc of adminsSnapshot.docs){
     const uid=adminDoc.id; const pref=(await db.collection("notificationPreferences").doc(uid).get()).data();
     if(!pref?.enabled)continue; admins++;
@@ -316,7 +316,7 @@ async function sendConversationMessageNotification(conversationId:string,message
   const preview=String(message.text||"Attachment sent");
   const body=preview.length>120?preview.slice(0,117)+"…":preview;
   const link=senderRole==="customer"?"/admin":"/account";
-  const publicUrl=process.env.JTS Styles_PUBLIC_URL||"https://boemo-joos-food-deals.vercel.app";
+  const publicUrl=process.env.NEXT_PUBLIC_BASE_URL||"https://john-the-stylist-bw.vercel.app";
   let sent=0;
   for(const uid of recipientUids){
     const jobId="conversation-message_"+conversationId+"_"+messageId+"_"+uid;
