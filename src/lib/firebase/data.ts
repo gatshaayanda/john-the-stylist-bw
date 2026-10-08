@@ -46,7 +46,7 @@ const conversationsCollection=collection(db,"conversations");
 export async function createCustomerConversation(uid:string,title:string):Promise<string>{
  const profile=await getCustomerProfile(uid);
  const now=new Date().toISOString();
- const reference=await addDoc(conversationsCollection,{customerId:uid,customerName:profile?.name||"BOEMO customer",title,status:"open",createdAt:now,updatedAt:now,lastMessageAt:now,lastMessagePreview:"",unreadForCustomer:false,unreadForAdmin:false});
+ const reference=await addDoc(conversationsCollection,{customerId:uid,customerName:profile?.name||"JTS Styles customer",title,status:"open",createdAt:now,updatedAt:now,lastMessageAt:now,lastMessagePreview:"",unreadForCustomer:false,unreadForAdmin:false});
  return reference.id;
 }
 export function subscribeToCustomerConversations(uid:string,onChange:(items:Conversation[])=>void,onError:(error:Error)=>void):Unsubscribe{
@@ -72,7 +72,7 @@ export async function ensureStarterMenuSeeded():Promise<MenuItem[]>{const snapsh
 // Existing menu records must never be silently reclassified by the current day. 
 
 
-const MENU_CACHE_KEY="boemo-menu-cache-v2";
+const MENU_CACHE_KEY="jts-menu-cache-v1";
 export function readCachedMenuItems():MenuItem[]{if(typeof window==="undefined")return [];try{const raw=window.localStorage.getItem(MENU_CACHE_KEY);return raw?JSON.parse(raw) as MenuItem[]:[]}catch{return []}}
 export async function getMenuItems():Promise<MenuItem[]>{const snapshot=await getDocs(menuCollection);const items=snapshot.docs.map(item=>({id:item.id,...item.data() as Omit<MenuItem,"id">})).sort((a,b)=>a.sortOrder-b.sortOrder||a.name.localeCompare(b.name));try{if(typeof window!=="undefined")window.localStorage.setItem(MENU_CACHE_KEY,JSON.stringify(items))}catch{}return items}
 export async function saveMenuItem(item:MenuItem){await setDoc(doc(menuCollection,item.id),item)}
