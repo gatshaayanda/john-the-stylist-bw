@@ -282,3 +282,10 @@ Do not rebuild the foundation merely because the product domain is changing. Reu
 - Chromium installation uses one retained `beforeinstallprompt` event and calls `prompt()` directly from the explicit Install app button user gesture; the consumed event is cleared and `appinstalled` removes the control.
 - iPhone/iPad Safari does not receive a fake native prompt; the Install app control opens concise Share → Add to Home Screen guidance.
 - Unsupported browsers do not receive a dead install control.
+
+
+### Install recovery checkpoint
+- `public/sw-jts.js` cache version is `jts-shell-v4` and its navigation handler must keep the response callback async because it awaits cache writes.
+- The install control remains visible on mobile browsers even before `beforeinstallprompt` arrives; when no native prompt is available it gives browser-specific truthful installation guidance instead of disappearing.
+- iOS installation guidance applies to iOS browsers generally: Share → Add to Home Screen; Chromium-based Android browsers use the native retained prompt when `beforeinstallprompt` is available.
+- Do not hide the mobile install control merely because the browser has not yet delivered `beforeinstallprompt`.
