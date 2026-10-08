@@ -51,11 +51,17 @@ export default function PwaRegister(){
   window.jtsInstallApp=async()=>{
    const promptEvent=window.jtsInstallPrompt;
    if(!promptEvent)return "unavailable";
-   window.jtsInstallPrompt=null;
-   window.dispatchEvent(new Event("jts-install-consumed"));
-   promptEvent.prompt();
-   const choice=await promptEvent.userChoice;
-   return choice.outcome;
+   try{
+    promptEvent.prompt();
+    window.jtsInstallPrompt=null;
+    window.dispatchEvent(new Event("jts-install-consumed"));
+    const choice=await promptEvent.userChoice;
+    return choice.outcome;
+   }catch{
+    window.jtsInstallPrompt=promptEvent;
+    window.dispatchEvent(new Event("jts-install-available"));
+    return "unavailable";
+   }
   };
 
   window.addEventListener("online",online);
