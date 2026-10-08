@@ -2,20 +2,26 @@ import Link from "next/link";
 
 export default function OfflinePage() {
   return (
-    <main className="orderPage">
-      <div className="orderWrap">
-        <div className="orderHeader">
-          <Link href="/" className="logo"><span className="logoMark">B</span><span>BOEMO</span></Link>
+    <main className="jtsBookingPage">
+      <div className="jtsContainer jtsBookingWrap">
+        <div className="jtsBookingTop">
+          <Link href="/" className="jtsBack">← JTS Styles</Link>
+          <span>Demo operation</span>
         </div>
-        <section className="orderCard confirm">
-          <div className="confirmIcon">📶</div>
-          <span className="kicker">Offline mode</span>
-          <h1>BOEMO is still here.</h1>
-          <p>The BOEMO app shell and previously loaded public pages can remain available on this device while your connection is away.</p>
-          <p>Firestore can keep an eligible order write locally and synchronize it later, but the kitchen has not received an offline order until Firebase confirms synchronization.</p>
-          <div className="actions centered">
-            <Link className="button buttonPrimary" href="/order">Open Order</Link>
-            <Link className="button buttonLight" href="/">Open BOEMO</Link>
+        <section className="jtsConfirmation">
+          <span className="jtsEyebrow">DEMO OPERATION · OFFLINE</span>
+          <div className="jtsConfirmIcon">⌁</div>
+          <h1>You're offline, but JTS Styles is still here.</h1>
+          <p>John The Stylist Bw is currently operating this customer experience as a demo operation while the business prepares the live paid service. Previously loaded pages can remain available on this device without a connection.</p>
+          <p>Any booking information saved while offline is only a local copy. It is <strong>not a confirmed appointment</strong> and does not mean a deposit or payment has been received.</p>
+          <div className="jtsPaymentCard">
+            <span>BEFORE GO-LIVE</span>
+            <strong>Demo operation</strong>
+            <small>The live customer service will only be treated as active once the business has completed its paid launch setup.</small>
+          </div>
+          <div className="jtsConfirmActions">
+            <Link className="jtsButton jtsButtonGold" href="/order">Open booking →</Link>
+            <Link className="jtsGhost" href="/">Back to JTS Styles</Link>
           </div>
         </section>
       </div>
