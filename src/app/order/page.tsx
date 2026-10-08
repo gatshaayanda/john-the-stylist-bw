@@ -1,3 +1,3 @@
 import OrderForm from "./order-form";
-export const metadata={title:"Order Food",description:"Order BOEMO food ahead for pickup or delivery."};
+export const metadata={title:"Book an Appointment",description:"Request an appointment with John The Stylist Bw in G West, Gaborone."};
 export default function OrderPage(){return <OrderForm/>}
