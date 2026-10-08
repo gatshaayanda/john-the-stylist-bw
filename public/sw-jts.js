@@ -55,7 +55,7 @@ self.addEventListener("fetch",event=>{
  if(isNavigation){
   const isPrivate=url.pathname.startsWith("/account")||url.pathname.startsWith("/orders/")||url.pathname.startsWith("/admin");
   event.respondWith(fetch(request).then(response=>{
-   if(response.ok&&!isPrivate)void caches.open(CACHE_VERSION).then(async cache=>{await cache.put(request,response.clone());const keys=await cache.keys();if(keys.length>PAGE_LIMIT+STATIC_LIMIT)await Promise.all(keys.slice(0,keys.length-(PAGE_LIMIT+STATIC_LIMIT)).map(key=>cache.delete(key))});
+   if(response.ok&&!isPrivate){const cache=await caches.open(CACHE_VERSION);await cache.put(request,response.clone());const keys=await cache.keys();if(keys.length>PAGE_LIMIT+STATIC_LIMIT){await Promise.all(keys.slice(0,keys.length-(PAGE_LIMIT+STATIC_LIMIT)).map(key=>cache.delete(key)))}}
    return response;
   }).catch(async()=>await caches.match(request)||await caches.match("/offline")||Response.error()));
  }
