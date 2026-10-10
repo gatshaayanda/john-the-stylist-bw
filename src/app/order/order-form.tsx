@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {FormEvent,useMemo,useState} from "react";
+import {FormEvent,useEffect,useMemo,useState} from "react";
 import {signInAnonymously} from "firebase/auth";
 import {auth} from "@/lib/firebase/client";
 import {createFoodOrder} from "@/lib/firebase/data";
@@ -18,6 +18,7 @@ const money=(value:number)=>"P"+value.toFixed(0);
 
 export default function OrderForm(){
  const[serviceId,setServiceId]=useState(""),[date,setDate]=useState(""),[time,setTime]=useState(""),[name,setName]=useState(""),[phone,setPhone]=useState(""),[style,setStyle]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[submitted,setSubmitted]=useState(false),[reference,setReference]=useState(""),[offlinePending,setOfflinePending]=useState(false);
+ useEffect(()=>{const requested=new URLSearchParams(window.location.search).get("service");if(!requested)return;const match=SERVICES.find(item=>item.id===requested||item.name.toLowerCase()===requested.toLowerCase());if(match)setServiceId(match.id)},[]);
  const service=useMemo(()=>SERVICES.find(item=>item.id===serviceId),[serviceId]);
  const deposit=service?service.price*.5:0;
  const depositText=service?.maxPrice?money(deposit)+"–"+money(service.maxPrice*.5):money(deposit);
