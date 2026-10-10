@@ -284,8 +284,8 @@ Do not rebuild the foundation merely because the product domain is changing. Reu
 - Unsupported browsers do not receive a dead install control.
 
 
-### Install recovery checkpoint
-- `public/sw-jts.js` cache version is `jts-shell-v4` and its navigation handler must keep the response callback async because it awaits cache writes.
+### Historical install recovery checkpoint (superseded by Golden PWA journey below)
+- At that checkpoint, `public/sw-jts.js` cache version was `jts-shell-v4` and its navigation handler must keep the response callback async because it awaits cache writes.
 - The install control remains visible on mobile browsers even before `beforeinstallprompt` arrives; when no native prompt is available it gives browser-specific truthful installation guidance instead of disappearing.
 - iOS installation guidance applies to iOS browsers generally: Share → Add to Home Screen; Chromium-based Android browsers use the native retained prompt when `beforeinstallprompt` is available.
 - Do not hide the mobile install control merely because the browser has not yet delivered `beforeinstallprompt`.
@@ -293,3 +293,30 @@ Do not rebuild the foundation merely because the product domain is changing. Reu
 
 ## Clone identity rule
 When this repository is cloned from another application, inherited application identity is unsafe until explicitly verified. Before feature work, identify the parent, establish the JTS identity, verify browser/PWA metadata and canonical icons, remove inherited branded assets, and bump the JTS service-worker cache namespace. The identity verification script must pass before a checkpoint. Compatibility architecture inherited from BOEMO may remain where it is intentionally used; that is not permission to retain BOEMO customer-facing branding, assets, metadata, cache names or generated documents.
+
+
+## GOLDEN SYSTEM — WhatsApp → Normal Browser → PWA Install (current contract)
+
+This section supersedes conflicting older install UX notes above. Do not remove or duplicate the root controller or add a second install-event listener without first inspecting this implementation.
+
+### Required journey
+1. **Embedded browser = escape stage.** `src/app/jts-browser-gate.tsx` detects WhatsApp and known social/in-app browsers. It is mounted once from `src/app/layout.tsx`, preserves the full current URL (path, query and hash), and presents one branded primary “OPEN IN CHROME” / “OPEN IN BROWSER” action. Android Chrome intent URLs are attempted where supported; other platforms use a new-tab handoff with explicit in-app-menu/copy-link recovery because an embedded host may refuse external-browser launches.
+2. **Normal browser = install stage.** The gate and install panel are separate UI/state. The gate covers the embedded journey; do not show competing install prompts or add auto-opening install modals.
+3. **One root controller.** `src/app/pwa-register.tsx` is the only owner of service-worker registration and the `beforeinstallprompt` / `appinstalled` event contract. It retains `window.jtsInstallPrompt`, exposes `window.jtsInstallApp`, and dispatches `jts-install-available`, `jts-install-consumed`, and `jts-install-complete`. Do not add page-specific listeners for the native browser event.
+4. **Native prompt first.** `src/app/jts-install-button.tsx` calls the retained prompt controller directly from the explicit button click. Do not insert another confirmation or instruction modal before invoking an available native prompt. If the controller reports unavailable or throws, show the fallback panel.
+5. **No silent failure.** The install action remains available on the public home route while not installed, including desktop when no native event is available. Android fallback explains Chrome's Install app/Add to Home screen menu; iPhone/iPad explains Safari Share → Add to Home Screen; desktop explains Chrome/Edge installation where offered. Never claim that a native prompt opened unless the browser actually exposed it.
+6. **Installed state.** Standalone/display-mode detection suppresses the install control and embedded gate; `appinstalled` clears the retained event and closes installation help. Do not block private/account routes with installation promotion.
+7. **Installability diagnosis.** If `beforeinstallprompt` is absent, inspect HTTPS, manifest response and metadata, declared 192/512 PNG icons and URLs, service-worker registration/scope, controller timing, browser support and installability diagnostics. JavaScript cannot force an OS/browser prompt.
+8. **Service worker/cache.** Actual current cache namespace is `jts-shell-v5` in `src/config/brand.ts` and `public/sw-jts.js`. Bump both consistently whenever shell assets or install-critical identity/metadata changes. Preserve network-first navigation and do not cache private account/admin responses.
+9. **Verification checklist.** Verify direct browser entry and embedded entry independently; gate detection and primary action; path/query/hash preservation; fallback/copy recovery; no redirect loop; native prompt direct from click when the event exists; useful platform fallback when absent; standalone/appinstalled suppression; manifest output and icons; SW scope/controller/cache; identity check, typecheck, lint and production build. For Vercel, only declare QA-ready after the exact intended commit's deployment reaches READY. Do not claim device-level WhatsApp/Safari/Chrome behavior was tested unless actually tested on those platforms.
+
+### Current implementation paths
+- Root mount: `src/app/layout.tsx`
+- Embedded-browser gate: `src/app/jts-browser-gate.tsx`
+- Single PWA/install controller: `src/app/pwa-register.tsx`
+- Public install action/fallback: `src/app/jts-install-button.tsx`
+- Install/gate styling: `src/app/pwa.css`
+- Manifest: `src/app/manifest.ts`
+- Canonical identity/cache namespace: `src/config/brand.ts`
+- Service worker and install shell: `public/sw-jts.js`
+- Identity verification: `npm run verify:identity`
