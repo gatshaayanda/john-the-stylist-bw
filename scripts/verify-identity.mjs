@@ -15,7 +15,7 @@ const required=[
   ["src/app/manifest.ts","/icon-192.png"],
   ["src/app/manifest.ts","/icon-512.png"],
   ["src/app/manifest.ts","John The Stylist Bw"],
-  ["public/sw-jts.js","jts-shell-v5"],
+  ["public/sw-jts.js","jts-shell-v6"],
   ["public/sw-jts.js","/icon-192.png"],
   ["public/sw-jts.js","/icon-512.png"]
 ];

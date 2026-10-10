@@ -379,7 +379,7 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
  .jtsEditPaymentBar{grid-template-columns:1fr 1.2fr}.jtsEditPaymentBar>.jtsEditPrimary{grid-column:1/-1;justify-self:start}
 }
 @media(max-width:720px){
- .jtsEditContainer{width:min(100% - 30px,560px)}
+ .jtsEditContainer{width:min(calc(100% - 30px),560px)}
  .jtsEditTopline .jtsEditContainer{font-size:.51rem;letter-spacing:.08em;gap:9px}.jtsEditTopline .jtsEditContainer span:nth-child(2){display:none}
  .jtsEditHeaderInner{min-height:70px;flex-wrap:wrap;padding:12px 0;row-gap:10px}
  .jtsEditHeader nav{order:3;width:100%;justify-content:space-between;border-top:1px solid var(--jts-line);padding-top:10px}
