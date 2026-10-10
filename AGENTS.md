@@ -320,3 +320,40 @@ This section supersedes conflicting older install UX notes above. Do not remove 
 - Canonical identity/cache namespace: `src/config/brand.ts`
 - Service worker and install shell: `public/sw-jts.js`
 - Identity verification: `npm run verify:identity`
+
+
+## JTS editorial product direction — current customer-facing contract
+
+The public experience should follow The Plug's editorial discipline without copying its retail model. The Plug is a curated storefront and customer relationship loop; JTS is a stylist-led service and appointment relationship. Translate the principles, not the features.
+
+### Brand and positioning
+- Position JTS Styles as a distinctive professional hairstyling/barbering service in G West, Gaborone, Botswana. The known differentiators are John's supplied service list, precision cuts/colour/bleach and statement styles, the purple-door location landmark, clear appointment rules, and direct contact.
+- Do not infer John's nationality, ethnicity, biography, client base, or reputation from his name or from unrelated search results. Public research reviewed for this revamp did not establish a reliable source for his country of origin. Keep the experience locally grounded in the verified business facts without making claims about John's personal background.
+- Use an editorial, mobile-first art direction: warm paper, deep plum, violet and a sharp lime accent; concise copy; confident typography; clear service and booking hierarchy. Do not retain BOEMO's food-brand identity or default black/gold/cyan treatment as the defining JTS brand.
+- Never fabricate portfolio photography, client transformations, reviews, ratings, demand, testimonials, discounts, availability, or prices. Add real portfolio work only when the owner supplies authentic images and has permission to publish them.
+
+### Required homepage journey
+1. A compact Gaborone/G West identity line and clear JTS brand.
+2. Editorial hero with one primary appointment action and one secondary route to services.
+3. Service edit showing only the four supplied priced services: Pixie Cut P350–P400; Cut + Pixie Cut P200; Pure White P300; Cut + Bleach P250.
+4. Unpriced services (fades, bobs, tinting and special-event looks) are enquiry-only until John supplies prices; do not make them look like priced bookable catalogue items.
+5. Explain the actual booking sequence: choose service, request a date/time at least one day ahead within 08:00–18:00, then follow the 50% Orange Money deposit instructions. A request is not a confirmed appointment and is not proof of payment.
+6. Prominent local directions, supplied purple-door landmark, hours, phone/WhatsApp, Orange Money number/account name.
+7. Optional install prompt appears in a contextual “Keep JTS close” section after service, booking and visit information. It must not occupy the primary header or compete with booking. Installation is never required to browse, request an appointment, or view booking history.
+8. Mobile booking action may remain sticky because it supports the primary task; install must remain secondary and non-blocking.
+
+### Customer relationship loop
+- Map The Plug's ongoing relationship model to JTS with private appointment history, clear status changes, useful reminders/updates where configured, and a low-friction repeat booking path.
+- Do not add retail-style points, lotteries, deals, membership promises, or notification pressure to a stylist business without an explicit owner-approved policy and reliable supporting data.
+- Keep guest-first booking. Google/account linking and installation are optional conveniences, never prerequisites.
+- Use real appointment records as the source of truth. Never present a requested slot as available/confirmed until John's workflow confirms it.
+
+### Legacy BOEMO boundary
+- JTS still has transitional BOEMO-shaped Firestore types and admin/menu code. These are implementation debt, not customer-facing product language. Do not surface food/menu/BOEMO wording or food-seeded catalogue items on JTS public pages. A domain-model/admin refactor must inspect Firestore rules and existing records first; do not perform a blind collection rename or weaken security rules.
+- The public homepage must not read the legacy food menu just to render salon services. Salon service prices above are supplied, explicit content; the admin's legacy menu is not an authoritative salon catalogue.
+
+### Research basis
+- Nielsen Norman Group, “Few Guesses, More Success: 4 Principles to Reduce Cognitive Load in Forms” (2025): logical structure, transparent expectations, plain language and timely support.
+- Nielsen Norman Group, “Progressive Disclosure” (2006): foreground frequent primary tasks and defer secondary choices.
+- Kaluza, Voigt & Paetz, “Empirical studies on the impact of booking status on customers’ choice behavior in online appointment systems” (2024): availability displays can signal quality or scarcity; never fake booking activity or show false availability.
+- Apply research as a design guide, not as proof that a specific layout will increase JTS conversions. Validate the live journey with real users and real appointment operations.
