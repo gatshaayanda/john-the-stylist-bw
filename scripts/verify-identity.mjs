@@ -5,17 +5,23 @@ const root=process.cwd();
 const identityFiles=[
   "src/app/layout.tsx",
   "src/app/manifest.ts",
+  "src/config/brand.ts",
   "public/sw-jts.js",
   "README.md",
   "AGENTS.md"
 ];
 const required=[
-  ["src/app/layout.tsx","/icon-192.png"],
-  ["src/app/layout.tsx","/manifest.webmanifest"],
-  ["src/app/manifest.ts","/icon-192.png"],
-  ["src/app/manifest.ts","/icon-512.png"],
-  ["src/app/manifest.ts","John The Stylist Bw"],
-  ["public/sw-jts.js","jts-shell-v6"],
+  ["src/app/layout.tsx","brand.icon192"],
+  ["src/app/layout.tsx","brand.manifest"],
+  ["src/app/manifest.ts","brand.icon192"],
+  ["src/app/manifest.ts","brand.icon512"],
+  ["src/app/manifest.ts","name: brand.name"],
+  ["src/config/brand.ts",'name: "John The Stylist Bw"'],
+  ["src/config/brand.ts",'icon192: "/icon-192.png"'],
+  ["src/config/brand.ts",'icon512: "/icon-512.png"'],
+  ["src/config/brand.ts",'manifest: "/manifest.webmanifest"'],
+  ["src/config/brand.ts",'serviceWorkerCache: "jts-shell-v6"'],
+  ["public/sw-jts.js",'const CACHE_VERSION="jts-shell-v6"'],
   ["public/sw-jts.js","/icon-192.png"],
   ["public/sw-jts.js","/icon-512.png"]
 ];

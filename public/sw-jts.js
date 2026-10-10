@@ -37,7 +37,7 @@ async function precache(){
 self.addEventListener("install",event=>event.waitUntil(precache().then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil((async()=>{
  const keys=await caches.keys();
- await Promise.all(keys.filter(key=>(key.startsWith("boemo-shell-")||key.startsWith("jts-shell-"))&&key!==CACHE_VERSION).map(key=>caches.delete(key)));
+ await Promise.all(keys.filter(key=>key.startsWith("jts-shell-")&&key!==CACHE_VERSION).map(key=>caches.delete(key)));
  await self.clients.claim();
 })()));
 self.addEventListener("message",event=>{if(event.data?.type==="SKIP_WAITING")self.skipWaiting()});
