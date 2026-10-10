@@ -284,8 +284,8 @@ Do not rebuild the foundation merely because the product domain is changing. Reu
 - Unsupported browsers do not receive a dead install control.
 
 
-### Install recovery checkpoint
-- `public/sw-jts.js` cache version is `jts-shell-v4` and its navigation handler must keep the response callback async because it awaits cache writes.
+### Historical install recovery checkpoint (superseded by Golden PWA journey below)
+- At that checkpoint, `public/sw-jts.js` cache version was `jts-shell-v4` and its navigation handler must keep the response callback async because it awaits cache writes.
 - The install control remains visible on mobile browsers even before `beforeinstallprompt` arrives; when no native prompt is available it gives browser-specific truthful installation guidance instead of disappearing.
 - iOS installation guidance applies to iOS browsers generally: Share → Add to Home Screen; Chromium-based Android browsers use the native retained prompt when `beforeinstallprompt` is available.
 - Do not hide the mobile install control merely because the browser has not yet delivered `beforeinstallprompt`.
@@ -293,3 +293,67 @@ Do not rebuild the foundation merely because the product domain is changing. Reu
 
 ## Clone identity rule
 When this repository is cloned from another application, inherited application identity is unsafe until explicitly verified. Before feature work, identify the parent, establish the JTS identity, verify browser/PWA metadata and canonical icons, remove inherited branded assets, and bump the JTS service-worker cache namespace. The identity verification script must pass before a checkpoint. Compatibility architecture inherited from BOEMO may remain where it is intentionally used; that is not permission to retain BOEMO customer-facing branding, assets, metadata, cache names or generated documents.
+
+
+## GOLDEN SYSTEM — WhatsApp → Normal Browser → PWA Install (current contract)
+
+This section supersedes conflicting older install UX notes above. Do not remove or duplicate the root controller or add a second install-event listener without first inspecting this implementation.
+
+### Required journey
+1. **Embedded browser = escape stage.** `src/app/jts-browser-gate.tsx` detects WhatsApp and known social/in-app browsers. It is mounted once from `src/app/layout.tsx`, preserves the full current URL (path, query and hash), and presents one branded primary “OPEN IN CHROME” / “OPEN IN BROWSER” action. Android Chrome intent URLs are attempted where supported; other platforms use a new-tab handoff with explicit in-app-menu/copy-link recovery because an embedded host may refuse external-browser launches.
+2. **Normal browser = install stage.** The gate and install panel are separate UI/state. The gate covers the embedded journey; do not show competing install prompts or add auto-opening install modals.
+3. **One root controller, early capture.** The `beforeInteractive` capture script in `src/app/layout.tsx` retains `beforeinstallprompt` before hydration can miss it and dispatches `jts-install-available`; `src/app/pwa-register.tsx` owns the retained-event install function, service-worker registration, `appinstalled`, and the `jts-install-consumed` / `jts-install-complete` contract. This is one root-level system, not permission to add more listeners. Do not add page-specific listeners for the native browser event.
+4. **Native prompt first.** `src/app/jts-install-button.tsx` calls the retained prompt controller directly from the explicit button click. Do not insert another confirmation or instruction modal before invoking an available native prompt. If the controller reports unavailable or throws, show the fallback panel.
+5. **No silent failure.** The install action remains available on the public home route while not installed, including desktop when no native event is available. Android fallback explains Chrome's Install app/Add to Home screen menu; iPhone/iPad explains Safari Share → Add to Home Screen; desktop explains Chrome/Edge installation where offered. Never claim that a native prompt opened unless the browser actually exposed it.
+6. **Installed state.** Standalone/display-mode detection suppresses the install control and embedded gate; `appinstalled` clears the retained event and closes installation help. Do not block private/account routes with installation promotion.
+7. **Installability diagnosis.** If `beforeinstallprompt` is absent, inspect HTTPS, manifest response and metadata, declared 192/512 PNG icons and URLs, service-worker registration/scope, controller timing, browser support and installability diagnostics. JavaScript cannot force an OS/browser prompt.
+8. **Service worker/cache.** Actual current cache namespace is `jts-shell-v6` in `src/config/brand.ts` and `public/sw-jts.js`. Bump both consistently whenever shell assets or install-critical identity/metadata changes. Preserve network-first navigation and do not cache private account/admin responses.
+9. **Verification checklist.** Verify direct browser entry and embedded entry independently; gate detection and primary action; path/query/hash preservation; fallback/copy recovery; no redirect loop; native prompt direct from click when the event exists; useful platform fallback when absent; standalone/appinstalled suppression; manifest output and icons; SW scope/controller/cache; identity check, typecheck, lint and production build. For Vercel, only declare QA-ready after the exact intended commit's deployment reaches READY. Do not claim device-level WhatsApp/Safari/Chrome behavior was tested unless actually tested on those platforms.
+
+### Current implementation paths
+- Root mount: `src/app/layout.tsx`
+- Embedded-browser gate: `src/app/jts-browser-gate.tsx`
+- Single PWA/install controller: `src/app/pwa-register.tsx`
+- Public install action/fallback: `src/app/jts-install-button.tsx`
+- Install/gate styling: `src/app/pwa.css`
+- Manifest: `src/app/manifest.ts`
+- Canonical identity/cache namespace: `src/config/brand.ts`
+- Service worker and install shell: `public/sw-jts.js`
+- Identity verification: `npm run verify:identity`
+
+
+## JTS editorial product direction — current customer-facing contract
+
+The public experience should follow The Plug's editorial discipline without copying its retail model. The Plug is a curated storefront and customer relationship loop; JTS is a stylist-led service and appointment relationship. Translate the principles, not the features.
+
+### Brand and positioning
+- Position JTS Styles as a distinctive professional hairstyling/barbering service in G West, Gaborone, Botswana. The known differentiators are John's supplied service list, precision cuts/colour/bleach and statement styles, the purple-door location landmark, clear appointment rules, and direct contact.
+- Do not infer John's nationality, ethnicity, biography, client base, or reputation from his name or from unrelated search results. Public research reviewed for this revamp did not establish a reliable source for his country of origin. Keep the experience locally grounded in the verified business facts without making claims about John's personal background.
+- Use an editorial, mobile-first art direction: warm paper, deep plum, violet and a sharp lime accent; concise copy; confident typography; clear service and booking hierarchy. Do not retain BOEMO's food-brand identity or default black/gold/cyan treatment as the defining JTS brand.
+- Never fabricate portfolio photography, client transformations, reviews, ratings, demand, testimonials, discounts, availability, or prices. Add real portfolio work only when the owner supplies authentic images and has permission to publish them.
+
+### Required homepage journey
+1. A compact Gaborone/G West identity line and clear JTS brand.
+2. Editorial hero with one primary appointment action and one secondary route to services.
+3. Service edit showing only the four supplied priced services: Pixie Cut P350–P400; Cut + Pixie Cut P200; Pure White P300; Cut + Bleach P250.
+4. Unpriced services (fades, bobs, tinting and special-event looks) are enquiry-only until John supplies prices; do not make them look like priced bookable catalogue items.
+5. Explain the actual booking sequence: choose service, request a date/time at least one day ahead within 08:00–18:00, then follow the 50% Orange Money deposit instructions. A request is not a confirmed appointment and is not proof of payment.
+6. Prominent local directions, supplied purple-door landmark, hours, phone/WhatsApp, Orange Money number/account name.
+7. Optional install prompt appears in a contextual “Keep JTS close” section after service, booking and visit information. It must not occupy the primary header or compete with booking. Installation is never required to browse, request an appointment, or view booking history.
+8. Mobile booking action may remain sticky because it supports the primary task; install must remain secondary and non-blocking.
+
+### Customer relationship loop
+- Map The Plug's ongoing relationship model to JTS with private appointment history, clear status changes, useful reminders/updates where configured, and a low-friction repeat booking path.
+- Do not add retail-style points, lotteries, deals, membership promises, or notification pressure to a stylist business without an explicit owner-approved policy and reliable supporting data.
+- Keep guest-first booking. Google/account linking and installation are optional conveniences, never prerequisites.
+- Use real appointment records as the source of truth. Never present a requested slot as available/confirmed until John's workflow confirms it.
+
+### Legacy BOEMO boundary
+- JTS still has transitional BOEMO-shaped Firestore types and admin/menu code. These are implementation debt, not customer-facing product language. Do not surface food/menu/BOEMO wording or food-seeded catalogue items on JTS public pages. A domain-model/admin refactor must inspect Firestore rules and existing records first; do not perform a blind collection rename or weaken security rules.
+- The public homepage must not read the legacy food menu just to render salon services. Salon service prices above are supplied, explicit content; the admin's legacy menu is not an authoritative salon catalogue.
+
+### Research basis
+- Nielsen Norman Group, “Few Guesses, More Success: 4 Principles to Reduce Cognitive Load in Forms” (2025): logical structure, transparent expectations, plain language and timely support.
+- Nielsen Norman Group, “Progressive Disclosure” (2006): foreground frequent primary tasks and defer secondary choices.
+- Kaluza, Voigt & Paetz, “Empirical studies on the impact of booking status on customers’ choice behavior in online appointment systems” (2024): availability displays can signal quality or scarcity; never fake booking activity or show false availability.
+- Apply research as a design guide, not as proof that a specific layout will increase JTS conversions. Validate the live journey with real users and real appointment operations.

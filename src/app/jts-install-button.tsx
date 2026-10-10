@@ -3,7 +3,6 @@
 import {useEffect,useState} from "react";
 
 type BrowserContext="whatsapp"|"instagram"|"facebook"|"messenger"|"linkedin"|"embedded"|"browser";
-
 function detectBrowserContext(ua:string):BrowserContext{
  const value=ua.toLowerCase();
  if(value.includes("whatsapp"))return "whatsapp";
@@ -11,28 +10,26 @@ function detectBrowserContext(ua:string):BrowserContext{
  if(value.includes("fban")||value.includes("fbav"))return "facebook";
  if(value.includes("messenger"))return "messenger";
  if(value.includes("linkedinapp"))return "linkedin";
- if(/; wv\)|\bwv\b|\bwebview\b/.test(value))return "embedded";
+ if(/; wv\)|\bwv\b|\bwebview\b|\bline\//.test(value))return "embedded";
  return "browser";
 }
 
 export default function JtsInstallButton(){
  const[available,setAvailable]=useState(false);
  const[installed,setInstalled]=useState(false);
- const[mobile,setMobile]=useState(false);
  const[ios,setIos]=useState(false);
+ const[android,setAndroid]=useState(false);
  const[busy,setBusy]=useState(false);
  const[showHelp,setShowHelp]=useState(false);
  const[browserContext,setBrowserContext]=useState<BrowserContext>("browser");
 
  useEffect(()=>{
   const standalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean((navigator as Navigator&{standalone?:boolean}).standalone));
-  setInstalled(standalone);
   const ua=navigator.userAgent;
-  const isIos=/iphone|ipad|ipod/i.test(ua);
-  setMobile(/android|iphone|ipad|ipod|mobile/i.test(ua));
-  setIos(isIos&&!standalone);
+  setInstalled(standalone);
+  setIos(/iphone|ipad|ipod/i.test(ua)&&!standalone);
+  setAndroid(/android/i.test(ua));
   setBrowserContext(detectBrowserContext(ua));
-
   const availableEvent=()=>setAvailable(Boolean(window.jtsInstallPrompt)&&!standalone);
   const consumed=()=>setAvailable(false);
   const complete=()=>{setAvailable(false);setInstalled(true);setIos(false);setShowHelp(false)};
@@ -49,36 +46,43 @@ export default function JtsInstallButton(){
 
  async function install(){
   if(busy)return;
-  if(window.jtsInstallPrompt&&window.jtsInstallApp){
+  const prompt=window.jtsInstallPrompt;
+  const runInstall=window.jtsInstallApp;
+  if(prompt&&runInstall){
    setBusy(true);
-   const outcome=await window.jtsInstallApp();
-   setBusy(false);
-   if(outcome==="accepted")setInstalled(true);
+   try{
+    const outcome=await runInstall();
+    if(outcome==="accepted")setInstalled(true);
+    if(outcome==="unavailable")setShowHelp(true);
+   }catch{
+    setShowHelp(true);
+   }finally{
+    setBusy(false);
+   }
    return;
   }
   setShowHelp(true);
  }
 
  if(installed)return null;
-
  const embedded=browserContext!=="browser";
  const contextNames:Record<Exclude<BrowserContext,"embedded"|"browser">,string>={whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook",messenger:"Messenger",linkedin:"LinkedIn"};
- const contextName=browserContext in contextNames ? contextNames[browserContext as keyof typeof contextNames] : "this in-app browser";
- const buttonLabel=available?"Install app":embedded?"Open in browser to install":ios?"How to install":"Install app";
-
+ const contextName=browserContext in contextNames?contextNames[browserContext as keyof typeof contextNames]:"this in-app browser";
+ const buttonLabel=available?"Install JTS Styles":embedded?"Open in browser to install":"Install JTS Styles";
+ const fallbackTitle=ios?"Add JTS Styles to your Home Screen":android?"Install JTS Styles in Chrome":"Install JTS Styles in Chrome or Edge";
  return <div className="jtsInstallWrap">
   <button type="button" className="jtsInstallButton" onClick={()=>void install()} disabled={busy} aria-label={buttonLabel}>
-   {busy?"Installing…":<><span aria-hidden="true">⌂</span> {buttonLabel}</>}
+   {busy?"Opening install…":<><span aria-hidden="true">⌂</span> {buttonLabel}</>}
   </button>
-  {showHelp&&<div className="pwaInstallHelp" role="dialog" aria-label="Install JTS Styles">
-   <strong>{embedded?"Open JTS Styles in your browser":ios?"Add JTS Styles to your Home Screen":available?"Install JTS Styles":"Install JTS Styles"}</strong>
+  {showHelp&&<div className="pwaInstallHelp" role="dialog" aria-label="Install JTS Styles" aria-live="polite">
+   <strong>{embedded?"Open JTS Styles in your browser":ios?"Add JTS Styles to your Home Screen":fallbackTitle}</strong>
    {embedded
-    ? <span>You opened this link inside <b>{contextName}</b>. JTS Styles works here, but this browser may not expose the native install prompt. Use <b>Open in browser</b> from the app&apos;s menu, then install JTS Styles from Chrome, Edge or Safari.</span>
+    ? <span>You opened this link inside <b>{contextName}</b>. Use its menu and choose <b>Open in browser</b> first. The app works here, but installation belongs in your normal browser.</span>
     : ios
-      ? <span>In Safari, tap <b>Share</b>, choose <b>Add to Home Screen</b>, then tap <b>Add</b>. If you are already in Safari, you can use that menu now.</span>
-      : available
-        ? <span>JTS Styles can install directly from this browser. Choose <b>Install</b> in the browser prompt.</span>
-        : <span>Installation is not available through this page&apos;s native prompt right now. Open the browser menu <b>⋮</b> and choose <b>Install app</b> or <b>Add to Home screen</b>.</span>}
+      ? <span>In <b>Safari</b>, tap <b>Share</b>, choose <b>Add to Home Screen</b>, then tap <b>Add</b>. This browser did not provide a native install prompt.</span>
+      : android
+       ? <span>The native install prompt is unavailable right now. In <b>Chrome</b>, open the <b>⋮</b> menu and choose <b>Install app</b> or <b>Add to Home screen</b>. If that option is missing, check that the page is online and the app has finished loading.</span>
+       : <span>The native install prompt is unavailable right now. In <b>Chrome or Edge</b>, open the browser menu and choose <b>Install JTS Styles</b> or <b>Apps → Install this site as an app</b> if offered.</span>}
    <button type="button" onClick={()=>setShowHelp(false)}>Got it</button>
   </div>}
  </div>;

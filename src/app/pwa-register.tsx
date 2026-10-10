@@ -36,13 +36,6 @@ export default function PwaRegister(){
   const online=()=>{setOffline(false);setReconnecting(true);window.setTimeout(()=>{setReconnecting(false);void retryPendingBookingNotifications()},1200)};
   const off=()=>{setReconnecting(false);setOffline(true)};
 
-  const install=(event:Event)=>{
-   event.preventDefault();
-   const promptEvent=event as InstallPromptEvent;
-   window.jtsInstallPrompt=promptEvent;
-   window.dispatchEvent(new Event("jts-install-available"));
-  };
-
   const appinstalled=()=>{
    window.jtsInstallPrompt=null;
    window.dispatchEvent(new Event("jts-install-complete"));
@@ -66,7 +59,6 @@ export default function PwaRegister(){
 
   window.addEventListener("online",online);
   window.addEventListener("offline",off);
-  window.addEventListener("beforeinstallprompt",install);
   window.addEventListener("appinstalled",appinstalled);
 
   let registration:ServiceWorkerRegistration|null=null;
@@ -91,7 +83,6 @@ export default function PwaRegister(){
   return()=>{
    window.removeEventListener("online",online);
    window.removeEventListener("offline",off);
-   window.removeEventListener("beforeinstallprompt",install);
    window.removeEventListener("appinstalled",appinstalled);
    if(window.jtsInstallApp)delete window.jtsInstallApp;
    if(window.jtsInstallPrompt)window.jtsInstallPrompt=null;
