@@ -17,7 +17,6 @@ function detectBrowserContext(ua:string):BrowserContext{
 export default function JtsInstallButton(){
  const[available,setAvailable]=useState(false);
  const[installed,setInstalled]=useState(false);
- const[mobile,setMobile]=useState(false);
  const[ios,setIos]=useState(false);
  const[android,setAndroid]=useState(false);
  const[busy,setBusy]=useState(false);
@@ -28,7 +27,6 @@ export default function JtsInstallButton(){
   const standalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean((navigator as Navigator&{standalone?:boolean}).standalone));
   const ua=navigator.userAgent;
   setInstalled(standalone);
-  setMobile(/android|iphone|ipad|ipod|mobile/i.test(ua));
   setIos(/iphone|ipad|ipod/i.test(ua)&&!standalone);
   setAndroid(/android/i.test(ua));
   setBrowserContext(detectBrowserContext(ua));
@@ -66,7 +64,7 @@ export default function JtsInstallButton(){
   setShowHelp(true);
  }
 
- if(installed||(!mobile&&!available))return null;
+ if(installed)return null;
  const embedded=browserContext!=="browser";
  const contextNames:Record<Exclude<BrowserContext,"embedded"|"browser">,string>={whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook",messenger:"Messenger",linkedin:"LinkedIn"};
  const contextName=browserContext in contextNames?contextNames[browserContext as keyof typeof contextNames]:"this in-app browser";
