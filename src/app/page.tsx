@@ -132,8 +132,8 @@ export default function Home() {
     <section className="jtsEditKeep">
       <div className="jtsEditContainer jtsEditKeepInner">
         <img className="jtsEditKeepLogo" src="/jts.jpg" alt="JTS Styles logo" />
-        <div className="jtsEditKeepCopy"><span className="jtsEditEyebrow">KEEP JTS CLOSE</span><h2>Your next appointment,<br /><em>one tap away.</em></h2><p>Optionally add JTS Styles to your home screen for quicker access to booking, your appointment history and John’s contact details. You can book without installing anything.</p></div>
-        <div className="jtsEditKeepAction"><JtsInstallButton /><small>Optional · no install needed to book</small></div>
+        <div className="jtsEditKeepCopy"><span className="jtsEditEyebrow">INSTALL JTS STYLES</span><h2>Your next appointment,<br /><em>one tap away.</em></h2><p>Add JTS Styles to your home screen for a quicker return to booking, appointment history and John’s updates.</p></div>
+        <div className="jtsEditKeepAction"><JtsInstallButton /></div>
       </div>
     </section>
 

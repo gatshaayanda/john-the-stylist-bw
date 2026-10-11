@@ -34,7 +34,7 @@ export default function JtsBrowserGate({initialContext,initialAndroid,initialIos
   setContext(effectiveContext);
   setCurrentUrl(window.location.href);
   setReady(true);
-  if(isStandalone())return;
+  if(isStandalone()||effectiveContext==="browser"){document.documentElement.classList.remove("jts-embedded-pending");return;}
   if(effectiveContext==="browser")return;
   const previousOverflow=document.body.style.overflow;
   document.body.style.overflow="hidden";

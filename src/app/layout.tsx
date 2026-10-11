@@ -40,9 +40,9 @@ export default async function RootLayout({children}:{children:React.ReactNode}){
  const initialAndroid=/Android/i.test(userAgent);
  const initialIos=/iPhone|iPad|iPod/i.test(userAgent)||(/Macintosh/i.test(userAgent)&&/Mobile/i.test(userAgent));
  return <html lang="en"><body style={embedded?{overflow:"hidden"}:undefined}>
+  <Script id="jts-embedded-browser-guard" strategy="beforeInteractive">{`(function(){var ua=navigator.userAgent||"";var embedded=/WhatsApp|Instagram|FBAN|FBAV|Messenger|Line\\/|Twitter|TikTok|Snapchat|LinkedInApp/i.test(ua)||(/Android/i.test(ua)&&/; wv\\)/i.test(ua));var standalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean(navigator.standalone));if(embedded&&!standalone)document.documentElement.classList.add("jts-embedded-pending");})();`}</Script>
   <Script id="jts-install-event-capture" strategy="beforeInteractive">{`window.addEventListener("beforeinstallprompt",function(event){event.preventDefault();window.jtsInstallPrompt=event;window.dispatchEvent(new Event("jts-install-available"));});`}</Script>
-  <PwaRegister/>
   <JtsBrowserGate initialContext={initialContext} initialAndroid={initialAndroid} initialIos={initialIos}/>
-  {children}<Analytics/><SpeedInsights/>
+  {!embedded&&<><PwaRegister/>{children}<Analytics/><SpeedInsights/></>}
  </body></html>;
 }

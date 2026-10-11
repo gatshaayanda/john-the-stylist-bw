@@ -381,3 +381,11 @@ The public experience should follow The Plug's editorial discipline without copy
 - The embedded-browser client detection fix is already on `main` at `fdb4219285fa44f78f4ff0c0c1a2a6197ba0a44c`; it preserves a server-detected embedded-browser context when the client User-Agent differs.
 - The last confirmed production deployment was older commit `d8cb477a536ef321cc75630b038a830831c9de36`; do not ask the owner to QA the live WhatsApp journey until a deployment containing the fix is confirmed `READY`.
 - If a documentation-only chore commit is used to retrigger Vercel after a rate-limit failure, do not mistake the commit itself for deployment success. Verify the exact new `main` SHA and its production deployment state first.
+
+
+## Product-use rule — no self-defeating install or detour copy (2026-10-11)
+- The product exists to be used. Customer-facing copy must invite customers into the app and make the next in-app action clear; do not add apologetic lines such as “you can book without installing anything”, “no install needed”, or language that talks customers out of using/installing the app.
+- Do not send customers to WhatsApp, a phone call, another website, or an external browser as the default path when the app can complete the task itself. External contact is a useful fallback for genuine exceptions, not the main product journey.
+- PWA installation should be offered as a direct, working app action with honest platform-specific handling. Do not falsely claim installation is technically mandatory, but do not foreground caveats about not needing the app.
+- Embedded-browser handoff is the explicit exception: use the branded gate to get a WhatsApp/social in-app visit into the normal browser when detected, preserve the requested route, and avoid rendering the full app underneath or flashing it before the gate.
+- Before changing customer copy, check whether it encourages completion inside the product or unnecessarily redirects the customer away from it. This principle applies to future projects and must be carried into their AGENTS.md when creating or updating them.
