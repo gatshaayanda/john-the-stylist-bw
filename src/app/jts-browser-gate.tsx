@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect,useRef,useState} from "react";
+import {useEffect,useRef,useState,type MouseEvent} from "react";
 
 type HandoffContext="whatsapp"|"instagram"|"facebook"|"messenger"|"linkedin"|"embedded"|"browser";
 type Props={initialContext:HandoffContext;initialAndroid:boolean;initialIos:boolean};
@@ -52,7 +52,7 @@ export default function JtsBrowserGate({initialContext,initialAndroid,initialIos
  const isAndroid=initialAndroid||/android/i.test(typeof navigator!=="undefined"?navigator.userAgent:"");
  const isIos=initialIos||/iphone|ipad|ipod/i.test(typeof navigator!=="undefined"?navigator.userAgent:"")||(typeof navigator!=="undefined"&&/MacIntel/.test(navigator.platform)&&navigator.maxTouchPoints>1);
  const names:Record<HandoffContext,string>={whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook",messenger:"Messenger",linkedin:"LinkedIn",embedded:"this in-app browser",browser:"your browser"};
- function openBrowser(event:React.MouseEvent<HTMLAnchorElement>){
+ function openBrowser(event:MouseEvent<HTMLAnchorElement>){
   const destination=window.location.href;
   if(isAndroid){
    event.preventDefault();
@@ -63,9 +63,10 @@ export default function JtsBrowserGate({initialContext,initialAndroid,initialIos
   }
   // The normal link opens the same current URL in a new tab on iOS/other platforms.
   // If the host blocks new tabs, expose the in-app-menu and copy-link recovery.
-  const opened=window.open(destination,"_blank","noopener,noreferrer");
   event.preventDefault();
-  if(!opened)setShowFallback(true);
+  const opened=window.open(destination,"_blank");
+  if(opened)opened.opener=null;
+  else setShowFallback(true);
  }
  return <div className="jtsBrowserGate" role="dialog" aria-modal="true" aria-labelledby="jtsBrowserGateTitle">
   <section className="jtsBrowserGateCard">
