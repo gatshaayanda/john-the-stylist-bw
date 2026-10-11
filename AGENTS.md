@@ -365,7 +365,7 @@ The public experience should follow The Plug's editorial discipline without copy
 - Visible brand placements: homepage header and footer; contextual Keep JTS Close section; WhatsApp/social embedded-browser handoff gate; install button; offline recovery; Open Graph/Twitter preview; notification icon/badge where supported; manifest/favicon. Keep booking as the primary action and install as optional.
 - `public/icon-192.png` and `public/icon-512.png` are retained as PNG compatibility fallbacks until proper PNG derivatives from the official source are generated and visually verified. Never copy JPEG bytes into a .png file or claim PNG derivatives exist when they do not.
 - If replacing the PNGs later, generate true 192×192 and 512×512 PNG files from `public/jts.jpg`, inspect them visually, update manifest and shortcuts, then run `npm run verify:identity`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
-- Any change to install-critical assets must bump `serviceWorkerCache` in `src/config/brand.ts` and `CACHE_VERSION` in `public/sw-jts.js` together. Current value: `jts-shell-v8`.
+- Any change to install-critical assets must bump `serviceWorkerCache` in `src/config/brand.ts` and `CACHE_VERSION` in `public/sw-jts.js` together. Current value: `jts-shell-v10`.
 - Verify the deployed favicon/share image and the install flow separately. Do not claim Android/iOS icon or WhatsApp handoff QA without testing on those actual platforms.
 
 
@@ -397,3 +397,9 @@ The public experience should follow The Plug's editorial discipline without copy
 - Hide the persistent install entry when the app is already running in standalone/installed mode. Keep the contextual “Keep JTS close” section and its button in the homepage.
 - Preserve the captured `beforeinstallprompt` event and the existing `window.jtsInstallApp` action. Never show a dead install button.
 - Verify the normal-browser install CTA and the embedded-browser handoff as separate flows. Do not claim actual device installation without a real Android/iOS browser test.
+
+
+### Native install prompt reliability — 2026-10-11
+- The normal-browser install CTA invokes the retained `beforeinstallprompt` event synchronously from the user's click; await the returned prompt promise and then await `userChoice`.
+- Treat `beforeinstallprompt` as one-shot. Clear it after invocation and never restore a stale/consumed event after an error. If the browser did not expose the event, JavaScript cannot force the native install UI; keep the existing platform fallback for that case.
+- The current service-worker cache namespace is `jts-shell-v10` in both `src/config/brand.ts` and `public/sw-jts.js`.
