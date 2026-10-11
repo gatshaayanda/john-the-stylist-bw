@@ -104,16 +104,15 @@ export default function PwaRegister(){
 
  async function startInstall(){
   const runInstall=window.jtsInstallApp;
-  if(!runInstall){setInstallHelp(true);return}
+  if(!runInstall){setInstallHelp(true);setInstallOpen(true);return}
+  // Start the native browser installation from this button click. Do not put
+  // an explanatory panel in front of an available native install prompt.
   const outcome=await runInstall();
   if(outcome==="accepted"){setInstalled(true);setInstallOpen(false);setInstallHelp(false)}
-  else if(outcome==="unavailable"){setInstallHelp(true)}
+  else if(outcome==="unavailable"){setInstallHelp(true);setInstallOpen(true)}
   else {setInstallOpen(false);setInstallHelp(false)}
  }
- function openInstallEntry(){
-  if(window.jtsInstallPrompt&&window.jtsInstallApp){void startInstall();return}
-  setInstallHelp(false);setInstallOpen(true);
- }
+ function openInstallEntry(){void startInstall();}
  function applyUpdate(){if(!updateReady)return;reloadForUpdate.current=true;updateReady.postMessage({type:"SKIP_WAITING"})}
 
  return <>
