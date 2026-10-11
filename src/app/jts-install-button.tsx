@@ -72,7 +72,7 @@ export default function JtsInstallButton(){
  const fallbackTitle=ios?"Add JTS Styles to your Home Screen":android?"Install JTS Styles in Chrome":"Install JTS Styles in Chrome or Edge";
  return <div className="jtsInstallWrap">
   <button type="button" className="jtsInstallButton" onClick={()=>void install()} disabled={busy} aria-label={buttonLabel}>
-   {busy?"Opening install…":<><span aria-hidden="true">⌂</span> {buttonLabel}</>}
+   {busy?"Opening install…":<><img src="/jts-logo.svg" alt="" aria-hidden="true" /> {buttonLabel}</>}
   </button>
   {showHelp&&<div className="pwaInstallHelp" role="dialog" aria-label="Install JTS Styles" aria-live="polite">
    <strong>{embedded?"Open JTS Styles in your browser":ios?"Add JTS Styles to your Home Screen":fallbackTitle}</strong>
