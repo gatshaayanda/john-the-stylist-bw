@@ -43,7 +43,7 @@ const forbiddenPatterns=[
 
 const failures=[];
 const brandContent=fs.readFileSync(path.join(root,"src/config/brand.ts"),"utf8");
-const cacheVersion=brandContent.match(/serviceWorkerCache:\\s*"([^"]+)"/)?.[1];
+const cacheVersion=brandContent.match(/serviceWorkerCache:[ \t]*"([^"]+)"/)?.[1];
 if(!cacheVersion){
   failures.push("src/config/brand.ts must define serviceWorkerCache");
 }else if(!fs.readFileSync(path.join(root,"public/sw-jts.js"),"utf8").includes('const CACHE_VERSION="'+cacheVersion+'"')){
