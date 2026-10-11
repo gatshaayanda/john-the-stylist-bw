@@ -51,14 +51,18 @@ export default function PwaRegister(){
    const promptEvent=window.jtsInstallPrompt;
    if(!promptEvent)return "unavailable";
    try{
-    promptEvent.prompt();
+    // Invoke the browser prompt synchronously in the click's user-activation
+    // window, then await its result before reading the user's choice.
+    const promptResult=promptEvent.prompt();
     window.jtsInstallPrompt=null;
     window.dispatchEvent(new Event("jts-install-consumed"));
+    await promptResult;
     const choice=await promptEvent.userChoice;
     return choice.outcome;
    }catch{
-    window.jtsInstallPrompt=promptEvent;
-    window.dispatchEvent(new Event("jts-install-available"));
+    // beforeinstallprompt is one-shot: never keep a stale event after an error.
+    window.jtsInstallPrompt=null;
+    window.dispatchEvent(new Event("jts-install-consumed"));
     return "unavailable";
    }
   };
