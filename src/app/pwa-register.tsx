@@ -9,6 +9,8 @@ type InstallPromptEvent=Event&{prompt:()=>void|Promise<void>;userChoice:Promise<
 declare global {
  interface Window {
   jtsInstallPrompt?:InstallPromptEvent|null;
+  __jtsEarlyInstallPrompt?:Event|null;
+  __jtsPwaListenerReady?:boolean;
   jtsInstallApp?:()=>Promise<"accepted"|"dismissed"|"unavailable">;
  }
 }
@@ -67,6 +69,20 @@ export default function PwaRegister(){
    }
   };
 
+  const onBeforeInstallPrompt=(event:Event)=>{
+   const currentStandalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean((navigator as Navigator&{standalone?:boolean}).standalone));
+   if(currentStandalone)return;
+   event.preventDefault();
+   window.jtsInstallPrompt=event as InstallPromptEvent;
+   window.dispatchEvent(new Event("jts-install-available"));
+  };
+  // Match The Plug's capture handshake: adopt any event captured before React
+  // hydrated, then let this single root controller handle future events.
+  window.__jtsPwaListenerReady=true;
+  const earlyPrompt=window.__jtsEarlyInstallPrompt;
+  if(earlyPrompt){delete window.__jtsEarlyInstallPrompt;onBeforeInstallPrompt(earlyPrompt)}
+  window.addEventListener("beforeinstallprompt",onBeforeInstallPrompt);
+
   window.addEventListener("online",online);
   window.addEventListener("offline",off);
   window.addEventListener("appinstalled",appinstalled);
@@ -94,6 +110,7 @@ export default function PwaRegister(){
    window.removeEventListener("online",online);
    window.removeEventListener("offline",off);
    window.removeEventListener("appinstalled",appinstalled);
+   window.removeEventListener("beforeinstallprompt",onBeforeInstallPrompt);
    window.removeEventListener("jts-open-install",openInstall);
    if(window.jtsInstallApp)delete window.jtsInstallApp;
    if(window.jtsInstallPrompt)window.jtsInstallPrompt=null;
