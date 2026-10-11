@@ -27,7 +27,7 @@ export default function JtsBrowserGate(){
  const names:Record<HandoffContext,string>={whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook",messenger:"Messenger",linkedin:"LinkedIn",embedded:"this in-app browser",browser:"your browser"};
  return <div className="jtsBrowserGate" role="dialog" aria-modal="true" aria-labelledby="jtsBrowserGateTitle">
   <section className="jtsBrowserGateCard">
-   <div className="jtsBrowserGateBrand"><span>JTS</span><div><b>JTS STYLES</b><small>JOHN THE STYLIST BW</small></div></div>
+   <div className="jtsBrowserGateBrand"><img src="/jts.jpg" alt="JTS Styles logo" /><div><b>JTS STYLES</b><small>JOHN THE STYLIST BW</small></div></div>
    <span className="jtsBrowserGateEyebrow">ONE QUICK STEP</span>
    <h1 id="jtsBrowserGateTitle">Open JTS in your browser.</h1>
    <p>You opened this page inside {names[context]}. For the best experience and app installation, continue in your normal browser. We’ll keep the page you wanted to open.</p>
