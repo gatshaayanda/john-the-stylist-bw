@@ -389,3 +389,11 @@ The public experience should follow The Plug's editorial discipline without copy
 - PWA installation should be offered as a direct, working app action with honest platform-specific handling. Do not falsely claim installation is technically mandatory, but do not foreground caveats about not needing the app.
 - Embedded-browser handoff is the explicit exception: use the branded gate to get a WhatsApp/social in-app visit into the normal browser when detected, preserve the requested route, and avoid rendering the full app underneath or flashing it before the gate.
 - Before changing customer copy, check whether it encourages completion inside the product or unnecessarily redirects the customer away from it. This principle applies to future projects and must be carried into their AGENTS.md when creating or updating them.
+
+
+## Browser install parity with The Plug — 2026-10-11
+- In a normal browser, JTS must offer a persistent, branded “Install JTS Styles” entry point, matching The Plug's working pattern: call the native browser install prompt directly from a user click when available; otherwise show a concise, platform-specific install guide.
+- The install panel is secondary and dismissible; it must never block browsing or booking, and it must not replace the server-first embedded-browser handoff gate.
+- Hide the persistent install entry when the app is already running in standalone/installed mode. Keep the contextual “Keep JTS close” section and its button in the homepage.
+- Preserve the captured `beforeinstallprompt` event and the existing `window.jtsInstallApp` action. Never show a dead install button.
+- Verify the normal-browser install CTA and the embedded-browser handoff as separate flows. Do not claim actual device installation without a real Android/iOS browser test.

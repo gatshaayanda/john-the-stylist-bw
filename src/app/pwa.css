@@ -2,3 +2,34 @@
 /* Prevent the full site flashing inside an embedded browser before the handoff gate hydrates. */
 html.jts-embedded-pending body > :not(.jtsBrowserGate){visibility:hidden!important}
 html.jts-embedded-pending body > .jtsBrowserGate{visibility:visible!important}
+
+
+/* Persistent browser install entry, following The Plug's normal-browser pattern with JTS branding. */
+.jtsPersistentInstall{position:fixed;left:16px;right:16px;bottom:16px;z-index:999;display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;max-width:720px;margin:0 auto;padding:12px 18px;border:1px solid #6b315f;border-radius:15px;background:#6b315f;color:#fffaf4;font:inherit;font-weight:900;letter-spacing:.04em;cursor:pointer;box-shadow:0 10px 28px rgba(65,31,63,.3)}
+.jtsPersistentInstall img{width:23px;height:23px;object-fit:contain;border-radius:4px;background:#050505}
+.jtsPersistentInstall span{color:#d8fa72;font-size:1.1rem}
+@media(min-width:700px){.jtsPersistentInstall{left:auto;right:18px;bottom:18px;width:auto;min-width:245px}}
+.jtsInstallPanel{position:fixed;inset:0;z-index:1001;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:rgba(26,15,27,.42);backdrop-filter:blur(4px)}
+.jtsInstallPanelCard{width:min(100%,620px);max-height:calc(100dvh - 32px);overflow-y:auto;border:1px solid #815c7e;border-radius:23px;padding:22px;background:linear-gradient(155deg,#fffaf4,#f1e8ef);color:#28212a;box-shadow:0 24px 90px rgba(0,0,0,.3)}
+.jtsInstallPanelTop{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.jtsInstallPanelTop img{width:35px;height:35px;object-fit:contain;border-radius:5px;background:#050505}
+.jtsInstallPanelTop>span{font-size:.61rem;font-weight:900;letter-spacing:.16em;color:#6b315f}
+.jtsInstallPanelTop>button{margin-left:auto;border:0;background:transparent;color:#4f294d;font-size:1.7rem;line-height:1;cursor:pointer}
+.jtsInstallPanelKicker{font-size:.62rem;font-weight:900;letter-spacing:.18em;color:#6b315f}
+.jtsInstallPanelCard h2{font:500 clamp(2rem,7vw,3rem)/.98 Georgia,serif;letter-spacing:-.04em;margin:12px 0}
+.jtsInstallPanelCard h2 em{color:#6b315f;font-weight:500}
+.jtsInstallPanelCard>p{font-size:.84rem;line-height:1.65;color:#675e68}
+.jtsInstallPanelBenefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0}
+.jtsInstallPanelBenefits span{display:grid;align-content:start;gap:5px;padding:12px;border:1px solid #ddcbd9;border-radius:12px;background:rgba(255,255,255,.55)}
+.jtsInstallPanelBenefits b{font-size:.62rem;letter-spacing:.1em;color:#6b315f}
+.jtsInstallPanelBenefits strong{font-size:.75rem}
+.jtsInstallPanelBenefits small{font-size:.68rem;line-height:1.45;color:#675e68}
+.jtsInstallPanelPrimary,.jtsInstallPanelSecondary{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:48px;border-radius:999px;font:inherit;font-size:.76rem;font-weight:900;letter-spacing:.06em;cursor:pointer}
+.jtsInstallPanelPrimary{border:1px solid #6b315f;background:#6b315f;color:#fffaf4}
+.jtsInstallPanelPrimary span{color:#d8fa72}
+.jtsInstallPanelSecondary{margin-top:8px;border:1px solid #ddcbd9;background:transparent;color:#4f294d}
+.jtsInstallPanelHelp{display:grid;gap:9px;margin:18px 0}
+.jtsInstallPanelHelp strong{font:600 1.05rem Georgia,serif;color:#6b315f}
+.jtsInstallPanelHelp p{margin:0;font-size:.82rem;line-height:1.65;color:#675e68}
+.jtsInstallPanelFootnote{margin-bottom:0!important;font-size:.68rem!important;color:#756b75!important}
+@media(max-width:420px){.jtsInstallPanelCard{padding:18px}.jtsInstallPanelBenefits{grid-template-columns:1fr;gap:7px}.jtsInstallPanelBenefits span{grid-template-columns:28px 1fr;align-items:start}.jtsInstallPanelBenefits b{grid-row:span 2}.jtsInstallPanelBenefits small{grid-column:2}}
