@@ -36,7 +36,8 @@ export default async function RootLayout({children}:{children:React.ReactNode}){
  const embedded=EMBEDDED_BROWSER_PATTERN.test(userAgent)
    ||(/Android/i.test(userAgent)&&/; wv\)/i.test(userAgent))
    ||REQUESTED_WITH_PATTERN.test(requestedWith);
- const initialContext=embedded?detectContext(userAgent):"browser";
+ const detectedContext=detectContext(userAgent);
+ const initialContext=embedded?(detectedContext==="browser"?"embedded":detectedContext):"browser";
  const initialAndroid=/Android/i.test(userAgent);
  const initialIos=/iPhone|iPad|iPod/i.test(userAgent)||(/Macintosh/i.test(userAgent)&&/Mobile/i.test(userAgent));
  return <html lang="en"><body style={embedded?{overflow:"hidden"}:undefined}>
