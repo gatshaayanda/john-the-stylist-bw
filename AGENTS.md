@@ -229,7 +229,7 @@ Brand direction:
 
 Do not use inherited BOEMO food assets as Stylist customer content.
 
-The current first-flow design uses a JTS monogram/typographic visual treatment until the supplied production logo/hairstyle photography is mapped into the repository. Do not fake customer work with unrelated stock images.
+The supplied official logo is `public/jts.jpg`. Use it for the homepage header/footer, browser handoff, install area, offline recovery, Open Graph/Twitter sharing and notification icon where supported. `public/jts-logo.svg` is a self-contained SVG wrapper embedding the canonical JPEG and is the scalable favicon/manifest icon. Existing `public/icon-192.png` and `public/icon-512.png` remain PNG fallbacks until verified real-logo PNG derivatives replace them; do not relabel JPEG bytes as PNG or fabricate a derivative. Do not fake customer work with unrelated stock images.
 
 ## Accessibility and form quality
 - visible labels;
@@ -307,7 +307,7 @@ This section supersedes conflicting older install UX notes above. Do not remove 
 5. **No silent failure.** The install action remains available on the public home route while not installed, including desktop when no native event is available. Android fallback explains Chrome's Install app/Add to Home screen menu; iPhone/iPad explains Safari Share → Add to Home Screen; desktop explains Chrome/Edge installation where offered. Never claim that a native prompt opened unless the browser actually exposed it.
 6. **Installed state.** Standalone/display-mode detection suppresses the install control and embedded gate; `appinstalled` clears the retained event and closes installation help. Do not block private/account routes with installation promotion.
 7. **Installability diagnosis.** If `beforeinstallprompt` is absent, inspect HTTPS, manifest response and metadata, declared 192/512 PNG icons and URLs, service-worker registration/scope, controller timing, browser support and installability diagnostics. JavaScript cannot force an OS/browser prompt.
-8. **Service worker/cache.** Actual current cache namespace is `jts-shell-v6` in `src/config/brand.ts` and `public/sw-jts.js`. Bump both consistently whenever shell assets or install-critical identity/metadata changes. Preserve network-first navigation and do not cache private account/admin responses.
+8. **Service worker/cache.** Actual current cache namespace is `jts-shell-v7` in `src/config/brand.ts` and `public/sw-jts.js`. Bump both consistently whenever shell assets or install-critical identity/metadata changes. Preserve network-first navigation and do not cache private account/admin responses.
 9. **Verification checklist.** Verify direct browser entry and embedded entry independently; gate detection and primary action; path/query/hash preservation; fallback/copy recovery; no redirect loop; native prompt direct from click when the event exists; useful platform fallback when absent; standalone/appinstalled suppression; manifest output and icons; SW scope/controller/cache; identity check, typecheck, lint and production build. For Vercel, only declare QA-ready after the exact intended commit's deployment reaches READY. Do not claim device-level WhatsApp/Safari/Chrome behavior was tested unless actually tested on those platforms.
 
 ### Current implementation paths
@@ -357,3 +357,13 @@ The public experience should follow The Plug's editorial discipline without copy
 - Nielsen Norman Group, “Progressive Disclosure” (2006): foreground frequent primary tasks and defer secondary choices.
 - Kaluza, Voigt & Paetz, “Empirical studies on the impact of booking status on customers’ choice behavior in online appointment systems” (2024): availability displays can signal quality or scarcity; never fake booking activity or show false availability.
 - Apply research as a design guide, not as proof that a specific layout will increase JTS conversions. Validate the live journey with real users and real appointment operations.
+
+
+## Official JTS logo asset contract (2026-10-11)
+- Canonical source: `public/jts.jpg`, supplied by the owner. Do not redraw, regenerate, crop destructively, recolour, or replace it with a text monogram.
+- Self-contained scalable icon: `public/jts-logo.svg`, which embeds the canonical JPEG. Use `brand.logo` and `brand.iconSvg` rather than hard-coding alternate logo paths in metadata.
+- Visible brand placements: homepage header and footer; contextual Keep JTS Close section; WhatsApp/social embedded-browser handoff gate; install button; offline recovery; Open Graph/Twitter preview; notification icon/badge where supported; manifest/favicon. Keep booking as the primary action and install as optional.
+- `public/icon-192.png` and `public/icon-512.png` are retained as PNG compatibility fallbacks until proper PNG derivatives from the official source are generated and visually verified. Never copy JPEG bytes into a .png file or claim PNG derivatives exist when they do not.
+- If replacing the PNGs later, generate true 192×192 and 512×512 PNG files from `public/jts.jpg`, inspect them visually, update manifest and shortcuts, then run `npm run verify:identity`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
+- Any change to install-critical assets must bump `serviceWorkerCache` in `src/config/brand.ts` and `CACHE_VERSION` in `public/sw-jts.js` together. Current value: `jts-shell-v7`.
+- Verify the deployed favicon/share image and the install flow separately. Do not claim Android/iOS icon or WhatsApp handoff QA without testing on those actual platforms.
