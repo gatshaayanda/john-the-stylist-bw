@@ -30,8 +30,6 @@ const required=[
   ["src/config/brand.ts",'icon192: "/icon-192.png"'],
   ["src/config/brand.ts",'icon512: "/icon-512.png"'],
   ["src/config/brand.ts",'manifest: "/manifest.webmanifest"'],
-  ["src/config/brand.ts",'serviceWorkerCache: "jts-shell-v8"'],
-  ["public/sw-jts.js",'const CACHE_VERSION="jts-shell-v8"'],
   ["public/sw-jts.js",'"/jts.jpg"'],
   ["public/sw-jts.js",'"/jts-logo.svg"'],
   ["public/sw-jts.js","/icon-192.png"],
@@ -44,6 +42,13 @@ const forbiddenPatterns=[
 ];
 
 const failures=[];
+const brandContent=fs.readFileSync(path.join(root,"src/config/brand.ts"),"utf8");
+const cacheVersion=brandContent.match(/serviceWorkerCache:\\s*"([^"]+)"/)?.[1];
+if(!cacheVersion){
+  failures.push("src/config/brand.ts must define serviceWorkerCache");
+}else if(!fs.readFileSync(path.join(root,"public/sw-jts.js"),"utf8").includes('const CACHE_VERSION="'+cacheVersion+'"')){
+  failures.push("public/sw-jts.js CACHE_VERSION must match brand.serviceWorkerCache ("+cacheVersion+")");
+}
 for(const [file,needle] of required){
   const content=fs.readFileSync(path.join(root,file),"utf8");
   if(!content.includes(needle)) failures.push(file+" must contain "+needle);
