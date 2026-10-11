@@ -5,7 +5,7 @@ export default function OfflinePage() {
     <main className="jtsBookingPage">
       <div className="jtsContainer jtsBookingWrap">
         <div className="jtsBookingTop">
-          <Link href="/" className="jtsBack">← JTS Styles</Link>
+          <Link href="/" className="jtsBack"><img className="jtsOfflineLogo" src="/jts.jpg" alt="" /> JTS Styles</Link>
           <span>Demo operation</span>
         </div>
         <section className="jtsConfirmation">
