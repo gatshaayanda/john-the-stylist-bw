@@ -376,3 +376,8 @@ The public experience should follow The Plug's editorial discipline without copy
 - The root layout applies the same gate on every route. Android attempts Chrome intent with the current path/query and an exact full-URL fallback; iOS/other platforms open the current URL in a new tab and explain the host-app menu/copy-link recovery if blocked.
 - Keep booking as the primary customer task and install as optional after handoff. Never add a blocking install modal to normal-browser entry.
 - Handoff implementation changes require cache namespace bump in both `src/config/brand.ts` and `public/sw-jts.js`, identity verification, typecheck, lint, build, and deployed-commit READY confirmation before asking the owner to QA.
+
+### Deployment retry checkpoint — 2026-10-11
+- The embedded-browser client detection fix is already on `main` at `fdb4219285fa44f78f4ff0c0c1a2a6197ba0a44c`; it preserves a server-detected embedded-browser context when the client User-Agent differs.
+- The last confirmed production deployment was older commit `d8cb477a536ef321cc75630b038a830831c9de36`; do not ask the owner to QA the live WhatsApp journey until a deployment containing the fix is confirmed `READY`.
+- If a documentation-only chore commit is used to retrigger Vercel after a rate-limit failure, do not mistake the commit itself for deployment success. Verify the exact new `main` SHA and its production deployment state first.
