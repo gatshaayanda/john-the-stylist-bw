@@ -7,21 +7,28 @@ const identityFiles=[
   "src/app/manifest.ts",
   "src/config/brand.ts",
   "public/sw-jts.js",
+  "public/jts-logo.svg",
   "README.md",
   "AGENTS.md"
 ];
 const required=[
   ["src/app/layout.tsx","brand.icon192"],
+  ["src/app/layout.tsx","brand.logo"],
+  ["src/app/layout.tsx","brand.iconSvg"],
   ["src/app/layout.tsx","brand.manifest"],
   ["src/app/manifest.ts","brand.icon192"],
   ["src/app/manifest.ts","brand.icon512"],
   ["src/app/manifest.ts","name: brand.name"],
   ["src/config/brand.ts",'name: "John The Stylist Bw"'],
+  ["src/config/brand.ts",'logo: "/jts.jpg"'],
+  ["src/config/brand.ts",'iconSvg: "/jts-logo.svg"'],
   ["src/config/brand.ts",'icon192: "/icon-192.png"'],
   ["src/config/brand.ts",'icon512: "/icon-512.png"'],
   ["src/config/brand.ts",'manifest: "/manifest.webmanifest"'],
-  ["src/config/brand.ts",'serviceWorkerCache: "jts-shell-v6"'],
-  ["public/sw-jts.js",'const CACHE_VERSION="jts-shell-v6"'],
+  ["src/config/brand.ts",'serviceWorkerCache: "jts-shell-v7"'],
+  ["public/sw-jts.js",'const CACHE_VERSION="jts-shell-v7"'],
+  ["public/sw-jts.js",'"/jts.jpg"'],
+  ["public/sw-jts.js",'"/jts-logo.svg"'],
   ["public/sw-jts.js","/icon-192.png"],
   ["public/sw-jts.js","/icon-512.png"]
 ];
@@ -45,6 +52,8 @@ for(const file of identityFiles){
 for(const file of ["public/boemo-assets","public/icon.svg"]){
   if(fs.existsSync(path.join(root,file))) failures.push("inherited branded asset remains: "+file);
 }
+const logo=fs.readFileSync(path.join(root,"public/jts-logo.svg"),"utf8");
+if(!logo.includes("data:image/jpeg;base64,")) failures.push("official SVG logo must embed the supplied JTS image");
 const manifest=fs.readFileSync(path.join(root,"src/app/manifest.ts"),"utf8");
 if(manifest.includes("/icon.svg")) failures.push("manifest still references /icon.svg");
 const layout=fs.readFileSync(path.join(root,"src/app/layout.tsx"),"utf8");
