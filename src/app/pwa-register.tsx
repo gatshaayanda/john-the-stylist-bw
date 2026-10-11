@@ -25,7 +25,8 @@ export default function PwaRegister(){
   const standalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean((navigator as Navigator&{standalone?:boolean}).standalone));
   const ua=navigator.userAgent||"";
   setInstalled(standalone);setIsIOS(/iPad|iPhone|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1));setIsAndroid(/Android/i.test(ua));setInstallReady(true);
-  const openInstall=()=>{setInstallHelp(false);setInstallOpen(true)};
+  // Every install entry must use this controller so the native prompt and fallback cannot drift apart.
+  const openInstall=()=>{void startInstall()};
   window.addEventListener("jts-open-install",openInstall);
 
   const retryPendingBookingNotifications=async()=>{
