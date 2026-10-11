@@ -3,9 +3,7 @@ importScripts("https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"
 firebase.initializeApp({apiKey:"AIzaSyD5_rgSQq1-ZlBH6GlkAmX88MvTId8bNog",authDomain:"stylist-36204.firebaseapp.com",projectId:"stylist-36204",storageBucket:"stylist-36204.firebasestorage.app",messagingSenderId:"622468889009",appId:"1:622468889009:web:0579e49d766c6e81a1a590",measurementId:"G-5LDNFHCC53"});
 
 const CACHE_VERSION="jts-shell-v9";
-const STATIC_LIMIT=120;
-const PAGE_LIMIT=20;
-const SHELL=["/","/order","/account","/offline","/manifest.webmanifest","/icon-192.png","/icon-512.png","/jts.jpg","/jts-logo.svg"];
+const SHELL=["/offline","/manifest.webmanifest","/icon-192.png","/icon-512.png","/jts.jpg","/jts-logo.svg"];
 
 firebase.messaging().onBackgroundMessage((payload)=>{
  const title=payload.notification?.title||payload.data?.title||"JTS Styles";
@@ -27,7 +25,7 @@ async function precache(){
  const cache=await caches.open(CACHE_VERSION);
  for(const path of SHELL){try{const response=await fetch(new Request(path,{cache:"reload"}));if(response.ok)await cache.put(path,response.clone())}catch{}}
  const discovered=new Set();
- for(const path of ["/","/order","/account","/offline"]){
+ for(const path of ["/offline"]){
   const response=await cache.match(path);if(!response)continue;
   const html=await response.text();
   for(const match of html.matchAll(/(?:src|href)=["'](\/\_next\/static\/[^"']+)["']/g))discovered.add(match[1]);
@@ -53,10 +51,9 @@ self.addEventListener("fetch",event=>{
   return;
  }
  if(isNavigation){
-  const isPrivate=url.pathname.startsWith("/account")||url.pathname.startsWith("/orders/")||url.pathname.startsWith("/admin");
-  event.respondWith(fetch(request).then(async response=>{
-   if(response.ok&&!isPrivate){const cache=await caches.open(CACHE_VERSION);await cache.put(request,response.clone());const keys=await cache.keys();if(keys.length>PAGE_LIMIT+STATIC_LIMIT){await Promise.all(keys.slice(0,keys.length-(PAGE_LIMIT+STATIC_LIMIT)).map(key=>cache.delete(key)))}}
-   return response;
-  }).catch(async()=>await caches.match(request)||await caches.match("/offline")||Response.error()));
+  // HTML varies by request context (including the embedded-browser gate) and may
+  // contain route-specific state. Never reuse cached homepage/booking HTML here.
+  // Keep navigation network-first and fall back only to the dedicated offline route.
+  event.respondWith(fetch(request).catch(async()=>await caches.match("/offline")||Response.error()));
  }
 });
