@@ -403,3 +403,10 @@ The public experience should follow The Plug's editorial discipline without copy
 - The normal-browser install CTA invokes the retained `beforeinstallprompt` event synchronously from the user's click; await the returned prompt promise and then await `userChoice`.
 - Treat `beforeinstallprompt` as one-shot. Clear it after invocation and never restore a stale/consumed event after an error. If the browser did not expose the event, JavaScript cannot force the native install UI; keep the existing platform fallback for that case.
 - The current service-worker cache namespace is `jts-shell-v10` in both `src/config/brand.ts` and `public/sw-jts.js`.
+
+
+### Chore checkpoint — 2026-10-11 install deployment retry
+- The current install-capture implementation and matching service-worker shell cache are present on `main`; the cache version in both `src/config/brand.ts` and `public/sw-jts.js` is `jts-shell-v11`.
+- A deployment marked READY for the earlier commit `87f616b80c01242da467e4555cb8763a51f2b81a` does not prove the later install-controller/cache commits are deployed. Confirm the deployment's exact Git SHA before device QA.
+- Do not create extra commits to tidy documentation or code after this checkpoint. Bundle any remaining changes into one intentional chore commit to conserve Vercel Hobby deployments.
+- Device-level native install and WhatsApp handoff remain unverified until tested on the actual phone/browser.
