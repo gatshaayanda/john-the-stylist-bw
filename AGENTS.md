@@ -410,3 +410,10 @@ The public experience should follow The Plug's editorial discipline without copy
 - A deployment marked READY for the earlier commit `87f616b80c01242da467e4555cb8763a51f2b81a` does not prove the later install-controller/cache commits are deployed. Confirm the deployment's exact Git SHA before device QA.
 - Do not create extra commits to tidy documentation or code after this checkpoint. Bundle any remaining changes into one intentional chore commit to conserve Vercel Hobby deployments.
 - Device-level native install and WhatsApp handoff remain unverified until tested on the actual phone/browser.
+
+
+## Customer booking flow hardening — 2026-10-11
+- Keep the first appointment request guest-first; reuse an existing Firebase Auth session and create anonymous auth only when there is no current session.
+- Validate a plausible phone/WhatsApp number before submission without rejecting common international formats.
+- The post-submit WhatsApp handoff should carry the customer's entered name, requested service/date/time, reference, optional style note, supplied price range and 50% deposit instructions. It must state that the appointment remains a request until John confirms it.
+- Do not migrate the legacy `orders` collection or rewrite the admin schema as part of customer-flow hardening. Admin replacement is a separate phase after the booking lifecycle is verified.
