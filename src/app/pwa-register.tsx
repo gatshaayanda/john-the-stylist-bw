@@ -53,6 +53,10 @@ export default function PwaRegister(){
    if(currentStandalone)return;
    event.preventDefault();
    installPromptRef.current=event as InstallPromptEvent;
+   // In a regular browser, surface the install offer as soon as the browser
+   // confirms the app is installable. Do not make customers hunt for the header button.
+   setInstallHelp(false);
+   setInstallOpen(true);
   };
   // Attach the live listener BEFORE marking the controller ready. Otherwise a
   // beforeinstallprompt event landing between the ready flag and addEventListener
