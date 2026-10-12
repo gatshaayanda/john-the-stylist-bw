@@ -120,6 +120,7 @@ export default function PwaRegister(){
    window.removeEventListener("beforeinstallprompt",onBeforeInstallPrompt);
    window.removeEventListener("jts-open-install",openInstall);
    if(window.jtsInstallApp)delete window.jtsInstallApp;
+   window.__jtsPwaListenerReady=false;
    if(window.jtsInstallPrompt)window.jtsInstallPrompt=null;
    navigator.serviceWorker?.removeEventListener("controllerchange",controllerChange);
    stopPendingAuth();
