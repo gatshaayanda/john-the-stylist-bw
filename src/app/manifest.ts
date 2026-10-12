@@ -19,14 +19,13 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     icons: [
       { src: brand.iconSvg, sizes: "any", type: "image/svg+xml", purpose: "any" },
-      { src: brand.icon512, sizes: "192x192 512x512", type: "image/png", purpose: "any" },
+      { src: brand.icon192, sizes: "192x192", type: "image/png", purpose: "any" },
       { src: brand.icon512, sizes: "512x512", type: "image/png", purpose: "any" },
       { src: brand.icon512, sizes: "512x512", type: "image/png", purpose: "maskable" },
-
     ],
     shortcuts: [
-      { name: "Book appointment", short_name: "Book", description: "Choose a service and request an appointment.", url: "/order", icons: [{ src: brand.iconSvg, sizes: "any", type: "image/svg+xml" }, { src: brand.icon512, sizes: "192x192", type: "image/png" }] },
-      { name: "My appointments", short_name: "My bookings", description: "See your appointment requests and account.", url: "/account", icons: [{ src: brand.icon512, sizes: "192x192 512x512", type: "image/png" }] }
+      { name: "Book appointment", short_name: "Book", description: "Choose a service and request an appointment.", url: "/order", icons: [{ src: brand.iconSvg, sizes: "any", type: "image/svg+xml" }, { src: brand.icon192, sizes: "192x192", type: "image/png" }] },
+      { name: "My appointments", short_name: "My bookings", description: "See your appointment requests and account.", url: "/account", icons: [{ src: brand.icon192, sizes: "192x192", type: "image/png" }] }
     ]
   };
 }
