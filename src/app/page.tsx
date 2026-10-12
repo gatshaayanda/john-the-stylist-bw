@@ -38,6 +38,7 @@ export default function Home() {
         <div className="jtsEditHeaderActions">
           <Link href="/account" className="jtsEditTextLink">My bookings ↗</Link>
           <Link href="/order" className="jtsEditBookButton">Book a look <span>↗</span></Link>
+          <JtsInstallButton />
         </div>
       </div>
     </header>
