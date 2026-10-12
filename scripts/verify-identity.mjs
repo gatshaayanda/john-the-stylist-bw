@@ -21,7 +21,7 @@ const required=[
   ["src/app/layout.tsx","initialContext"],
   ["src/app/jts-browser-gate.tsx","OPEN IN CHROME"],
   ["src/app/jts-browser-gate.tsx","window.location.href"],
-  ["src/app/manifest.ts","brand.icon192"],
+  ["src/app/manifest.ts","brand.iconSvg"],
   ["src/app/manifest.ts","brand.icon512"],
   ["src/app/manifest.ts","name: brand.name"],
   ["src/config/brand.ts",'name: "John The Stylist Bw"'],
