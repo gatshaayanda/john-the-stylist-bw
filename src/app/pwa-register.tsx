@@ -26,7 +26,13 @@ export default function PwaRegister(){
   const ua=navigator.userAgent||"";
   setInstalled(standalone);setIsIOS(/iPad|iPhone|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1));setIsAndroid(/Android/i.test(ua));setInstallReady(true);
   // Every install entry must use this controller so the native prompt and fallback cannot drift apart.
-  const openInstall=()=>{void startInstall()};
+  // Match The Plug: launch native install directly when Chrome supplied its one-shot prompt.
+  // Otherwise open the install offer first; only its Install action shows browser-specific help.
+  const openInstall=()=>{
+   if(window.jtsInstallPrompt){void startInstall();return;}
+   setInstallHelp(false);
+   setInstallOpen(true);
+  };
   window.addEventListener("jts-open-install",openInstall);
 
   const retryPendingBookingNotifications=async()=>{
