@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import JtsInstallButton from "@/app/jts-install-button";
 
 const services = [
   { name: "Pixie cut", price: "P350–P400", note: "A shaped, precision short cut.", tag: "THE CUT" },
@@ -38,7 +37,6 @@ export default function Home() {
         <div className="jtsEditHeaderActions">
           <Link href="/account" className="jtsEditTextLink">My bookings ↗</Link>
           <Link href="/order" className="jtsEditBookButton">Book a look <span>↗</span></Link>
-          <JtsInstallButton />
         </div>
       </div>
     </header>
