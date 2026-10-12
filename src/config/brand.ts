@@ -6,7 +6,7 @@ export const brand = {
   backgroundColor: "#f4efe7",
   logo: "/jts.jpg",
   iconSvg: "/jts-logo.svg",
-  icon192: "/icon-192.png",
+  icon192: "/icon-512.png",
   icon512: "/icon-512.png",
   manifest: "/manifest.webmanifest",
   serviceWorkerCache: "jts-shell-v13"
