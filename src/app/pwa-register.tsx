@@ -77,12 +77,18 @@ export default function PwaRegister(){
    window.jtsInstallPrompt=event as InstallPromptEvent;
    window.dispatchEvent(new Event("jts-install-available"));
   };
-  // Match The Plug's capture handshake: adopt any event captured before React
-  // hydrated, then let this single root controller handle future events.
+  // Attach the live listener BEFORE marking the controller ready. Otherwise a
+  // beforeinstallprompt event landing between the ready flag and addEventListener
+  // is ignored by the early-capture script and lost before the Install click.
+  window.addEventListener("beforeinstallprompt",onBeforeInstallPrompt);
   window.__jtsPwaListenerReady=true;
   const earlyPrompt=window.__jtsEarlyInstallPrompt;
-  if(earlyPrompt){delete window.__jtsEarlyInstallPrompt;onBeforeInstallPrompt(earlyPrompt)}
-  window.addEventListener("beforeinstallprompt",onBeforeInstallPrompt);
+  if(earlyPrompt){
+   delete window.__jtsEarlyInstallPrompt;
+   // The live listener may already have received this same event in the tiny
+   // handoff window; never overwrite it by adopting the event twice.
+   if(window.jtsInstallPrompt!==earlyPrompt)onBeforeInstallPrompt(earlyPrompt);
+  }
 
   window.addEventListener("online",online);
   window.addEventListener("offline",off);
