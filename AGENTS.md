@@ -218,18 +218,15 @@ Push notifications:
 Do not reintroduce BOEMO food/kitchen/pickup language into customer-facing PWA, offline or notification surfaces.
 
 ## Media/design
-Brand direction:
-- black #000000 / near-black foundation;
-- metallic gold/bronze;
-- white;
-- electric/neon blue accent;
-- orange may be used for payment/service cues where useful;
-- polished, modern, high-end salon/barbershop tone;
-- monochrome editorial styling plus vibrant hairstyle photography when real business assets are supplied.
+Canonical visual reference: the owner-supplied `public/jts.jpg` logo. Its palette is **black, metallic gold, white and silver**. The logo contains white/silver script, gold hairline accents and gold “STYLES” lettering on black.
 
-Do not use inherited BOEMO food assets as Stylist customer content.
-
-The supplied official logo is `public/jts.jpg`. Use it for the homepage header/footer, browser handoff, install area, offline recovery, Open Graph/Twitter sharing and notification icon where supported. `public/jts-logo.svg` is a self-contained SVG wrapper embedding the canonical JPEG and is the scalable favicon/manifest icon. Existing `public/icon-192.png` and `public/icon-512.png` remain PNG fallbacks until verified real-logo PNG derivatives replace them; do not relabel JPEG bytes as PNG or fabricate a derivative. Do not fake customer work with unrelated stock images.
+- Keep `public/jts.jpg` as the canonical logo. Do not redraw, recolour, crop destructively or replace it with a text monogram.
+- Style every route—homepage, booking, booking history/detail, admin, install panel, embedded-browser gate and offline recovery—as one JTS product using the same logo-led palette.
+- Use black/near-black foundations, readable white, silver/neutral secondary surfaces and restrained metallic-gold accents. Remove inherited plum/purple, lime-green, neon-blue, pink and orange styling where it is decorative rather than semantic.
+- Maintain readable contrast, visible focus, error/status distinction, responsive spacing and touch-friendly actions. Keep the booking CTA primary; installation stays secondary and non-blocking.
+- Keep genuine supplied salon imagery only. Do not invent client results or use unrelated stock photography.
+- Use `brand.logo` and `brand.iconSvg` for canonical brand references. Do not assume a JPEG is a valid PNG. Verify icon file signatures, dimensions and rendered appearance before calling PWA icons correct.
+- Brand metadata/theme color, manifest, browser handoff, install panel, offline UI, favicon/share assets and notification imagery must agree with the canonical logo.
 
 ## Accessibility and form quality
 - visible labels;
@@ -417,3 +414,70 @@ The public experience should follow The Plug's editorial discipline without copy
 - Validate a plausible phone/WhatsApp number before submission without rejecting common international formats.
 - The post-submit WhatsApp handoff should carry the customer's entered name, requested service/date/time, reference, optional style note, supplied price range and 50% deposit instructions. It must state that the appointment remains a request until John confirms it.
 - Do not migrate the legacy `orders` collection or rewrite the admin schema as part of customer-flow hardening. Admin replacement is a separate phase after the booking lifecycle is verified.
+
+
+## Top-down styling and operations roadmap — 2026-10-16
+
+This is the active work plan. It supersedes earlier conflicting decorative colour guidance above and older install/cache checkpoint values. Preserve working behavior first; keep visual styling and operational refactors as separate, reviewable slices.
+
+### Audit baseline — inspected on `main`
+
+- Canonical brand image: `public/jts.jpg`; visual palette is black, metallic gold, white and silver.
+- Public homepage: `src/app/page.tsx`; currently has four supplied priced services, an enquiry path for unpriced styles, booking guidance, location/visit details, and an optional install section. Preserve those paths and their supplied prices.
+- Customer booking: `src/app/order/order-form.tsx`; guest-first form, service selection, requested date/time, name/phone, optional style note, deposit information, local booking copy and explicit request-vs-confirmation language. It currently accepts a typed time within the configured 08:00–18:00 window; that is a **requested time, not live verified availability**.
+- Customer history/detail: `src/app/account/page.tsx`, `src/app/orders/[id]/page.tsx`; history is associated with the current guest session/device, with Google linking and local/offline tracking behavior in the existing flow. Do not remove these behaviors during styling.
+- Admin: `src/app/admin/admin-gate.tsx` and `src/app/admin/page.tsx`; role-gated Firebase access exists, but the screen still identifies itself as BOEMO Kitchen and operates on food orders, food menu, kitchen location and food-sale reconciliation. This is the highest-priority domain mismatch.
+- Data/security: `src/lib/firebase/data.ts` and `firestore.rules` still use legacy `orders`, `menu`, `businessSettings`, pickup/delivery fields and customer UID ownership. Rules constrain customer-created records and reserve admin writes for owner/staff. Do not blindly rename collections, overwrite live records or loosen rules.
+- PWA/handoff: `src/app/layout.tsx`, `src/app/jts-browser-gate.tsx`, `src/app/pwa-register.tsx`, `src/app/jts-install-button.tsx`, `src/app/pwa.css`, `src/app/manifest.ts`, `src/config/brand.ts`, and `public/sw-jts.js`. Preserve the one root install controller, server-first embedded-browser gate and current user journeys. Native prompt behavior and real-device handoff must be reported as unverified unless tested on the device/browser.
+
+### Tripple S patterns inspected and approved for adaptation
+
+Use the Tripple S implementation as a **workflow reference, not a code/schema/branding clone**:
+
+- **Customer flow:** service discovery and published price/duration first; guest-first request; real server-generated availability; server revalidation when submitted; clear request receipt/reference; separate staff confirmation and payment state; optional post-request account linking for cross-device history. The Spa uses `GET /api/availability`, `POST /api/bookings`, and a transaction-backed `slotReservations` model. JTS does not yet have an equivalent verified live calendar, so do not pretend its free-form requested time is an available/held slot.
+- **Admin flow:** a searchable/filterable request queue with new/confirmed/payment-pending counts; distinct appointment requests versus general enquiries; direct status/payment updates with honest save/error feedback; owner-managed service/category catalogue; owner-managed operating hours/announcements; related calendar/client/follow-up tools only where JTS has an approved operational need.
+- **Access/security:** Tripple S checks individual Firebase identities against `admins/{uid}` owner/staff roles, uses validated server routes and the Admin SDK for booking writes, and denies direct client writes to booking requests/slot reservations in Firestore rules. Adopt those boundaries gradually for JTS after inspecting the configured Firebase project, live data and current access rules. Do not copy the Spa's access word, credentials, project IDs, clinical/wellness features, customer data or schema.
+- **Account onboarding:** retain guest-first booking; invite account linking after the request to improve recoverable appointment history. Handle existing-account collisions explicitly and never silently merge customer identities.
+- **Truth and usability:** distinguish request received, under review, confirmed, deposit pending/received and completed; no success message unless persistence is confirmed; recoverable field errors; concise mobile-first layouts; reduced-motion support; no fabricated availability or customer outcomes.
+
+### Delivery roadmap
+
+**P0 — Complete the logo-led visual consistency pass**
+1. Apply black/gold/white/silver styling to the homepage, service cards, booking form/summary, confirmation, account/history/detail, admin shell, install panel, embedded-browser gate, offline/update UI and form controls.
+2. Preserve current page structure, routes, text/data behavior, booking flow, guest sessions, WhatsApp links, auth/rules, and install/handoff logic during this styling-only slice.
+3. Verify responsive behavior and contrast at mobile and desktop widths. Ensure the canonical logo remains unchanged and the manifest/theme colours match it.
+4. Bump the service-worker shell cache namespace in `src/config/brand.ts` and `public/sw-jts.js` together when shell styling changes.
+
+**P0 — Make Admin represent John the Stylist**
+1. Replace BOEMO/Kitchen/food-order wording with JTS appointment and customer language.
+2. Map the useful existing admin foundation to JTS tasks: appointment request queue, requested date/time and service, customer contact, clear lifecycle status, deposit record, private customer communication, service/pricing management and operating information.
+3. Do not simply relabel food CRUD or financial reconciliation and call it done. Inspect legacy records and security rules, then plan the smallest safe domain migration with backward compatibility where necessary.
+4. Keep admin separate from customers, owner/staff role-gated, and never introduce self-service admin registration or hard-coded UIDs.
+
+**P1 — Make the appointment lifecycle dependable**
+1. Keep guest-first discovery and submission; published prices must precede personal details.
+2. Clearly label the selected date/time as a request until a verified calendar exists. Maintain the minimum one-day notice and 08:00–18:00 business constraints unless John explicitly changes them.
+3. Design a validated server-side booking write and availability/slot-reservation layer only after confirming the real operating calendar and data source. Recheck conflicts on submission; never fabricate open slots or call a request confirmed.
+4. Separate appointment status from deposit/payment status. The 50% Orange Money instructions remain guidance, not proof of payment; only an authorized, evidence-backed admin action may record receipt.
+5. Verify status changes, request ownership, duplicate/conflicting requests, error recovery and customer-visible next steps before adding automation.
+
+**P1 — Improve customer continuity without adding first-booking friction**
+1. Preserve anonymous/guest booking and existing same-device history.
+2. After a successful request, offer optional account linking for recoverable history; preserve the same UID/records when linking and handle account collisions explicitly.
+3. Never require installation, Google, email/password or profile completion before the first request. Never imply device-local history is automatically recoverable across devices.
+4. Keep appointment communication useful and truthful; do not add marketing/reminder automation without owner approval.
+
+**P2 — Harden and measure after the core flow works**
+1. Review direct Firestore writes, status mutation permissions, server validation, admin least privilege, offline/local-copy wording and cache boundaries against actual deployed behavior.
+2. Add only owner-useful, privacy-minimised analytics after booking and status data are trustworthy.
+3. Consider calendar, customer follow-up and richer service management only when they solve a confirmed JTS operating need.
+
+### Required acceptance gates
+
+- Inspect `AGENTS.md`, Git state, current production commit, Firebase project/rules and relevant route before implementation.
+- Styling-only work must not alter business logic or remove working controls/routes.
+- Run `npm run verify:identity`, `npx tsc --noEmit`, `npm run lint`, and `npm run build` when available.
+- Inspect the final diff; confirm the canonical logo, manifest metadata and matching service-worker cache version.
+- Verify homepage → service selection → booking request → receipt/reference → history/detail; separately verify admin access and each authorized state/payment change.
+- Check the exact Vercel deployment SHA and READY state before describing a change as deployed. Device-level Chrome/Safari/WhatsApp install behavior remains NOT RUN unless physically tested.
+- Record every gate as PASS / FAIL / NOT RUN / BLOCKED. Do not call a source audit, build, or READY deployment a complete customer-flow QA.

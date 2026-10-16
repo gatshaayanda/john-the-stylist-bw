@@ -418,3 +418,84 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
  .jtsEditorialHome{padding-bottom:76px}
 }
 @media(prefers-reduced-motion:reduce){.jtsEditTicker div{animation:none}.jtsEditServiceCard,.jtsEditBookButton,.jtsEditPrimary{transition:none}}
+
+
+/* JTS Styles: logo-led black, metallic gold, white and silver palette (2026-10-16). */
+:root{
+  --boemo-black:#070707;
+  --boemo-gold:#d4af37;
+  --boemo-amber:#b58b35;
+  --boemo-pink:#d4af37;
+  --boemo-cyan:#c9cdd3;
+  --boemo-white:#f7f7f5;
+  --boemo-paper:#111112;
+  --boemo-line:#383838;
+  --boemo-muted:#b7b7b3;
+  --jts-black:#050505;
+  --jts-white:#f7f7f5;
+  --jts-muted:#a8a8a4;
+  --jts-gold:#b98d35;
+  --jts-gold2:#e1c987;
+  --jts-blue:#c9cdd3;
+}
+.jtsSite{--jts-black:#050505;--jts-white:#f7f7f5;--jts-muted:#a8a8a4;--jts-gold:#b98d35;--jts-gold2:#e1c987;--jts-blue:#c9cdd3}
+.jtsEditorialHome{
+  --jts-ink:#080808;
+  --jts-paper:#f7f7f5;
+  --jts-card:#ffffff;
+  --jts-plum:#b58b35;
+  --jts-violet:#c9cdd3;
+  --jts-lime:#e1c987;
+  --jts-muted:#686a6d;
+  --jts-line:#d5d7da;
+  background:var(--jts-paper);
+  color:var(--jts-ink);
+}
+.jtsEditorialHome .jtsEditBookButton,
+.jtsEditorialHome .jtsEditPrimary{background:#d4af37;color:#050505;border:1px solid #e1c987}
+.jtsEditorialHome .jtsEditBookButton span,
+.jtsEditorialHome .jtsEditPrimary span{color:#050505}
+.jtsEditorialHome .jtsEditBookButton:hover,
+.jtsEditorialHome .jtsEditPrimary:hover{background:#e1c987;color:#050505}
+.jtsEditorialHome .jtsEditHeroArt{background:#050505;border:1px solid #b58b35;color:#f7f7f5}
+.jtsEditorialHome .jtsEditArtCircle{background:#c9cdd3;color:#050505}
+.jtsEditorialHome .jtsEditArtType em{color:#d4af37}
+.jtsEditorialHome .jtsEditArtSide,
+.jtsEditorialHome .jtsEditHours>span,
+.jtsEditorialHome .jtsEditHours>small{color:#c9cdd3}
+.jtsEditorialHome .jtsEditServiceCard:hover{border-color:#b58b35}
+.jtsEditorialHome .jtsEditServiceGlyph,
+.jtsEditorialHome .jtsEditServiceGlyph1,
+.jtsEditorialHome .jtsEditServiceGlyph2,
+.jtsEditorialHome .jtsEditServiceGlyph3{background:#e6e8eb}
+.jtsEditorialHome .jtsEditServiceGlyph:before,
+.jtsEditorialHome .jtsEditServiceGlyph:after{border-color:rgba(181,139,53,.42)}
+.jtsEditorialHome .jtsEditServiceGlyph span,
+.jtsEditorialHome .jtsEditServiceGlyph1 span,
+.jtsEditorialHome .jtsEditServiceGlyph2 span,
+.jtsEditorialHome .jtsEditServiceGlyph3 span{color:#8a6923}
+.jtsEditorialHome .jtsEditAskBand{background:#eceef0;border-left-color:#b58b35}
+.jtsEditorialHome .jtsEditAskBand>a,
+.jtsEditorialHome .jtsEditServiceFoot a{color:#8a6923}
+.jtsEditorialHome .jtsEditBooking{background:#e8e9eb}
+.jtsEditorialHome .jtsEditBookingGrid{border-color:#c9cdd3}
+.jtsEditorialHome .jtsEditBookingGrid article+article{border-color:#c9cdd3}
+.jtsEditorialHome .jtsEditVisitCard{background:#050505;border:1px solid #b58b35;color:#f7f7f5}
+.jtsEditorialHome .jtsEditDoor{background:#090909;border-color:#b58b35;box-shadow:0 0 0 1px #c9cdd3}
+.jtsEditorialHome .jtsEditDoor>span{color:#d4af37}
+.jtsEditorialHome .jtsEditDoor>small{color:#c9cdd3}
+.jtsEditorialHome .jtsEditKeep h2 em{color:#d4af37}
+.jtsEditorialHome .jtsEditFooter{background:#050505;border-color:#383838}
+.jtsEditorialHome .jtsEditFooterBottom a:hover{color:#d4af37}
+.heroVisual,.storyImage{border-color:#b58b35;box-shadow:0 0 0 1px #070707,0 0 28px rgba(212,175,55,.16),0 22px 55px rgba(0,0,0,.45)}
+.dealsSection .kicker{color:#d4af37}
+.dealCard:before{border-left-color:#d4af37;box-shadow:0 0 18px rgba(212,175,55,.14)}
+.dealCard b,.total strong,.stats strong,.varianceGrid strong,.countdown{color:#d4af37}
+.dealFriendPrice span,.dealFriendPrice strong,.friendPriceActive{color:#d4af37!important}
+.jtsBookingPage .jtsChoice:hover,
+.jtsBookingPage .jtsChoice.selected{border-color:#c9cdd3;box-shadow:0 0 0 1px rgba(201,205,211,.18)}
+.jtsBookingMain input:focus,
+.jtsBookingMain textarea:focus{border-color:#c9cdd3;box-shadow:0 0 0 3px rgba(201,205,211,.12)}
+.jtsDepositCard{background:#0b0b0c;border-color:#b58b35}
+.jtsConfirmIcon{background:#17140d;color:#d4af37;border:1px solid #b58b35}
+.jtsPaymentCard{border-color:#b58b35;background:#111112}
