@@ -202,6 +202,41 @@ service cloud.firestore {
       }
     }
 
+    match /styleFeed/{postId} {
+      // Customers may only read published style posts. Owner/staff can see drafts and manage publishing.
+      allow read: if isAdmin() || resource.data.published == true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title','caption','imageUrl','service','tags','published','createdAt','createdAtServer','createdBy'])
+        && request.resource.data.keys().hasAll(['title','caption','imageUrl','service','tags','published','createdAt','createdBy'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.caption is string
+        && request.resource.data.caption.size() <= 700
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.size() > 0
+        && request.resource.data.service is string
+        && request.resource.data.tags is list
+        && request.resource.data.tags.size() <= 8
+        && request.resource.data.published is bool
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title','caption','imageUrl','service','tags','published','updatedAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.caption is string
+        && request.resource.data.caption.size() <= 700
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.size() > 0
+        && request.resource.data.service is string
+        && request.resource.data.tags is list
+        && request.resource.data.tags.size() <= 8
+        && request.resource.data.published is bool;
+      allow delete: if isAdmin();
+    }
+
     match /dailyReconciliations/{date} {
       allow read: if isAdmin();
       allow create, update: if isAdmin() && validReconciliation();
