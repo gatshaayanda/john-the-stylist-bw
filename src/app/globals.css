@@ -499,3 +499,28 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsDepositCard{background:#0b0b0c;border-color:#b58b35}
 .jtsConfirmIcon{background:#17140d;color:#d4af37;border:1px solid #b58b35}
 .jtsPaymentCard{border-color:#b58b35;background:#111112}
+
+
+/* Customer-first JTS booking flow: use the canonical logo as the homepage's
+   visual anchor and keep service selection unmistakably on-brand. */
+.jtsEditLogo .jtsOfficialLogo{display:block;width:48px;height:48px;object-fit:contain;background:#050505;border:1px solid #b58b35}
+.jtsEditorialHome .jtsEditHeroLogoWrap{position:absolute;inset:70px 34px 66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.jtsEditorialHome .jtsEditHeroLogo{display:block;width:min(100%,390px);max-height:290px;object-fit:contain;border:1px solid rgba(212,175,55,.42);background:#050505}
+.jtsEditorialHome .jtsEditHeroLogoWrap p{margin:0;color:#c9cdd3;font-size:.62rem;font-weight:900;letter-spacing:.24em;text-align:center}
+.jtsEditorialHome .jtsEditHeroArt:before{border-color:rgba(201,205,211,.22)}
+.jtsEditorialHome .jtsEditHeroArt:after{border-color:rgba(212,175,55,.34)}
+.jtsEditorialHome .jtsEditServiceFoot a:focus-visible,
+.jtsEditorialHome .jtsEditPrimary:focus-visible,
+.jtsEditorialHome .jtsEditBookButton:focus-visible,
+.jtsBookingPage a:focus-visible,
+.jtsBookingPage button:focus-visible{outline:3px solid #d4af37;outline-offset:3px}
+.jtsBookingPage .jtsChoice:hover,
+.jtsBookingPage .jtsChoice.selected{border-color:#d4af37;box-shadow:0 0 0 1px rgba(212,175,55,.28)}
+.jtsBookingPage .jtsChoice i{color:#d4af37}
+.jtsBookingMain input:focus,
+.jtsBookingMain textarea:focus{border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.14)}
+@media(max-width:720px){
+ .jtsEditorialHome .jtsEditHeroLogoWrap{inset:62px 18px 60px;gap:16px}
+ .jtsEditorialHome .jtsEditHeroLogo{max-height:225px}
+ .jtsEditorialHome .jtsEditHeroLogoWrap p{font-size:.52rem;letter-spacing:.16em}
+}
