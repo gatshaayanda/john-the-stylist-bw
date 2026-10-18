@@ -202,6 +202,94 @@ service cloud.firestore {
       }
     }
 
+    match /styleFeed/{postId} {
+      // Customers may only read published style posts. Owner/staff can see drafts and manage publishing.
+      allow read: if isAdmin() || resource.data.published == true;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['title','caption','imageUrl','service','tags','published','createdAt','createdAtServer','createdBy'])
+        && request.resource.data.keys().hasAll(['title','caption','imageUrl','service','tags','published','createdAt','createdBy'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.caption is string
+        && request.resource.data.caption.size() <= 700
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.size() > 0
+        && request.resource.data.service is string
+        && request.resource.data.tags is list
+        && request.resource.data.tags.size() <= 8
+        && request.resource.data.published is bool
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title','caption','imageUrl','service','tags','published','updatedAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100
+        && request.resource.data.caption is string
+        && request.resource.data.caption.size() <= 700
+        && request.resource.data.imageUrl is string
+        && request.resource.data.imageUrl.size() > 0
+        && request.resource.data.service is string
+        && request.resource.data.tags is list
+        && request.resource.data.tags.size() <= 8
+        && request.resource.data.published is bool;
+      allow delete: if isAdmin();
+    }
+
+
+    match /customerStyleReviews/{reviewId} {
+      function validCustomerStyleReview() {
+        return request.resource.data.keys().hasOnly([
+            'customerId', 'customerName', 'title', 'caption', 'imageUrl', 'imageKey',
+            'service', 'rating', 'comparison', 'previousReviewId', 'createdAt',
+            'published', 'status'
+          ])
+          && request.resource.data.keys().hasAll([
+            'customerId', 'customerName', 'title', 'caption', 'imageUrl', 'imageKey',
+            'service', 'rating', 'comparison', 'previousReviewId', 'createdAt',
+            'published', 'status'
+          ])
+          && request.resource.data.customerId == request.auth.uid
+          && request.resource.data.customerName is string
+          && request.resource.data.customerName.size() <= 60
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 80
+          && request.resource.data.caption is string
+          && request.resource.data.caption.size() > 0
+          && request.resource.data.caption.size() <= 700
+          && request.resource.data.imageUrl is string
+          && request.resource.data.imageUrl.matches('https://.*')
+          && request.resource.data.imageKey is string
+          && request.resource.data.imageKey.size() > 0
+          && request.resource.data.service is string
+          && request.resource.data.service.size() <= 80
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5
+          && request.resource.data.comparison in ['first', 'happier', 'same', 'less-happy']
+          && request.resource.data.previousReviewId is string
+          && request.resource.data.createdAt is string
+          && request.resource.data.published == true
+          && request.resource.data.status == 'published';
+      }
+
+      allow create: if signedIn() && !isAdmin() && validCustomerStyleReview();
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.customerId == request.auth.uid)
+        || resource.data.published == true;
+      // Customers' reviews are an immutable history. Owner/staff can moderate, edit, or remove them.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'customerName', 'title', 'caption', 'imageUrl', 'imageKey', 'service',
+          'rating', 'comparison', 'published', 'status', 'moderatedAt', 'moderatedBy'
+        ])
+        && request.resource.data.customerId == resource.data.customerId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
     match /dailyReconciliations/{date} {
       allow read: if isAdmin();
       allow create, update: if isAdmin() && validReconciliation();
