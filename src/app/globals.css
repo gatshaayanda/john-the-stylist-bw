@@ -595,3 +595,51 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsFeedAdminActions button:hover{border-color:#ffc800;color:#ffc800}
 @media(max-width:760px){.jtsFeedGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.jtsFeedManagerGrid{grid-template-columns:1fr}.jtsFeedReturn,.jtsStylePanel,.jtsStyleNext,.jtsStyleFeedInvite{align-items:flex-start;flex-direction:column}.jtsFeedReturn{padding:22px}.jtsStyleStats{gap:8px}.jtsStyleStats article{padding:13px}.jtsStyleStats strong{font-size:1.55rem}.jtsJourneyNav>div{gap:10px}.jtsJourneyNav>div>a{font-size:.7rem}}
 @media(max-width:520px){.jtsFeedGrid{grid-template-columns:1fr}.jtsFeedHero{padding:52px 0 40px}.jtsFeedImage{aspect-ratio:5/4}.jtsStyleStats small{font-size:.66rem}.jtsStyleStats article>span{font-size:.58rem}.jtsStyleBookingRow{align-items:flex-start;flex-direction:column}.jtsJourneyNav{align-items:flex-start}.jtsJourneyNav>div{justify-content:flex-end}.jtsJourneyBrand{font-size:.7rem}.jtsJourneyBrand img{width:34px;height:34px}.jtsAccountTopLinks .jtsGhost{font-size:.68rem;padding:8px}.jtsStylePanel,.jtsStyleNext,.jtsStyleFeedInvite{padding:19px}}
+
+
+/* JTS customer-owned look + repeat review journal */
+.jtsFeedHeroActions{display:flex;gap:10px;flex-wrap:wrap}
+.jtsCustomerReview{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:28px;padding:28px;margin:0 0 52px;border:1px solid #4b4026;border-radius:16px;background:radial-gradient(circle at 8% 0,rgba(255,200,0,.1),transparent 35%),#131313;scroll-margin-top:20px}
+.jtsCustomerReviewIntro{align-self:start;position:sticky;top:20px}
+.jtsCustomerReviewIntro h2{font-size:clamp(2.4rem,4.5vw,4.5rem);line-height:.88;letter-spacing:-.04em;margin:15px 0}
+.jtsCustomerReviewIntro h2 em{font-style:normal;color:#ffc800}
+.jtsCustomerReviewIntro p{color:#c5bfb5;line-height:1.7;font-size:.9rem}
+.jtsCustomerReviewIntro>small{display:block;color:#9c958b;font-size:.73rem;line-height:1.6;margin-top:22px}
+.jtsCustomerReviewForm{display:grid;gap:15px;min-width:0}
+.jtsCustomerReviewForm>label{display:grid;gap:8px;font-size:.78rem;font-weight:900;color:#f7f2e9}
+.jtsCustomerReviewForm input:not([type=radio]):not([type=file]),.jtsCustomerReviewForm textarea{width:100%;min-width:0;border:1px solid #4a4439;border-radius:8px;padding:12px;background:#090909;color:#fffdf7;font:inherit;font-weight:500}
+.jtsCustomerReviewForm input[type=file]{width:100%;min-width:0;border:1px dashed #66552b;border-radius:8px;padding:12px;background:#0a0a0a;color:#d6cec0;font-size:.75rem}
+.jtsCustomerReviewForm label small{font-weight:500;color:#9c958b;font-size:.7rem;line-height:1.5}
+.jtsCustomerPhotoSelected{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid #39352d;border-radius:8px;color:#f7f2e9;font-size:.74rem}
+.jtsCustomerPhotoSelected small{color:#b5a78c}
+.jtsCustomerRating,.jtsCustomerComparison{min-width:0;border:1px solid #39352d;border-radius:10px;padding:14px}
+.jtsCustomerRating legend,.jtsCustomerComparison legend{padding:0 6px;font-size:.78rem;font-weight:950;color:#fffdf7}
+.jtsCustomerStars{display:flex;align-items:center;gap:7px}
+.jtsCustomerStars button{font-size:1.7rem;color:#766d5b;line-height:1;padding:3px}
+.jtsCustomerStars button.isSelected{color:#ffc800}
+.jtsCustomerStars strong{margin-left:6px;color:#ffc800;font-size:.85rem}
+.jtsCustomerComparison>p{color:#aaa296;font-size:.74rem;line-height:1.5;margin:0 0 10px}
+.jtsCustomerComparisonOption{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:.78rem;color:#eee5d8}
+.jtsCustomerComparisonOption input{accent-color:#ffc800;width:17px;height:17px}
+.jtsCustomerFirstReview{margin:0;padding:12px;border:1px solid #51431e;border-radius:8px;background:#1a170d;color:#e6d8a8;font-size:.77rem;line-height:1.55}
+.jtsCustomerReviewForm>.jtsJourneyButton{justify-self:start;cursor:pointer}
+.jtsCustomerReviewForm>.jtsJourneyButton:disabled{opacity:.55;cursor:wait}
+.jtsCustomerReviewError,.jtsCustomerReviewSuccess{margin:0;padding:12px;border-radius:8px;font-size:.78rem;line-height:1.55}
+.jtsCustomerReviewError{border:1px solid #743b36;background:#241110;color:#ffb6ac}
+.jtsCustomerReviewSuccess{border:1px solid #5b4c19;background:#19170e;color:#ffe17a}
+.jtsCustomerReviewHistory{grid-column:1/-1;border-top:1px solid #383128;padding-top:26px}
+.jtsCustomerReviewHistory .jtsJourneySectionHead{margin-bottom:14px}
+.jtsCustomerReviewHistory .jtsJourneySectionHead h3{font-size:clamp(1.8rem,4vw,2.8rem);margin:8px 0}
+.jtsCustomerReviewList{display:grid;gap:10px}
+.jtsCustomerReviewRow{display:grid;grid-template-columns:90px minmax(0,1fr);gap:14px;padding:12px;border:1px solid #37322a;border-radius:10px;background:#0d0d0d}
+.jtsCustomerReviewRow>img{width:90px;height:100px;object-fit:cover;border-radius:7px}
+.jtsCustomerReviewRow h4{font-size:1.05rem;margin:7px 0}
+.jtsCustomerReviewRow p{font-size:.8rem;color:#c5bfb5;line-height:1.55;margin:0 0 7px;overflow-wrap:anywhere}
+.jtsCustomerReviewRow small{font-size:.69rem;color:#ffc800;line-height:1.5}
+.jtsCustomerFeedRating{display:flex;align-items:center;gap:8px;margin:10px 0;color:#ffc800}
+.jtsCustomerFeedRating span{letter-spacing:.12em}
+.jtsCustomerFeedRating b{font-size:.72rem}
+.jtsCustomerFeedByline{display:block;color:#b7a98d;font-size:.7rem;line-height:1.5;margin-top:10px}
+.jtsVisuallyHidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:760px){.jtsCustomerReview{grid-template-columns:1fr;padding:20px;gap:20px}.jtsCustomerReviewIntro{position:static}.jtsCustomerReviewIntro h2{font-size:clamp(2.7rem,12vw,4rem)}.jtsCustomerReviewHistory{grid-column:auto}}
+@media(max-width:520px){.jtsFeedHeroActions{display:grid}.jtsFeedHeroActions>*{width:100%}.jtsCustomerReviewRow{grid-template-columns:70px minmax(0,1fr);gap:10px}.jtsCustomerReviewRow>img{width:70px;height:85px}.jtsCustomerReviewForm>.jtsJourneyButton{width:100%}}
