@@ -60,8 +60,10 @@ export default function Home() {
         </div>
         <div className="jtsEditHeroArt" aria-label="JTS Styles visual identity">
           <div className="jtsEditArtTop"><span>THE PERSONAL EDIT</span><span>BW / 001</span></div>
-          <div className="jtsEditArtCircle"><span>J</span><i>✳</i></div>
-          <div className="jtsEditArtType"><span>STYLE</span><em>IS</em><span>PERSONAL.</span></div>
+          <div className="jtsEditHeroLogoWrap">
+            <img className="jtsEditHeroLogo" src="/jts.jpg" alt="JTS Styles — John The Stylist Bw" />
+            <p>YOUR LOOK. YOUR SIGNATURE.</p>
+          </div>
           <div className="jtsEditArtSide">CUT · COLOUR · CHARACTER · CUT · COLOUR · CHARACTER ·</div>
           <div className="jtsEditArtBottom"><span>JOHN THE STYLIST BW</span><span>GABORONE, BOTSWANA</span></div>
         </div>
