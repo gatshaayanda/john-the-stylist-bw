@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { collection, limit, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, limit, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase/client";
 
@@ -24,11 +24,10 @@ export default function JtsFeedPage() {
     const feedQuery = query(
       collection(db, "styleFeed"),
       where("published", "==", true),
-      orderBy("createdAt", "desc"),
       limit(30)
     );
     return onSnapshot(feedQuery, snapshot => {
-      setPosts(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as StylePost)));
+      setPosts(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as StylePost)).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")).slice(0, 30));
       setLoading(false);
       setUnavailable(false);
     }, () => {
