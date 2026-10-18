@@ -40,7 +40,7 @@ export default async function RootLayout({children}:{children:React.ReactNode}){
  const initialContext=embedded?(detectedContext==="browser"?"embedded":detectedContext):"browser";
  const initialAndroid=/Android/i.test(userAgent);
  const initialIos=/iPhone|iPad|iPod/i.test(userAgent)||(/Macintosh/i.test(userAgent)&&/Mobile/i.test(userAgent));
- return <html lang="en"><head><link rel="manifest" href="/manifest.webmanifest" /></head><body style={embedded?{overflow:"hidden"}:undefined}>
+ return <html lang="en"><head><link rel="manifest" href={brand.manifest} /></head><body style={embedded?{overflow:"hidden"}:undefined}>
   <Script id="jts-embedded-browser-guard" strategy="beforeInteractive">{`(function(){var ua=navigator.userAgent||"";var lower=ua.toLowerCase();var embedded=/WhatsApp|Instagram|FBAN|FBAV|Messenger|Twitter|TikTok|Snapchat|LinkedInApp/i.test(ua)||lower.indexOf("line/")!==-1||(/Android/i.test(ua)&&lower.indexOf("; wv)")!==-1);var standalone=window.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean(navigator.standalone));if(embedded&&!standalone)document.documentElement.classList.add("jts-embedded-pending");})();`}</Script>
   <Script id="jts-install-event-capture" strategy="beforeInteractive">{`(function(){var w=window;w.addEventListener("beforeinstallprompt",function(event){var standalone=w.matchMedia("(display-mode: standalone)").matches||("standalone" in navigator&&Boolean(navigator.standalone));if(standalone||w.__jtsPwaListenerReady===true)return;event.preventDefault();w.__jtsEarlyInstallPrompt=event;});})();`}</Script>
   <JtsBrowserGate initialContext={initialContext} initialAndroid={initialAndroid} initialIos={initialIos}/>
