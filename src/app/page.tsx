@@ -60,8 +60,10 @@ export default function Home() {
         </div>
         <div className="jtsEditHeroArt" aria-label="JTS Styles visual identity">
           <div className="jtsEditArtTop"><span>THE PERSONAL EDIT</span><span>BW / 001</span></div>
-          <div className="jtsEditArtCircle"><span>J</span><i>✳</i></div>
-          <div className="jtsEditArtType"><span>STYLE</span><em>IS</em><span>PERSONAL.</span></div>
+          <div className="jtsEditHeroLogoWrap">
+            <img className="jtsEditHeroLogo" src="/jts.jpg" alt="JTS Styles — John The Stylist Bw" />
+            <p>YOUR LOOK. YOUR SIGNATURE.</p>
+          </div>
           <div className="jtsEditArtSide">CUT · COLOUR · CHARACTER · CUT · COLOUR · CHARACTER ·</div>
           <div className="jtsEditArtBottom"><span>JOHN THE STYLIST BW</span><span>GABORONE, BOTSWANA</span></div>
         </div>
@@ -134,6 +136,21 @@ export default function Home() {
         <img className="jtsEditKeepLogo" src="/jts.jpg" alt="JTS Styles logo" />
         <div className="jtsEditKeepCopy"><span className="jtsEditEyebrow">INSTALL JTS STYLES</span><h2>Your next appointment,<br /><em>one tap away.</em></h2><p>Add JTS Styles to your home screen for a quicker return to booking, appointment history and John’s updates.</p></div>
         <div className="jtsEditKeepAction"><JtsInstallButton /></div>
+        <details className="jtsIphoneHelp">
+          <summary><span>Using an iPhone?</span><b>See how to add JTS to your Home Screen <span aria-hidden="true">↗</span></b></summary>
+          <div className="jtsIphoneHelpContent">
+            <div className="jtsIphoneHelpCopy">
+              <span className="jtsEditEyebrow">IPHONE · SAFARI</span>
+              <h3>Keep JTS one tap away.</h3>
+              <p>Open this page in Safari, tap Share, choose “Add to Home Screen”, then tap Add. This is Apple’s manual install route; it does not change the normal install button above.</p>
+              <a href="https://youtu.be/et2_1AcBYlg?si=0w5zwl1NxcNc_Lrk" target="_blank" rel="noreferrer">Watch the iPhone walkthrough <span aria-hidden="true">↗</span></a>
+            </div>
+            <a className="jtsIphoneGuideImage" href="/iphone.jpg" target="_blank" rel="noreferrer" aria-label="Open the iPhone installation picture full size">
+              <img src="/iphone.jpg" alt="Visual guide to adding JTS Styles to the iPhone Home Screen" loading="lazy" />
+              <span>Open picture full size ↗</span>
+            </a>
+          </div>
+        </details>
       </div>
     </section>
 
