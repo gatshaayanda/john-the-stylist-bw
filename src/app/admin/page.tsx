@@ -1,85 +1,152 @@
 "use client";
+
 import Link from "next/link";
-import {useEffect,useMemo,useState} from "react";
-import {getDownloadURL,ref,uploadBytes} from "firebase/storage";
+import { useEffect, useMemo, useState } from "react";
+import { collection, onSnapshot, updateDoc, doc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
-import {storage} from "@/lib/firebase/client";
-import NotificationSettings from "@/components/NotificationSettings";
-import AdminConversations from "@/components/AdminConversations";
-import {deleteMenuItem,ensureStarterMenuSeeded,getBusinessSettings,getDailyReconciliation,getFoodOrders,getMenuItems,saveBusinessSettings,saveDailyReconciliation,saveMenuItem,subscribeToBusinessSettings,subscribeToFoodOrders,subscribeToMenuItems,updateFoodOrderPayment,updateFoodOrderStatus,ORDER_STATUSES,type BusinessSettings,type DailyReconciliation,type FoodOrder,type MenuItem,type OrderStatus,type PaymentMethod,type PaymentStatus} from "@/lib/firebase/data";
+import { db } from "@/lib/firebase/client";
 
-const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-const GABORONE_TIME_ZONE="Africa/Gaborone";
-const gaboroneDateKey=(date=new Date())=>new Intl.DateTimeFormat("en-CA",{timeZone:GABORONE_TIME_ZONE,year:"numeric",month:"2-digit",day:"2-digit"}).format(date);
-const gaboroneWeekday=(date=new Date())=>new Intl.DateTimeFormat("en-US",{weekday:"long",timeZone:GABORONE_TIME_ZONE}).format(date);
-const gaboroneDateTime=(iso:string)=>new Intl.DateTimeFormat("en-GB",{dateStyle:"medium",timeStyle:"short",timeZone:GABORONE_TIME_ZONE}).format(new Date(iso));
-const money=(n:number)=>`P${n.toFixed(2)}`;
-const currentDay=gaboroneWeekday();
-const blankMenu:MenuItem={id:"",name:"",price:0,friendPrice:undefined,category:"Today",description:"",available:true,preparationMinutes:15,sortOrder:0,section:"daily",days:[currentDay]};
+type Appointment = {
+  id: string;
+  customerName?: string;
+  phone?: string;
+  scheduledFor?: string;
+  createdAt?: string;
+  status?: string;
+  items?: Array<{ name?: string; price?: number; quantity?: number }>;
+  total?: number;
+  instructions?: string;
+  deliveryLocation?: string;
+};
+type CustomerReview = {
+  id: string;
+  customerName?: string;
+  title?: string;
+  caption?: string;
+  imageUrl?: string;
+  service?: string;
+  rating?: number;
+  comparison?: string;
+  createdAt?: string;
+  published?: boolean;
+  status?: string;
+};
 
-function Dashboard(){
- const[orders,setOrders]=useState<FoodOrder[]>([]),[menu,setMenu]=useState<MenuItem[]>([]),[settings,setSettings]=useState<BusinessSettings>({id:"main",location:"",hours:"",locationNote:"",updatedAt:new Date().toISOString()}),[loading,setLoading]=useState(true),[notice,setNotice]=useState(""),[tab,setTab]=useState<"orders"|"menu"|"location"|"financials"|"inbox">("orders"),[menuDraft,setMenuDraft]=useState<MenuItem>(blankMenu),[uploading,setUploading]=useState(false),[financialDate,setFinancialDate]=useState(gaboroneDateKey()),[reconciliation,setReconciliation]=useState<DailyReconciliation>({date:new Date().toISOString().slice(0,10),actualCash:0,actualETransfer:0,actualOther:0,notes:"",updatedAt:new Date().toISOString()}),[savingRecon,setSavingRecon]=useState(false);
+const dateText = (value?: string) => {
+  if (!value) return "Date not provided";
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Gaborone" }) : value;
+};
+const money = (value?: number) => "P" + (Number(value) || 0).toFixed(0);
 
- async function load(){setLoading(true);try{const [ordersResult,menuResult,settingsResult]=await Promise.all([getFoodOrders(),getMenuItems(),getBusinessSettings()]);setOrders(ordersResult);setMenu(menuResult);if(settingsResult)setSettings(settingsResult)}catch{setNotice("BOEMO data could not be loaded. Check Firebase access and connectivity.")}finally{setLoading(false)}}
- useEffect(()=>{void ensureStarterMenuSeeded().catch(()=>setNotice("BOEMO menu initialization could not be completed. Check Firebase access and connectivity."));let ready=0;const done=()=>{ready+=1;if(ready>=3)setLoading(false)};const stopOrders=subscribeToFoodOrders(next=>{setOrders(next);done()},error=>{setNotice(error.message);done()});const stopMenu=subscribeToMenuItems(next=>{setMenu(next);done()},error=>{setNotice(error.message);done()});const stopSettings=subscribeToBusinessSettings(next=>{if(next)setSettings(next);done()},error=>{setNotice(error.message);done()});return()=>{stopOrders();stopMenu();stopSettings()}},[]);
- useEffect(()=>{if(tab!=="financials")return;void getDailyReconciliation(financialDate).then(record=>setReconciliation(record??{date:financialDate,actualCash:0,actualETransfer:0,actualOther:0,notes:"",updatedAt:new Date().toISOString()})).catch(()=>setNotice("Financial reconciliation could not be loaded."))},[tab,financialDate]);
+function Dashboard() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
+  const [tab, setTab] = useState<"appointments" | "reviews">("appointments");
+  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState("");
 
- const active=useMemo(()=>orders.filter(o=>!["Collected","Delivered","Cancelled"].includes(o.status)),[orders]),deliveries=active.filter(o=>o.mode==="delivery"),today=gaboroneDateKey(),todayCount=orders.filter(o=>o.scheduledFor.startsWith(today)).length;
- const dayOrders=useMemo(()=>orders.filter(o=>o.scheduledFor.startsWith(financialDate)&&o.status!=="Cancelled"),[orders,financialDate]);
- const salesTotal=dayOrders.reduce((s,o)=>s+o.total,0),paidTotal=dayOrders.reduce((s,o)=>s+Math.min(o.total,o.amountPaid??0),0),outstanding=Math.max(0,salesTotal-paidTotal);
- const recordedCash=dayOrders.reduce((s,o)=>s+(o.paymentMethod==="cash"?Math.min(o.total,o.amountPaid??0):0),0);
- const recordedETransfer=dayOrders.reduce((s,o)=>s+(o.paymentMethod==="etransfer"?Math.min(o.total,o.amountPaid??0):0),0);
- const recordedOther=dayOrders.reduce((s,o)=>s+(o.paymentMethod==="other"?Math.min(o.total,o.amountPaid??0):0),0);
- const cashVariance=reconciliation.actualCash-recordedCash,etransferVariance=reconciliation.actualETransfer-recordedETransfer,otherVariance=reconciliation.actualOther-recordedOther;
+  useEffect(() => {
+    let ready = 0;
+    const done = () => { ready += 1; if (ready >= 2) setLoading(false); };
+    const stopAppointments: Unsubscribe = onSnapshot(collection(db, "orders"), snapshot => {
+      setAppointments(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as Appointment))
+        .sort((a, b) => (a.scheduledFor || "").localeCompare(b.scheduledFor || "")));
+      done();
+    }, () => { setNotice("Appointment requests could not be loaded. Check Firebase access and connection."); done(); });
+    const stopReviews: Unsubscribe = onSnapshot(collection(db, "customerStyleReviews"), snapshot => {
+      setReviews(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as CustomerReview))
+        .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")));
+      done();
+    }, () => { setNotice("Customer reviews could not be loaded. Check Firebase access and connection."); done(); });
+    return () => { stopAppointments(); stopReviews(); };
+  }, []);
 
- async function status(id:string,next:OrderStatus){try{await updateFoodOrderStatus(id,next);setOrders(current=>current.map(o=>o.id===id?{...o,status:next}:o))}catch{setNotice("Status update was not confirmed. Check connectivity and try again.")}}
- async function payment(order:FoodOrder,method:PaymentMethod,amount:string){const numeric=Math.min(order.total,Math.max(0,Number(amount)||0));const status:PaymentStatus=numeric<=0?"unpaid":numeric>=order.total?"paid":"partial";try{await updateFoodOrderPayment(order.id,status,method,numeric);setOrders(current=>current.map(o=>o.id===order.id?{...o,paymentStatus:status,paymentMethod:method,amountPaid:numeric}:o))}catch{setNotice("Payment record was not saved.")}}
+  const openAppointments = useMemo(() => appointments.filter(item => !["Cancelled", "Completed"].includes(item.status || "")), [appointments]);
 
- async function saveMenu(){if(!menuDraft.name.trim()||menuDraft.price<0){setNotice("Add a menu name and valid price.");return}if(menuDraft.section==="daily"&&!menuDraft.days?.length){setNotice("Choose at least one day for Today&apos;s Food.");return}const clean:MenuItem={id:menuDraft.id||crypto.randomUUID(),name:menuDraft.name.trim(),price:menuDraft.price,...(menuDraft.friendPrice===undefined?{}:{friendPrice:menuDraft.friendPrice}),category:menuDraft.category.trim()||"Deal",description:menuDraft.description.trim(),available:menuDraft.available,preparationMinutes:Math.max(0,menuDraft.preparationMinutes),sortOrder:Math.max(0,menuDraft.sortOrder),...(menuDraft.imageUrl?{imageUrl:menuDraft.imageUrl}:{}),section:menuDraft.section||"deal",days:menuDraft.section==="daily"?(menuDraft.days??[]):[]};try{await saveMenuItem(clean);setMenu(current=>[...current.filter(x=>x.id!==clean.id),clean].sort((a,b)=>a.sortOrder-b.sortOrder));setMenuDraft({...blankMenu,sortOrder:menu.length+1,days:[currentDay]});setNotice("Menu item published.")}catch{setNotice("Menu item could not be saved.")}}
- async function removeMenu(id:string){try{await deleteMenuItem(id);setMenu(current=>current.filter(x=>x.id!==id))}catch{setNotice("Menu item could not be deleted.")}}
- async function uploadPhoto(file:File){if(!file.type.startsWith("image/")){setNotice("Choose an image file.");return}setUploading(true);try{const fileRef=ref(storage,`boemoMedia/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"-")}`);const result=await uploadBytes(fileRef,file);const url=await getDownloadURL(result.ref);setMenuDraft(current=>({...current,imageUrl:url}));setNotice("Photo uploaded. Save the menu item to publish it.")}catch{setNotice("Photo upload failed. Check Firebase Storage access.")}finally{setUploading(false)}}
- async function saveLocation(){try{const next={...settings,id:"main",updatedAt:new Date().toISOString()};await saveBusinessSettings(next);setSettings(next);setNotice("Kitchen location and hours saved.")}catch{setNotice("Business settings could not be saved.")}}
- async function saveRecon(){setSavingRecon(true);try{const next={...reconciliation,date:financialDate,actualCash:Math.max(0,reconciliation.actualCash),actualETransfer:Math.max(0,reconciliation.actualETransfer),actualOther:Math.max(0,reconciliation.actualOther),updatedAt:new Date().toISOString()};await saveDailyReconciliation(next);setReconciliation(next);setNotice("Daily reconciliation saved.")}catch{setNotice("Daily reconciliation could not be saved.")}finally{setSavingRecon(false)}}
+  async function setAppointmentStatus(item: Appointment, status: string) {
+    setNotice("");
+    try {
+      await updateDoc(doc(db, "orders", item.id), { status });
+      setNotice("Appointment #" + item.id.slice(0, 8).toUpperCase() + " updated to " + status + ".");
+    } catch {
+      setNotice("That appointment update was not saved. Check Firebase rules and try again.");
+    }
+  }
 
- return <main className="adminPage"><div className="adminShell">
-  <div className="adminHeader"><div><span className="kicker">BOEMO · Kitchen Control</span><h1>Run the kitchen.</h1><p>Orders, menu, today&apos;s food and the money received stay in one place.</p></div><Link href="/" className="button buttonLight">View customer app</Link></div>
-  {notice&&<div className="notice adminNotice" role="status" aria-live="polite">✓ {notice}</div>}
-  <NotificationSettings/><nav className="adminTabs"><button className={tab==="orders"?"active":""} onClick={()=>setTab("orders")}>Orders</button><button className={tab==="inbox"?"active":""} onClick={()=>setTab("inbox")}>Customer Inbox</button><button className={tab==="menu"?"active":""} onClick={()=>setTab("menu")}>Menu & Prices</button><button className={tab==="financials"?"active":""} onClick={()=>setTab("financials")}>Financials</button><button className={tab==="location"?"active":""} onClick={()=>setTab("location")}>Location & Hours</button></nav>
+  async function setReviewPublished(item: CustomerReview, published: boolean) {
+    setNotice("");
+    try {
+      await updateDoc(doc(db, "customerStyleReviews", item.id), {
+        published,
+        status: published ? "published" : "hidden",
+        moderatedAt: new Date().toISOString()
+      });
+      setNotice(published ? "Customer look is visible in the public feed." : "Customer look is hidden from the public feed.");
+    } catch {
+      setNotice("Review moderation was not saved. Check Firebase rules and try again.");
+    }
+  }
 
-  {tab==="inbox"&&<AdminConversations/>}
-
-  {tab==="orders"&&<><div className="stats"><article><span>Today</span><strong>{todayCount}</strong></article><article><span>Active</span><strong>{active.length}</strong></article><article><span>Delivery</span><strong>{deliveries.length}</strong></article><article><span>Ready</span><strong>{active.filter(o=>o.status==="Ready").length}</strong></article></div>
-   <section className="adminPanel"><div className="panelHeading"><div><h2>Kitchen queue</h2><p className="orderTruth">Record payment when cash or an e-transfer is actually received. The order total remains the expected sale.</p></div><button className="button buttonLight" type="button" onClick={()=>void load()}>Refresh</button></div>
-   {loading?<div className="emptyState">Loading orders…</div>:active.length===0?<div className="emptyState">No active orders right now.</div>:<div className="queue">{active.map(order=><article className="queueRow" key={order.id}><div><strong>#{order.id.slice(0,8).toUpperCase()} · {order.customerName}</strong><small>{order.mode==="delivery"?"🚚 Delivery":"🛍️ Pickup"} · {gaboroneDateTime(order.scheduledFor)}</small><small>{order.items.map(item=>item.quantity+"× "+item.name).join(" · ")} · {money(order.total)}</small>{order.mode==="delivery"&&<small>📍 {order.deliveryLocation}</small>}{order.instructions&&<small>Note: {order.instructions}</small>}</div><div className="queueActions"><strong>{order.status}</strong><select value={order.status} onChange={e=>void status(order.id,e.target.value as OrderStatus)}>{ORDER_STATUSES.map(value=><option key={value}>{value}</option>)}</select><select value={order.paymentMethod??"unpaid"} onChange={e=>void payment(order,e.target.value as PaymentMethod,String(order.amountPaid??0))}><option value="unpaid">Unpaid</option><option value="cash">Cash</option><option value="etransfer">E-transfer</option><option value="other">Other</option></select><input className="paymentInput" type="number" min="0" max={order.total} step="0.01" value={order.amountPaid??0} onChange={e=>{const value=e.target.value;setOrders(current=>current.map(o=>o.id===order.id?{...o,amountPaid:Number(value)}:o))}} onBlur={e=>void payment(order,order.paymentMethod??"unpaid",e.target.value)} aria-label={"Amount received for "+order.customerName}/><small>{order.paymentStatus==="paid"?"Paid":order.paymentStatus==="partial"?"Part paid":"Payment pending"}</small></div></article>)}</div>}
-   </section></>}
-
-  {tab==="menu"&&<section className="adminPanel"><div className="panelHeading"><div><h2>Menu & prices</h2><p className="orderTruth">Publish today&apos;s food and manage separate deals/offers without changing the kitchen workflow.</p></div><div className="menuQuickActions"><button className="button buttonPrimary" type="button" onClick={()=>setMenuDraft({...blankMenu,sortOrder:menu.length+1,section:"daily",category:"Today",days:[currentDay]})}>+ Today&apos;s food</button><button className="button buttonLight" type="button" onClick={()=>setMenuDraft({...blankMenu,sortOrder:menu.length+1,section:"deal",category:"Deal",days:[]})}>+ Deal / offer</button></div></div>
-   <div className="adminTwoCol"><form className="adminForm" onSubmit={e=>{e.preventDefault();void saveMenu()}}>
-    <label>Name<input value={menuDraft.name} onChange={e=>setMenuDraft({...menuDraft,name:e.target.value})} required/></label>
-    <label>Public price (P)<input type="number" min="0" step="0.01" value={menuDraft.price} onChange={e=>setMenuDraft({...menuDraft,price:Number(e.target.value)})}/></label>
-    <label>Bring-a-Friend price (optional)<input type="number" min="0" step="0.01" value={menuDraft.friendPrice??""} onChange={e=>setMenuDraft({...menuDraft,friendPrice:e.target.value===""?undefined:Number(e.target.value)})}/></label>
-    <label>Section<select value={menuDraft.section??"deal"} onChange={e=>setMenuDraft({...menuDraft,section:e.target.value as "daily"|"deal"})}><option value="daily">Today&apos;s Food</option><option value="deal">Deal / everyday menu</option></select></label>
-    <label>Category<input value={menuDraft.category} onChange={e=>setMenuDraft({...menuDraft,category:e.target.value})}/></label>
-    {menuDraft.section==="daily"&&<fieldset className="dayPicker"><legend>Show on</legend><div>{DAYS.map(day=><label key={day}><input type="checkbox" checked={menuDraft.days?.includes(day)??false} onChange={e=>setMenuDraft({...menuDraft,days:e.target.checked?[...(menuDraft.days??[]),day]:(menuDraft.days??[]).filter(x=>x!==day)})}/>{day}</label>)}</div></fieldset>}
-    <label>Preparation minutes<input type="number" min="0" value={menuDraft.preparationMinutes} onChange={e=>setMenuDraft({...menuDraft,preparationMinutes:Number(e.target.value)})}/></label>
-    <label>Sort order<input type="number" min="0" value={menuDraft.sortOrder} onChange={e=>setMenuDraft({...menuDraft,sortOrder:Number(e.target.value)})}/></label>
-    <label>Description<textarea value={menuDraft.description} onChange={e=>setMenuDraft({...menuDraft,description:e.target.value})}/></label>
-    <label>Food photo<input type="file" accept="image/*" onChange={e=>{const file=e.target.files?.[0];if(file)void uploadPhoto(file)}} disabled={uploading}/>{uploading&&<small>Uploading photo…</small>}{menuDraft.imageUrl&&<small>Photo attached ✓</small>}</label>
-    <label className="checkRow"><input type="checkbox" checked={menuDraft.available} onChange={e=>setMenuDraft({...menuDraft,available:e.target.checked})}/> Available to customers</label>
-    <div className="saveAction"><button className="button buttonPrimary" type="submit">Save & publish menu item</button><span className="saveHint">After saving, this item appears in the published list beside the form.</span></div>
-   </form>
-   <div className="menuAdminList"><div className="menuListHeading"><strong>Today&apos;s Food</strong><span>Published meals for a specific day</span></div>{menu.filter(item=>item.section==="daily").map(item=><article key={item.id}><div>{item.imageUrl&&<img className="menuThumb" src={item.imageUrl} alt=""/>}<strong>{item.name}</strong><small>Today&apos;s Food · {(item.days??[]).join(", ")} · {money(item.price)} · {item.available?"Public":"Hidden"}</small></div><div><button className="button buttonLight" onClick={()=>setMenuDraft(item)}>Edit</button><button className="button buttonDanger" onClick={()=>void removeMenu(item.id)}>Delete</button></div></article>)}<div className="menuListHeading"><strong>Deals & offers</strong><span>Everyday offers, combos and Bring-a-Friend pricing</span></div>{menu.filter(item=>item.section!=="daily").map(item=><article key={item.id}><div>{item.imageUrl&&<img className="menuThumb" src={item.imageUrl} alt=""/>}<strong>{item.name}</strong><small>Deal / offer · {money(item.price)}{item.friendPrice!==undefined?" · Bring a Friend: "+money(item.friendPrice):""} · {item.available?"Public":"Hidden"}</small></div><div><button className="button buttonLight" onClick={()=>setMenuDraft(item)}>Edit</button><button className="button buttonDanger" onClick={()=>void removeMenu(item.id)}>Delete</button></div></article>)}</div></div>
-  </section>}
-
-  {tab==="financials"&&<section className="adminPanel"><div className="panelHeading"><div><h2>Daily financials</h2><p className="orderTruth">This is a simple reconciliation: compare BOEMO order sales with money actually received. It is not a profit report because food costs and other expenses are not recorded here.</p></div><label className="dateField">Business day<input type="date" value={financialDate} onChange={e=>setFinancialDate(e.target.value)}/></label></div>
-   <div className="stats financialStats"><article><span>Order sales</span><strong>{money(salesTotal)}</strong></article><article><span>Recorded paid</span><strong>{money(paidTotal)}</strong></article><article><span>Outstanding</span><strong>{money(outstanding)}</strong></article><article><span>Orders</span><strong>{dayOrders.length}</strong></article></div>
-   <div className="financeGrid"><article className="financeCard"><span>Recorded from orders</span><strong>Cash {money(recordedCash)}</strong><strong>E-transfer {money(recordedETransfer)}</strong><strong>Other {money(recordedOther)}</strong></article><article className="financeCard"><span>Actually received / counted</span><label>Cash<input type="number" min="0" step="0.01" value={reconciliation.actualCash} onChange={e=>setReconciliation({...reconciliation,actualCash:Number(e.target.value)})}/></label><label>E-transfer<input type="number" min="0" step="0.01" value={reconciliation.actualETransfer} onChange={e=>setReconciliation({...reconciliation,actualETransfer:Number(e.target.value)})}/></label><label>Other<input type="number" min="0" step="0.01" value={reconciliation.actualOther} onChange={e=>setReconciliation({...reconciliation,actualOther:Number(e.target.value)})}/></label></article></div>
-   <div className="varianceGrid"><article><span>Cash variance</span><strong>{money(cashVariance)}</strong><small>Actual cash minus recorded cash</small></article><article><span>E-transfer variance</span><strong>{money(etransferVariance)}</strong><small>Actual e-transfer minus recorded e-transfer</small></article><article><span>Other variance</span><strong>{money(otherVariance)}</strong><small>Actual other minus recorded other</small></article></div>
-   <label className="adminForm">Reconciliation note<textarea value={reconciliation.notes} onChange={e=>setReconciliation({...reconciliation,notes:e.target.value})} placeholder="e.g. P10 cash used for change, e-transfer batch checked…"/></label><div className="saveAction"><button className="button buttonPrimary" onClick={()=>void saveRecon()} disabled={savingRecon}>{savingRecon?"Saving…":"Save daily reconciliation"}</button><span className="saveHint">The saved values remain on this page so you can verify them immediately.</span></div>
-   <h3 className="financeListTitle">Orders needing payment</h3><div className="queue">{dayOrders.filter(o=>(o.amountPaid??0)<o.total).map(order=><article className="queueRow" key={order.id}><div><strong>#{order.id.slice(0,8).toUpperCase()} · {order.customerName}</strong><small>{money(order.total)} sale · {money(order.amountPaid??0)} recorded · {money(order.total-(order.amountPaid??0))} outstanding</small></div><strong>{order.status}</strong></article>)}{dayOrders.every(o=>(o.amountPaid??0)>=o.total)&&<div className="emptyState">No outstanding order payments recorded for this day.</div>}</div>
-  </section>}
-
-  {tab==="location"&&<section className="adminPanel"><h2>Where BOEMO is today</h2><p className="orderTruth">This is customer-facing information. Do not publish a location until it is actually correct.</p><form className="adminForm" onSubmit={e=>{e.preventDefault();void saveLocation()}}><label>Today&apos;s kitchen location<input value={settings.location} onChange={e=>setSettings({...settings,location:e.target.value})} placeholder="BAC campus / specific spot"/></label><label>Serving hours<input value={settings.hours} onChange={e=>setSettings({...settings,hours:e.target.value})} placeholder="e.g. 10:00–16:00"/></label><label>Location note / customer instruction<textarea value={settings.locationNote} onChange={e=>setSettings({...settings,locationNote:e.target.value})} placeholder="Look for the BOEMO mobile kitchen..."/></label><div className="saveAction"><button className="button buttonPrimary" type="submit">Publish location & hours</button><span className="saveHint">Saved settings stay visible above and are published to customers.</span></div></form></section>}
- </div></main>
+  return <main className="adminPage"><div className="adminShell">
+    <header className="adminHeader">
+      <div><span className="kicker">JTS STYLES · OPERATIONS</span><h1>Run the appointments.</h1><p>Review requests, update appointment status and moderate customer looks.</p></div>
+      <Link href="/" className="button buttonLight">View customer app</Link>
+    </header>
+    {notice && <div className="notice adminNotice" role="status" aria-live="polite">{notice}</div>}
+    <section className="stats">
+      <article><span>Appointment requests</span><strong>{appointments.length}</strong></article>
+      <article><span>Needs attention</span><strong>{appointments.filter(item => !item.status || item.status === "New").length}</strong></article>
+      <article><span>Customer looks</span><strong>{reviews.length}</strong></article>
+      <article><span>Published reviews</span><strong>{reviews.filter(item => item.published !== false).length}</strong></article>
+    </section>
+    <nav className="adminTabs" aria-label="Operations sections">
+      <button className={tab === "appointments" ? "active" : ""} onClick={() => setTab("appointments")}>Appointment requests</button>
+      <button className={tab === "reviews" ? "active" : ""} onClick={() => setTab("reviews")}>Customer looks & reviews</button>
+    </nav>
+    {loading ? <section className="adminPanel"><p>Loading JTS operations…</p></section> : tab === "appointments" ? <section className="adminPanel">
+      <div className="panelHeading"><div><span className="kicker">THE APPOINTMENT QUEUE</span><h2>Customer requests</h2></div><span>{openAppointments.length} open</span></div>
+      {appointments.length === 0 ? <div className="emptyState"><h3>No appointment requests yet</h3><p>New requests submitted through the JTS booking form will appear here.</p></div> : <div className="queue">
+        {appointments.map(item => <article className="queueRow" key={item.id}>
+          <div>
+            <span className="kicker">#{item.id.slice(0, 8).toUpperCase()} · {item.status || "New"}</span>
+            <h3>{item.customerName || "Customer"}</h3>
+            <p>{(item.items || []).map(service => service.name || "Service").join(" · ") || "Appointment request"}</p>
+            <small>{dateText(item.scheduledFor)} · {money(item.total)}</small>
+            {item.phone && <small>Customer contact: {item.phone}</small>}
+            {item.instructions && <p>{item.instructions}</p>}
+          </div>
+          <div className="queueActions">
+            <select aria-label={"Update appointment " + item.id} value={item.status || "New"} onChange={event => void setAppointmentStatus(item, event.target.value)}>
+              <option value="New">New request</option>
+              <option value="Reviewing">Reviewing</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </article>)}
+      </div>}
+    </section> : <section className="adminPanel">
+      <div className="panelHeading"><div><span className="kicker">COMMUNITY STYLE FEED</span><h2>Customer photos & reviews</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
+      {reviews.length === 0 ? <div className="emptyState"><h3>No customer reviews yet</h3><p>Customer-submitted looks and reviews will appear here for moderation.</p></div> : <div className="queue">
+        {reviews.map(item => <article className="queueRow" key={item.id}>
+          {item.imageUrl && <img src={item.imageUrl} alt="" loading="lazy" style={{ width: 100, height: 120, objectFit: "cover", borderRadius: 10 }} />}
+          <div>
+            <span className="kicker">{item.published === false ? "Hidden" : "Published"} · {item.rating || 0}/5</span>
+            <h3>{item.title || "Customer look"}</h3>
+            <p>{item.caption || ""}</p>
+            <small>{item.customerName || "JTS customer"} · {item.service || "JTS Styles"} · {dateText(item.createdAt)}</small>
+            {item.comparison && <small>Repeat review: {item.comparison}</small>}
+          </div>
+          <div className="queueActions"><button className="button buttonLight" onClick={() => void setReviewPublished(item, item.published === false)}>{item.published === false ? "Publish" : "Hide from feed"}</button></div>
+        </article>)}
+      </div>}
+    </section>}
+    <p style={{ color: "#938c82", fontSize: ".8rem", marginTop: 18 }}>A request is not confirmed until John confirms the slot and deposit. Customer photos and reviews are public only while published.</p>
+  </div></main>;
 }
-export default function AdminPage(){return <AdminGate><Dashboard/></AdminGate>}
+
+export default function AdminPage() {
+  return <AdminGate><Dashboard /></AdminGate>;
+}
