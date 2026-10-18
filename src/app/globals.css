@@ -643,3 +643,76 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsVisuallyHidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:760px){.jtsCustomerReview{grid-template-columns:1fr;padding:20px;gap:20px}.jtsCustomerReviewIntro{position:static}.jtsCustomerReviewIntro h2{font-size:clamp(2.7rem,12vw,4rem)}.jtsCustomerReviewHistory{grid-column:auto}}
 @media(max-width:520px){.jtsFeedHeroActions{display:grid}.jtsFeedHeroActions>*{width:100%}.jtsCustomerReviewRow{grid-template-columns:70px minmax(0,1fr);gap:10px}.jtsCustomerReviewRow>img{width:70px;height:85px}.jtsCustomerReviewForm>.jtsJourneyButton{width:100%}}
+
+
+/* Homepage conversion pass: one clear booking action, quieter supporting content. */
+.jtsEditorialHome .jtsEditTopline{padding:6px 0}
+.jtsEditorialHome .jtsEditHeaderInner{min-height:72px}
+.jtsEditorialHome .jtsEditHeader nav{gap:22px}
+.jtsEditorialHome .jtsEditTextLink{font-size:.72rem;color:#686a6d}
+.jtsEditorialHome .jtsEditHero{padding:44px 0 34px}
+.jtsEditorialHome .jtsEditHeroGrid{gap:clamp(28px,5vw,64px)}
+.jtsEditorialHome .jtsEditHeroCopy>p{max-width:470px}
+.jtsEditorialHome .jtsEditHeroActions{margin-top:25px;gap:18px}
+.jtsEditorialHome .jtsEditHeroActions .jtsEditPrimary{min-width:220px}
+.jtsEditorialHome .jtsEditHeroArt{min-height:420px}
+.jtsEditorialHome .jtsEditArtCircle{width:145px;height:145px}
+.jtsEditorialHome .jtsEditServices{padding:66px 0}
+.jtsEditorialHome .jtsEditSectionHead{margin-bottom:25px}
+.jtsEditorialHome .jtsEditSectionHead h2{margin-bottom:0}
+.jtsEditorialHome .jtsEditServiceGrid{gap:12px}
+.jtsEditorialHome .jtsEditServiceCard{padding:18px}
+.jtsEditorialHome .jtsEditServiceGlyph{height:82px;margin:14px 0 13px}
+.jtsEditorialHome .jtsEditAskBand{margin-top:14px;padding:19px 22px}
+.jtsEditorialHome .jtsEditAskBand>a{min-width:0;width:auto;justify-content:flex-start;white-space:nowrap}
+.jtsEditorialHome .jtsEditBooking{padding:66px 0}
+.jtsEditorialHome .jtsEditBookingHead{margin-bottom:24px}
+.jtsEditorialHome .jtsEditBookingHead h2{font-size:clamp(2.6rem,5vw,4.4rem)}
+.jtsEditorialHome .jtsEditBookingGrid article{padding-top:20px;padding-bottom:20px}
+.jtsEditorialHome .jtsEditPaymentBar{margin-top:16px;padding:19px 22px}
+.jtsEditorialHome .jtsEditVisit{padding:66px 0}
+.jtsEditorialHome .jtsEditVisitCard{min-height:350px}
+.jtsEditorialHome .jtsEditDoor{min-height:210px}
+.jtsEditorialHome .jtsEditVisitActions .jtsEditPrimary{background:transparent;color:var(--jts-ink);border-color:#a6a9ad;box-shadow:none}
+.jtsEditorialHome .jtsEditVisitActions .jtsEditPrimary span{color:var(--jts-ink)}
+.jtsEditorialHome .jtsEditVisitActions .jtsEditPrimary:hover{background:#e6e8eb}
+.jtsEditorialHome .jtsEditKeep{padding:38px 0}
+.jtsEditorialHome .jtsEditKeepLogo{width:64px;height:64px;object-fit:contain}
+.jtsEditorialHome .jtsEditFooterMain{padding-bottom:20px}
+.jtsEditorialHome .jtsEditFooterMain>.jtsEditPrimary{display:none}
+@media(max-width:1000px){
+ .jtsEditorialHome .jtsEditHeroArt{min-height:390px}
+ .jtsEditorialHome .jtsEditServiceCard{padding:15px}
+}
+@media(max-width:720px){
+ .jtsEditorialHome .jtsEditHeaderInner{min-height:62px;padding:9px 0;flex-wrap:nowrap}
+ .jtsEditorialHome .jtsEditHeader nav{order:initial;width:auto;border-top:0;padding-top:0;gap:14px;justify-content:flex-end}
+ .jtsEditorialHome .jtsEditHeader nav a{font-size:.61rem}
+ .jtsEditorialHome .jtsEditHeaderActions{display:none}
+ .jtsEditorialHome .jtsEditHero{padding:30px 0 20px}
+ .jtsEditorialHome .jtsEditHeroGrid{gap:22px;padding-bottom:24px}
+ .jtsEditorialHome .jtsEditHeroCopy>p{max-width:430px}
+ .jtsEditorialHome .jtsEditHeroActions{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px}
+ .jtsEditorialHome .jtsEditHeroActions .jtsEditPrimary{width:100%;min-width:0}
+ .jtsEditorialHome .jtsEditHeroActions .jtsEditSecondary{justify-self:start}
+ .jtsEditorialHome .jtsEditHeroArt{min-height:330px}
+ .jtsEditorialHome .jtsEditArtCircle{width:112px;height:112px;top:48px}
+ .jtsEditorialHome .jtsEditServices,.jtsEditorialHome .jtsEditBooking,.jtsEditorialHome .jtsEditVisit{padding:48px 0}
+ .jtsEditorialHome .jtsEditServiceGrid{gap:9px}
+ .jtsEditorialHome .jtsEditServiceCard{padding:12px;min-height:275px}
+ .jtsEditorialHome .jtsEditServiceGlyph{height:65px;margin:12px 0}
+ .jtsEditorialHome .jtsEditAskBand{padding:16px;gap:12px}
+ .jtsEditorialHome .jtsEditAskBand>a{white-space:normal}
+ .jtsEditorialHome .jtsEditBookingHead{margin-bottom:18px}
+ .jtsEditorialHome .jtsEditPaymentBar{padding:16px;gap:12px}
+ .jtsEditorialHome .jtsEditVisitGrid{gap:22px}
+ .jtsEditorialHome .jtsEditVisitCard{min-height:330px}
+ .jtsEditorialHome .jtsEditDoor{min-height:185px}
+ .jtsEditorialHome .jtsEditKeepInner{grid-template-columns:50px 1fr;gap:14px}
+ .jtsEditorialHome .jtsEditKeepLogo{width:48px;height:48px}
+}
+@media(max-width:390px){
+ .jtsEditorialHome .jtsEditHeader nav{gap:9px}
+ .jtsEditorialHome .jtsEditHeader nav a{font-size:.56rem}
+ .jtsEditorialHome .jtsEditServiceCard h3{font-size:1.12rem}
+}

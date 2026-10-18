@@ -30,13 +30,11 @@ export default function Home() {
       <div className="jtsEditContainer jtsEditHeaderInner">
         <Logo />
         <nav aria-label="Main navigation">
-          <a href="#services">The services</a>
-          <a href="#booking">Your appointment</a>
-          <a href="#visit">Find John</a>
+          <a href="#services">Services & prices</a>
+          <a href="#booking">Before you book</a>
         </nav>
         <div className="jtsEditHeaderActions">
           <Link href="/account" className="jtsEditTextLink">My bookings ↗</Link>
-          <Link href="/order" className="jtsEditBookButton">Book a look <span>↗</span></Link>
         </div>
       </div>
     </header>
@@ -46,15 +44,10 @@ export default function Home() {
         <div className="jtsEditHeroCopy">
           <span className="jtsEditEyebrow"><i /> JTS STYLES · G WEST</span>
           <h1>Your look.<br />Your <em>signature.</em></h1>
-          <p>Precision cuts, bleach, colour and statement styles by John The Stylist Bw. Bring the idea. Let’s plan the look.</p>
+          <p>Precision cuts, bleach, colour and statement styles by John. Bring the idea. Let’s shape your look.</p>
           <div className="jtsEditHeroActions">
-            <Link href="/order" className="jtsEditPrimary">Plan your appointment <span>↗</span></Link>
-            <a href="#services" className="jtsEditSecondary">Explore the services <span>↓</span></a>
-          </div>
-          <div className="jtsEditFacts" aria-label="Appointment essentials">
-            <div><b>01 DAY</b><span>Minimum notice</span></div>
-            <div><b>50%</b><span>Deposit to secure</span></div>
-            <div><b>08–18</b><span>Appointment hours</span></div>
+            <Link href="/order" className="jtsEditPrimary">Book an appointment <span>↗</span></Link>
+            <a href="#services" className="jtsEditSecondary">View services & prices <span>↓</span></a>
           </div>
         </div>
         <div className="jtsEditHeroArt" aria-label="JTS Styles visual identity">
@@ -65,14 +58,13 @@ export default function Home() {
           <div className="jtsEditArtBottom"><span>JOHN THE STYLIST BW</span><span>GABORONE, BOTSWANA</span></div>
         </div>
       </div>
-      <div className="jtsEditTicker" aria-hidden="true"><div>CUT <i>✳</i> COLOUR <i>✳</i> BLEACH <i>✳</i> BARBERING <i>✳</i> STATEMENT STYLE <i>✳</i> CUT <i>✳</i> COLOUR <i>✳</i> BLEACH <i>✳</i></div></div>
     </section>
 
     <section id="services" className="jtsEditServices">
       <div className="jtsEditContainer">
         <div className="jtsEditSectionHead">
           <div><span className="jtsEditEyebrow">01 / THE SERVICE EDIT</span><h2>Choose the <em>starting point.</em></h2></div>
-          <p>Clear prices for the listed services. Have another look in mind? Ask John before booking.</p>
+          <p>Choose a listed service and see its price before you request a time.</p>
         </div>
         <div className="jtsEditServiceGrid">
           {services.map((service, index) => <article className="jtsEditServiceCard" key={service.name}>
@@ -85,7 +77,7 @@ export default function Home() {
         </div>
         <div className="jtsEditAskBand">
           <div><span>YOUR IDEA ISN’T LISTED?</span><strong>Fades, bobs, tinting or a special-event look?</strong><p>Ask about the style and price before you commit. No made-up catalogue prices.</p></div>
-          <Link href="/order" className="jtsEditPrimary">Start an appointment request <span>↗</span></Link>
+          <Link href="/order" className="jtsEditSecondary">Request another style <span>↗</span></Link>
         </div>
       </div>
     </section>
@@ -93,8 +85,8 @@ export default function Home() {
     <section id="booking" className="jtsEditBooking">
       <div className="jtsEditContainer">
         <div className="jtsEditSectionHead jtsEditBookingHead">
-          <div><span className="jtsEditEyebrow">02 / THE APPOINTMENT</span><h2>Good style.<br /><em>No guesswork.</em></h2></div>
-          <p>A straightforward request, with the important details clear before you send anything.</p>
+          <div><span className="jtsEditEyebrow">BEFORE YOU BOOK</span><h2>Good style.<br /><em>No guesswork.</em></h2></div>
+          <p>Three things to know before you send your appointment request.</p>
         </div>
         <div className="jtsEditBookingGrid">
           <article><span>01</span><div><h3>Choose your service</h3><p>Start with the listed look that fits. Add notes to describe what you have in mind.</p></div></article>
@@ -104,7 +96,6 @@ export default function Home() {
         <div className="jtsEditPaymentBar">
           <div><span>ORANGE MONEY · DEPOSIT DETAILS</span><strong>75720306</strong><small>Account name: John SHUMBA</small></div>
           <p><b>Important:</b> submitting a request does not confirm the appointment or mean a deposit has been received. Your booking is secured when John confirms the slot and deposit.</p>
-          <Link href="/order" className="jtsEditPrimary">Start a booking <span>↗</span></Link>
         </div>
       </div>
     </section>
@@ -122,7 +113,6 @@ export default function Home() {
         <aside className="jtsEditVisitCard">
           <div className="jtsEditVisitCardTop"><span>JTS STYLES</span><span>GABORONE / BW</span></div>
           <div className="jtsEditDoor"><span>J</span><b>MISS EMMA</b><small>UPSTAIRS · G WEST SHOPS</small></div>
-          <div className="jtsEditHours"><span>APPOINTMENT HOURS</span><strong>08:00 — 18:00</strong><small>Book at least one day ahead</small></div>
         </aside>
       </div>
     </section>
@@ -137,10 +127,10 @@ export default function Home() {
 
     <footer className="jtsEditFooter">
       <div className="jtsEditContainer">
-        <div className="jtsEditFooterMain"><Logo /><p>Beauty · Colour · Cuts · Barbering<br />Gaborone, Botswana</p><Link href="/order" className="jtsEditPrimary">Book your look <span>↗</span></Link></div>
+        <div className="jtsEditFooterMain"><Logo /><p>Beauty · Colour · Cuts · Barbering<br />Gaborone, Botswana</p></div>
         <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My bookings</Link><Link href="/admin">Admin</Link></div></div>
       </div>
     </footer>
-    <div className="jtsMobileCta jtsEditMobileCta"><Link href="/order" className="jtsEditPrimary">Book your appointment <span>↗</span></Link></div>
+    <div className="jtsMobileCta jtsEditMobileCta"><Link href="/order" className="jtsEditPrimary">Book an appointment <span>↗</span></Link></div>
   </main>;
 }
