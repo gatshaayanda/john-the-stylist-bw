@@ -23,7 +23,6 @@ export default function Home() {
       <div className="jtsEditContainer">
         <span>GABORONE, BOTSWANA</span>
         <span>PERSONAL STYLE · BY APPOINTMENT</span>
-        <a href="https://wa.me/26778053564">WHATSAPP JOHN ↗</a>
       </div>
     </div>
 
@@ -86,7 +85,7 @@ export default function Home() {
         </div>
         <div className="jtsEditAskBand">
           <div><span>YOUR IDEA ISN’T LISTED?</span><strong>Fades, bobs, tinting or a special-event look?</strong><p>Ask about the style and price before you commit. No made-up catalogue prices.</p></div>
-          <a href="https://wa.me/26778053564?text=Hi%20John%2C%20I%27d%20like%20to%20ask%20about%20a%20hairstyle%20and%20price." target="_blank" rel="noreferrer">Ask John on WhatsApp <span>↗</span></a>
+          <Link href="/order" className="jtsEditPrimary">Start an appointment request <span>↗</span></Link>
         </div>
       </div>
     </section>
@@ -118,7 +117,6 @@ export default function Home() {
           <p>G West shops, upstairs at Star Tattoos parlor and boutique, inside the salon with the purple door labelled “miss Emma”.</p>
           <div className="jtsEditVisitActions">
             <a href="https://www.google.com/maps/search/?api=1&query=Star+Tattoos+G+West+Gaborone+Botswana" target="_blank" rel="noreferrer" className="jtsEditPrimary">Find the location <span>↗</span></a>
-            <a href="tel:+26778053564" className="jtsEditPhone">+267 78 053 564</a>
           </div>
         </div>
         <aside className="jtsEditVisitCard">
@@ -140,7 +138,7 @@ export default function Home() {
     <footer className="jtsEditFooter">
       <div className="jtsEditContainer">
         <div className="jtsEditFooterMain"><Logo /><p>Beauty · Colour · Cuts · Barbering<br />Gaborone, Botswana</p><Link href="/order" className="jtsEditPrimary">Book your look <span>↗</span></Link></div>
-        <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My bookings</Link><a href="https://wa.me/26778053564">WhatsApp</a><a href="tel:+26778053564">Call John</a><Link href="/admin">Admin</Link></div></div>
+        <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My bookings</Link><Link href="/admin">Admin</Link></div></div>
       </div>
     </footer>
     <div className="jtsMobileCta jtsEditMobileCta"><Link href="/order" className="jtsEditPrimary">Book your appointment <span>↗</span></Link></div>
