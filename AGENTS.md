@@ -481,3 +481,15 @@ Use the Tripple S implementation as a **workflow reference, not a code/schema/br
 - Verify homepage → service selection → booking request → receipt/reference → history/detail; separately verify admin access and each authorized state/payment change.
 - Check the exact Vercel deployment SHA and READY state before describing a change as deployed. Device-level Chrome/Safari/WhatsApp install behavior remains NOT RUN unless physically tested.
 - Record every gate as PASS / FAIL / NOT RUN / BLOCKED. Do not call a source audit, build, or READY deployment a complete customer-flow QA.
+
+
+## NON-NEGOTIABLE PWA INSTALLATION STANDARD — DO NOT REGRESS
+
+The product-owner-approved Africhiko installation standard is mandatory for this repository. Read [docs/PWA-INSTALLATION-STANDARD.md](./docs/PWA-INSTALLATION-STANDARD.md) before any PWA/install work. It is the permanent installation-behavior contract for JTS and applies to every developer, AI coding agent, automated tool, dependency update and future feature implementation.
+
+- Treat the current approved installation implementation as protected infrastructure. Do not redesign, rewrite, replace, simplify, refactor or remove its behavior unless the product owner explicitly authorizes that specific change.
+- Preserve the retained `beforeinstallprompt` event and direct native prompt invocation from the user's branded install click; keep the JTS-specific embedded-browser handoff and existing root install controller intact.
+- Preserve the compact, branded, dismissible install experience and accurate iPhone/iPad Safari Share → Add to Home Screen pathway. Do not introduce duplicate prompts, fake native prompts, dead buttons, generic fallback screens that contradict the standard, or JavaScript alerts.
+- For routine branding work, change only genuine JTS identity/assets/metadata; do not modify protected install runtime, event handling, lifecycle, manifest behavior, service-worker registration/cache behavior or platform handling as a side effect.
+- Before any authorized install-mechanics change, explain the specific need and obtain explicit product-owner authorization. Then make the smallest isolated change, compare against the approved baseline, run identity/type/lint/build checks, inspect manifest/assets/cache behavior, and report device QA honestly.
+- Report source commit, checks, deployment state and physical-device QA separately. A commit or successful build does not prove the Vercel deployment or native prompt was tested.
