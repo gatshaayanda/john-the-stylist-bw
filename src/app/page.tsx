@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import JtsInstallButton from "@/app/jts-install-button";
+import StyleStudio from "@/app/style-studio";
 
 const services = [
   { name: "Pixie cut", price: "P350–P400", note: "A shaped, precision short cut.", tag: "THE CUT" },
@@ -81,6 +82,8 @@ export default function Home() {
         </div>
       </div>
     </section>
+
+    <StyleStudio />
 
     <section id="booking" className="jtsEditBooking">
       <div className="jtsEditContainer">
