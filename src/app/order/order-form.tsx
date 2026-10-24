@@ -14,7 +14,7 @@ const SERVICES=[
 
 const gaboroneDateKey=(date=new Date())=>new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Gaborone",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);
 const minDate=()=>{const parts=gaboroneDateKey().split("-").map(Number);const d=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]+1));return d.toISOString().slice(0,10)};
-const TIME_GROUPS=Array.from({length:11},(_,index)=>{const hour=String(index+8).padStart(2,"0");return {hour,times:index===10?[hour+":00"]:[hour+":00",hour+":30]}});
+const TIME_GROUPS=Array.from({length:11},(_,index)=>{const hour=String(index+8).padStart(2,"0");return {hour,times:index===10?[hour+":00"]:[hour+":00",hour+":30"]}});
 const money=(value:number)=>"P"+value.toFixed(0);
 
 export default function OrderForm(){
