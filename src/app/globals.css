@@ -777,3 +777,33 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 @media(max-width:760px){.jtsStudioHeader{grid-template-columns:1fr;gap:12px}.jtsStudioHeader>p{max-width:520px}.jtsStudioBoard{grid-template-columns:1fr}.jtsStudioCanvas{padding:12px}.jtsStudioPortrait{min-height:350px;max-height:460px}.jtsStudioControls{padding:20px 14px}.jtsStudioCutChoices button{padding:9px 7px}.jtsStudioCutChoices button b{font-size:.65rem}}
 @media(max-width:390px){.jtsStudioPortrait{min-height:300px}.jtsStudioCutChoices{gap:5px}.jtsStudioCutChoices button{padding:8px 5px}.jtsStudioCutChoices button small{font-size:.56rem}.jtsStudioFinishChoices{gap:5px}.jtsStudioFinishChoices button{padding:8px 6px}.jtsStudioColourChoices{gap:5px}.jtsStudioSwatch{padding:7px;font-size:.63rem}}
 @media(prefers-reduced-motion:reduce){.jtsStudioCutChoices button,.jtsStudioFinishChoices button{transition:none}}
+
+
+/* JTS booking UX: selected-look continuity and Tripple S-inspired preferred-time picker */
+.jtsSelectedLook{margin:13px 0 18px;padding:14px;border:1px solid #3d3b34;background:linear-gradient(135deg,#151614,#101113);border-radius:12px}
+.jtsSelectedLook>span{font-size:.57rem;letter-spacing:.14em;color:var(--jts-gold2);font-weight:800}
+.jtsSelectedLook p{margin:8px 0 0;color:#c6c4bd;font-size:.76rem;line-height:1.55}
+.jtsTimeField{min-width:0;display:flex;flex-direction:column;gap:8px}
+.jtsTimeFieldLabel{color:#d4d5d1;font-size:.72rem;font-weight:700}
+.jtsTimeSelectionSummary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:54px;border:1px solid #303236;background:#070809;border-radius:11px;padding:9px 11px}
+.jtsTimeSelectionSummary>div{min-width:0}
+.jtsTimeSelectionSummary strong,.jtsTimeSelectionSummary small{display:block}
+.jtsTimeSelectionSummary strong{font:600 1.05rem Georgia,serif;color:#f6f6f3}
+.jtsTimeSelectionSummary small{margin-top:4px;color:#7d807b;font-size:.59rem;line-height:1.35}
+.jtsTimeOpen{flex:0 0 auto;border:1px solid #45464a;background:#17191b;color:#f0eee7;border-radius:8px;padding:10px 12px;font-size:.67rem;font-weight:800;cursor:pointer}
+.jtsTimeOpen:hover{border-color:var(--jts-blue);color:#fff}
+.jtsTimeHint{display:block;margin:3px 0 0;color:#777a77;font-size:.61rem;line-height:1.55}
+.jtsTimePickerBackdrop{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.76);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px}
+.jtsTimePickerDialog{width:min(580px,100%);max-height:min(82vh,760px);overflow:auto;background:#0c0d0f;border:1px solid #3b3d40;border-radius:20px;padding:22px;box-shadow:0 28px 90px rgba(0,0,0,.65);outline:none}
+.jtsTimePickerHeading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding-bottom:18px;border-bottom:1px solid #292b2d}
+.jtsTimePickerHeading h3{font:500 1.8rem/1.05 Georgia,serif;text-transform:none;margin:9px 0}
+.jtsTimePickerHeading p{max-width:410px;color:#969995;font-size:.76rem;line-height:1.55;margin:0}
+.jtsTimePickerClose{flex:0 0 38px;width:38px;height:38px;border:1px solid #393b3e;border-radius:50%;background:#141517;color:#eee;font-size:1.5rem;cursor:pointer}
+.jtsTimeSlotGroups{display:grid;gap:15px;padding:18px 0}
+.jtsTimeSlotGroup{display:grid;grid-template-columns:65px minmax(0,1fr);gap:12px;align-items:start}
+.jtsTimeSlotGroup h4{margin:9px 0 0;color:#9a8b68;font-size:.67rem;font-weight:800}
+.jtsTimeSlotGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.jtsTimeSlot{min-height:42px;border:1px solid #33363a;border-radius:9px;background:#141618;color:#e8e8e3;font-size:.75rem;cursor:pointer}
+.jtsTimeSlot:hover,.jtsTimeSlot.selected{border-color:var(--jts-blue);background:#10212a;box-shadow:inset 0 0 0 1px rgba(28,168,255,.22)}
+.jtsTimeSlot.selected{color:#fff}
+@media(max-width:520px){.jtsTimePickerBackdrop{padding:8px;align-items:flex-end}.jtsTimePickerDialog{max-height:88vh;border-radius:18px 18px 12px 12px;padding:18px 14px}.jtsTimeSlotGroup{grid-template-columns:48px minmax(0,1fr);gap:8px}.jtsTimeSlotGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.jtsTimeSelectionSummary{align-items:flex-start;flex-direction:column}.jtsTimeOpen{width:100%}}
