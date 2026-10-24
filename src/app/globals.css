@@ -742,10 +742,10 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsStudioNose{position:absolute;left:48%;top:42%;width:5%;height:23%;border-right:1px solid rgba(90,51,38,.6);transform:rotate(10deg)}
 .jtsStudioMouth{position:absolute;left:41%;top:74%;width:18%;height:5px;border-bottom:2px solid #74473e;border-radius:50%}
 .jtsStudioHairShape{position:absolute;z-index:5;left:26%;top:13%;width:48%;height:40%;border-radius:48% 48% 24% 22%;background:#e5dfcf;clip-path:polygon(8% 24%,18% 7%,38% 0,64% 3%,86% 14%,100% 39%,88% 58%,78% 37%,70% 22%,48% 26%,28% 21%,16% 48%,9% 72%,0 60%)}
-.jtsStudioHair-warm .jtsStudioHairShape{background:#b58b53}.jtsStudioHair-contrast .jtsStudioHairShape{background:linear-gradient(120deg,#262522 0 42%,#e5dfcf 43% 75%,#262522 76%)}.jtsStudioHair-natural .jtsStudioHairShape{background:#352b25}
-.jtsStudioCut-shape .jtsStudioHairShape{left:22%;top:13%;width:56%;height:46%;border-radius:48% 48% 40% 40%;clip-path:polygon(7% 27%,18% 7%,37% 0,64% 4%,87% 14%,100% 37%,90% 70%,80% 94%,67% 69%,53% 78%,36% 69%,21% 92%,10% 64%,0 48%)}
-.jtsStudioCut-change .jtsStudioHairShape{left:19%;top:10%;width:62%;height:55%;border-radius:46% 46% 25% 25%;clip-path:polygon(8% 25%,19% 7%,38% 0,65% 3%,86% 15%,100% 40%,92% 100%,75% 78%,66% 42%,48% 35%,30% 39%,22% 78%,8% 100%,0 49%)}
-.jtsStudioFinish-soft .jtsStudioHairShape{filter:blur(1px);opacity:.9}.jtsStudioFinish-bold .jtsStudioHairShape{filter:contrast(1.35);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.jtsStudioPortrait.jtsStudioHair-warm .jtsStudioHairShape{background:#b58b53}.jtsStudioPortrait.jtsStudioHair-contrast .jtsStudioHairShape{background:linear-gradient(120deg,#262522 0 42%,#e5dfcf 43% 75%,#262522 76%)}.jtsStudioPortrait.jtsStudioHair-natural .jtsStudioHairShape{background:#352b25}
+.jtsStudioPortrait.jtsStudioCut-shape .jtsStudioHairShape{left:22%;top:13%;width:56%;height:46%;border-radius:48% 48% 40% 40%;clip-path:polygon(7% 27%,18% 7%,37% 0,64% 4%,87% 14%,100% 37%,90% 70%,80% 94%,67% 69%,53% 78%,36% 69%,21% 92%,10% 64%,0 48%)}
+.jtsStudioPortrait.jtsStudioCut-change .jtsStudioHairShape{left:19%;top:10%;width:62%;height:55%;border-radius:46% 46% 25% 25%;clip-path:polygon(8% 25%,19% 7%,38% 0,65% 3%,86% 15%,100% 40%,92% 100%,75% 78%,66% 42%,48% 35%,30% 39%,22% 78%,8% 100%,0 49%)}
+.jtsStudioPortrait.jtsStudioFinish-soft .jtsStudioHairShape{filter:blur(1px);opacity:.9}.jtsStudioPortrait.jtsStudioFinish-bold .jtsStudioHairShape{filter:contrast(1.35);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
 .jtsStudioPortraitLabel{position:absolute;right:12px;bottom:12px;z-index:6;writing-mode:vertical-rl;font-size:.57rem;letter-spacing:.18em;color:#625b4f;font-weight:800}
 .jtsStudioControls{padding:clamp(18px,3vw,34px);min-width:0}
 .jtsStudioBrief{border-bottom:1px solid #dedbd2;padding-bottom:16px;margin-bottom:18px}
