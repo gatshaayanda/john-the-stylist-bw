@@ -894,3 +894,35 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsAccountGoogleButton.googleSignInButton:focus-visible{outline:3px solid #d4af37;outline-offset:3px;}
 .jtsAccountGoogleButton.googleSignInButton:disabled{background:#f3f3f3;color:#5f6368;opacity:1;}
 .jtsAccountGoogleButton .googleSignInMark{display:block;width:20px;height:20px;flex:0 0 20px;background:transparent;border-radius:0;padding:0;}
+
+
+
+/* JTS Operations sign-in: restrained black, silver and metallic gold; auth behaviour stays unchanged. */
+.adminSignInPage{display:flex;align-items:center;padding:36px 0 56px;background:radial-gradient(ellipse at 50% 0%,rgba(181,139,53,.13),transparent 46%),#090909}
+.adminSignInShell{width:min(100% - 28px,520px)}
+.adminSignInPanel{width:100%;margin:0!important;padding:clamp(22px,5vw,38px);background:linear-gradient(155deg,#171717,#101010 70%);border:1px solid #494133;border-radius:5px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
+.adminSignInBrand{display:flex;align-items:center;gap:13px;padding-bottom:22px;margin-bottom:27px;border-bottom:1px solid #34302a}
+.adminSignInBrand img{display:block;width:64px;height:64px;object-fit:cover;border:1px solid #8f7137;background:#000}
+.adminSignInBrand span{color:#e9e2d5;font-size:.69rem;font-weight:900;letter-spacing:.17em;line-height:1.6}
+.adminSignInBrand i{color:#c5a35b;font-style:normal}
+.adminSignInIntro .kicker{font-size:.62rem;letter-spacing:.2em;color:#c9a85e}
+.adminSignInIntro h1{font-size:clamp(2rem,7vw,2.75rem);line-height:1.02;letter-spacing:-.045em;margin:10px 0 13px;color:#fff}
+.adminSignInIntro p{margin:0 0 24px;color:#c3bdb3;font-size:.92rem;line-height:1.65}
+.adminGoogleButton{width:100%;min-height:52px;display:flex;gap:13px;background:#fff!important;color:#202124!important;border:1px solid #d4af67!important;border-radius:3px!important;box-shadow:0 2px 5px rgba(0,0,0,.2);font-size:.92rem!important;font-weight:700!important;letter-spacing:0!important}
+.adminGoogleButton:hover{background:#f7f5f0!important;border-color:#ead49d!important}
+.adminGoogleButton:focus-visible,.adminEmailButton:focus-visible{outline:3px solid #e0c37e;outline-offset:3px}
+.adminGoogleButton:disabled{opacity:1;background:#e8e6e1!important;color:#555!important}
+.adminGoogleButton .googleSignInMark{width:20px;height:20px;flex:0 0 20px;background:transparent;border-radius:0;padding:0}
+.adminSignInPanel .adminDivider{display:flex;align-items:center;gap:13px;margin:22px 0;color:#a8a094;font-size:.63rem;font-weight:900;letter-spacing:.15em}
+.adminSignInPanel .adminDivider:before,.adminSignInPanel .adminDivider:after{content:"";height:1px;flex:1;background:#39342b}
+.adminSignInForm{gap:17px}
+.adminSignInForm label{gap:8px;color:#e7e1d7;font-size:.8rem;font-weight:800}
+.adminSignInForm input{min-height:48px;padding:13px 14px;background:#0b0b0b;color:#fff;border:1px solid #514a3e;border-radius:3px;font-size:.92rem}
+.adminSignInForm input::placeholder{color:#827b70}
+.adminSignInForm input:focus{border-color:#d4af67;box-shadow:0 0 0 3px rgba(212,175,103,.14)}
+.adminSignInForm .adminEmailButton{min-height:49px;margin-top:2px;border:1px solid #b58b35;border-radius:3px;background:#d4af67;color:#111;font-weight:900}
+.adminSignInForm .adminEmailButton:hover{background:#e4c785;color:#090909}
+.adminSignInForm .adminEmailButton:disabled{opacity:.65}
+.adminSignInError{overflow-wrap:anywhere;line-height:1.55}
+.adminSignInSecurity{margin:22px 0 0;padding-top:15px;border-top:1px solid #34302a;color:#9e9689;font-size:.72rem;line-height:1.5;text-align:center}
+@media(max-width:520px){.adminSignInPage{padding:18px 0 30px}.adminSignInShell{width:calc(100% - 20px)}.adminSignInPanel{padding:22px 18px}.adminSignInBrand{margin-bottom:23px}.adminSignInBrand img{width:54px;height:54px}}
