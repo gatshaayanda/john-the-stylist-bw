@@ -877,8 +877,8 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 }
 
 /* Clear, one-word operations entry at the bottom of the customer site. */
-.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 13px;border:1px solid #7c6678;border-radius:2px;color:#f8f0e8;font-size:.68rem;font-weight:900;letter-spacing:.14em;text-transform:lowercase;}
-.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:hover,.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:focus-visible{border-color:#d4af37;color:#d4af37;outline-offset:3px;}
+.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border:1px solid #b58b35;border-radius:2px;background:#111;color:#f7f7f5;font-size:.68rem;font-weight:900;letter-spacing:.12em;text-transform:lowercase;transition:background .18s ease,border-color .18s ease,color .18s ease;}
+.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:hover,.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:focus-visible{background:#1a1a1a;border-color:#e1c987;color:#e1c987;outline:2px solid #e1c987;outline-offset:3px;}
 .jtsUnavailableList{margin-top:12px;padding:12px 13px;border:1px solid #e4d8d4;background:#fff9f6;color:#3c302d}
 .jtsUnavailableList>strong{display:block;font-size:.67rem;letter-spacing:.04em;margin-bottom:7px}
 .jtsUnavailableList ul{list-style:none;padding:0;margin:0;display:grid;gap:7px}
@@ -886,3 +886,11 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsUnavailableList li span{font-weight:800;white-space:nowrap}
 .jtsUnavailableList li small{color:#84655f;text-align:right;line-height:1.4}
 @media(max-width:420px){.jtsUnavailableList li{flex-direction:column;gap:3px}.jtsUnavailableList li small{text-align:left}}
+
+
+/* JTS-branded, high-contrast Google account connection. Keep the Google mark in its official colours. */
+.jtsAccountGoogleButton.googleSignInButton{background:#fff;color:#202124;border:1px solid #b58b35;box-shadow:0 1px 2px rgba(0,0,0,.12);font-family:Arial,Helvetica,sans-serif;font-weight:700;letter-spacing:0;transition:background .18s ease,box-shadow .18s ease,border-color .18s ease;}
+.jtsAccountGoogleButton.googleSignInButton:hover{background:#f8f7f3;border-color:#d4af37;box-shadow:0 2px 5px rgba(0,0,0,.18);}
+.jtsAccountGoogleButton.googleSignInButton:focus-visible{outline:3px solid #d4af37;outline-offset:3px;}
+.jtsAccountGoogleButton.googleSignInButton:disabled{background:#f3f3f3;color:#5f6368;opacity:1;}
+.jtsAccountGoogleButton .googleSignInMark{display:block;width:20px;height:20px;flex:0 0 20px;background:transparent;border-radius:0;padding:0;}
