@@ -875,3 +875,14 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
   .jtsCalendarDay{min-height:38px;font-size:.76rem}
   .jtsCalendarHeader{grid-template-columns:38px 1fr 38px}
 }
+
+/* Clear, one-word operations entry at the bottom of the customer site. */
+.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 13px;border:1px solid #7c6678;border-radius:2px;color:#f8f0e8;font-size:.68rem;font-weight:900;letter-spacing:.14em;text-transform:lowercase;}
+.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:hover,.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:focus-visible{border-color:#d4af37;color:#d4af37;outline-offset:3px;}
+.jtsUnavailableList{margin-top:12px;padding:12px 13px;border:1px solid #e4d8d4;background:#fff9f6;color:#3c302d}
+.jtsUnavailableList>strong{display:block;font-size:.67rem;letter-spacing:.04em;margin-bottom:7px}
+.jtsUnavailableList ul{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+.jtsUnavailableList li{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-top:1px solid #eadfda;padding-top:7px;font-size:.72rem}
+.jtsUnavailableList li span{font-weight:800;white-space:nowrap}
+.jtsUnavailableList li small{color:#84655f;text-align:right;line-height:1.4}
+@media(max-width:420px){.jtsUnavailableList li{flex-direction:column;gap:3px}.jtsUnavailableList li small{text-align:left}}

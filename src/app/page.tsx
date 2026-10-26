@@ -131,7 +131,7 @@ export default function Home() {
     <footer className="jtsEditFooter">
       <div className="jtsEditContainer">
         <div className="jtsEditFooterMain"><Logo /><p>Beauty · Colour · Cuts · Barbering<br />Gaborone, Botswana</p></div>
-        <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My bookings</Link><Link href="/admin">Admin</Link></div></div>
+        <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My bookings</Link><Link href="/admin" className="jtsAdminAccessLink" aria-label="Admin login">admin</Link></div></div>
       </div>
     </footer>
     <div className="jtsMobileCta jtsEditMobileCta"><Link href="/order" className="jtsEditPrimary">Book an appointment <span>↗</span></Link></div>
