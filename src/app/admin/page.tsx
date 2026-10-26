@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
+import { collection, onSnapshot, updateDoc, doc, setDoc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
 import { auth, db } from "@/lib/firebase/client";
 
@@ -68,8 +68,9 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const stop = onSnapshot(collection(db, "appointmentAvailability"), snapshot => {
-      setUnavailableDates(snapshot.docs.map(item => ({ id: item.id, date: String(item.data().date || item.id), reason: String(item.data().reason || "Unavailable"), updatedAt: String(item.data().updatedAt || "") })).sort((a,b) => a.date.localeCompare(b.date)));
+    const stop = onSnapshot(doc(db, "businessSettings", "appointmentAvailability"), snapshot => {
+      const entries = snapshot.exists() && Array.isArray(snapshot.data().unavailableDates) ? snapshot.data().unavailableDates : [];
+      setUnavailableDates(entries.filter((item: unknown) => !!item && typeof item === "object" && "date" in item && typeof item.date === "string").map((item: {date:string;reason?:string;updatedAt?:string}) => ({ id: item.date, date: item.date, reason: typeof item.reason === "string" ? item.reason : "Unavailable", updatedAt: item.updatedAt || "" })).sort((a,b) => a.date.localeCompare(b.date)));
       setAvailabilityNotice("");
     }, () => setAvailabilityNotice("Availability settings could not be loaded. Check Firebase access and connection."));
     return () => stop();
@@ -80,7 +81,8 @@ function Dashboard() {
     if (!closureDate) { setAvailabilityNotice("Choose a date first."); return; }
     setAvailabilityNotice("");
     try {
-      await setDoc(doc(db, "appointmentAvailability", closureDate), { date: closureDate, available: false, reason: closureReason.trim() || "Unavailable", updatedAt: new Date().toISOString() });
+      const next = [...unavailableDates.filter(item => item.date !== closureDate), { id: closureDate, date: closureDate, reason: closureReason.trim() || "Unavailable", updatedAt: new Date().toISOString() }].sort((a,b) => a.date.localeCompare(b.date));
+      await setDoc(doc(db, "businessSettings", "appointmentAvailability"), { unavailableDates: next.map(({date,reason,updatedAt}) => ({date,reason,updatedAt})), updatedAt: new Date().toISOString() }, { merge: true });
       setAvailabilityNotice(closureDate + " is now marked unavailable to new appointment requests.");
       setClosureDate(""); setClosureReason("");
     } catch {
@@ -91,7 +93,8 @@ function Dashboard() {
   async function reopenDate(item: {id:string;date:string}) {
     setAvailabilityNotice("");
     try {
-      await deleteDoc(doc(db, "appointmentAvailability", item.id));
+      const next = unavailableDates.filter(entry => entry.date !== item.date).map(({date,reason,updatedAt}) => ({date,reason,updatedAt}));
+      await setDoc(doc(db, "businessSettings", "appointmentAvailability"), { unavailableDates: next, updatedAt: new Date().toISOString() }, { merge: true });
       setAvailabilityNotice(item.date + " is available for new requests again.");
     } catch {
       setAvailabilityNotice("That date could not be reopened. Check your admin permissions and try again.");
