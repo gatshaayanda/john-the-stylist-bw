@@ -83,7 +83,6 @@ export default function Home() {
       </div>
     </section>
 
-    <StyleStudio />
 
     <section id="booking" className="jtsEditBooking">
       <div className="jtsEditContainer">
@@ -127,6 +126,9 @@ export default function Home() {
         <div className="jtsEditKeepAction"><JtsInstallButton /></div>
       </div>
     </section>
+
+    <section className="jtsAccountStudioIntro"><span className="jtsEyebrow">YOUR PERSONAL STYLE PLAYGROUND</span><h2>Try a new direction.</h2><p>Build a look, test it against a style brief, and carry your choices into your next appointment request.</p></section>
+    <StyleStudio />
 
     <footer className="jtsEditFooter">
       <div className="jtsEditContainer">
