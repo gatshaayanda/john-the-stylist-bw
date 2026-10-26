@@ -28,6 +28,11 @@ export default function AdminGate({children}:{children:React.ReactNode}){
    setChecking(true);
    setOffline(false);
    if(!next){setAuthorized(false);setChecking(false);return}
+   if(next.emailVerified&&ADMIN_GOOGLE_EMAILS.has((next.email??"").trim().toLowerCase())){
+    setAuthorized(true);
+    setChecking(false);
+    return;
+   }
    stopAdmin=onSnapshot(doc(db,"admins",next.uid),snapshot=>{
     const allowed=snapshot.exists()&&hasAdminRole(snapshot.data());
     setAuthorized(allowed);
@@ -47,21 +52,15 @@ export default function AdminGate({children}:{children:React.ReactNode}){
   try{
    const next=await action();
    const normalizedEmail=(next.email??"").trim().toLowerCase();
-   if(!ADMIN_GOOGLE_EMAILS.has(normalizedEmail)){
-    setError("This Google account is not on the JTS Operations allowlist.");
+   if(!next.emailVerified||!ADMIN_GOOGLE_EMAILS.has(normalizedEmail)){
+    setError("Use a verified Google account approved for JTS Operations.");
     await signOut(auth);
     return;
    }
-   const adminSnapshot=await new Promise<{exists:boolean;data:()=>Record<string,unknown>}|null>(resolve=>{
-    const stop=onSnapshot(doc(db,"admins",next.uid),snapshot=>{stop();resolve({exists:snapshot.exists(),data:()=>snapshot.data()??{}})},()=>{stop();resolve(null)});
-   });
-   if(!adminSnapshot||!adminSnapshot.exists||!hasAdminRole(adminSnapshot.data())){
-    setError("This account is not enabled for JTS Operations. Add this user's UID to the admins collection with role owner or staff.");
-    await signOut(auth);
-   }else{
-    setAuthorized(true);
-    setOffline(false);
-   }
+   setAuthorized(true);
+   setOffline(false);
+   return;
+
   }catch(err){setError(friendlyAuthError(err))}
   finally{setBusy(false)}
  }
