@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
 import { auth, db } from "@/lib/firebase/client";
@@ -38,6 +38,7 @@ const dateText = (value?: string) => {
   return Number.isFinite(date.getTime()) ? date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Gaborone" }) : value;
 };
 const money = (value?: number) => "P" + (Number(value) || 0).toFixed(0);
+const minBookableDate = () => { const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Gaborone", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()); const part = (type: string) => parts.find(item => item.type === type)?.value ?? ""; return new Date(Date.UTC(Number(part("year")), Number(part("month")) - 1, Number(part("day")) + 1)).toISOString().slice(0, 10); };
 
 function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -74,7 +75,7 @@ function Dashboard() {
     return () => stop();
   }, []);
 
-  async function markDateUnavailable(event: React.FormEvent<HTMLFormElement>) {
+  async function markDateUnavailable(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!closureDate) { setAvailabilityNotice("Choose a date first."); return; }
     setAvailabilityNotice("");
@@ -167,7 +168,7 @@ function Dashboard() {
       <div className="panelHeading"><div><span className="kicker">CUSTOMER BOOKING CALENDAR</span><h2>Manage unavailable dates</h2></div><span>{unavailableDates.length} closed date{unavailableDates.length===1?"":"s"}</span></div>
       <p className="availabilityIntro">Dates you add here are blocked in the customer calendar. Customers can see the closure reason and the next nearest date they can request. This does not cancel or change existing requests already in the appointment queue.</p>
       <form className="availabilityForm" onSubmit={markDateUnavailable}>
-        <label>Mark a date unavailable<input type="date" value={closureDate} min={new Date(Date.now()+86400000).toISOString().slice(0,10)} onChange={event=>setClosureDate(event.target.value)} required /></label>
+        <label>Mark a date unavailable<input type="date" value={closureDate} min={minBookableDate()} onChange={event=>setClosureDate(event.target.value)} required /></label>
         <label>Reason shown to customers <span>(optional)</span><input value={closureReason} onChange={event=>setClosureReason(event.target.value)} maxLength={120} placeholder="e.g. Fully booked, personal day, salon closed" /></label>
         <button className="button buttonLight" type="submit">Save unavailable date</button>
       </form>
