@@ -1,1 +1,38 @@
 .jtsAccountList{display:grid;gap:12px}.jtsBookingRow{display:flex;justify-content:space-between;align-items:center;gap:20px;border:1px solid #2a2c2f;background:#0b0c0e;border-radius:18px;padding:24px}.jtsBookingRow h2{font:600 1.45rem Georgia,serif;margin:10px 0 6px}.jtsBookingRow p{color:#9a9b97;margin:0 0 8px}.jtsBookingRow small{color:#656763;font-size:.68rem}.jtsAccountNote{margin-top:18px;border-top:1px solid #292a2d;padding:18px 0;color:#777974;font-size:.75rem;line-height:1.6}.jtsAccountNote strong{color:#d8d8d4}@media(max-width:520px){.jtsBookingRow{display:grid}.jtsBookingRow .jtsGhost{justify-self:start}}
+
+/* Account utility dashboard: identity and actionable updates precede history and play. */
+.jtsAccountUtilityAuth{margin:8px 0 16px;padding:clamp(20px,4vw,32px);border:1px solid #4d3d18;background:linear-gradient(135deg,#171717,#0b0c0e);border-radius:20px}
+.jtsAccountUtilityHeading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.jtsAccountUtilityAuth h1{font:600 clamp(2.3rem,6vw,4.1rem)/.98 Georgia,serif;letter-spacing:-.045em;text-transform:none;margin:12px 0}
+.jtsAccountUtilityAuth h1 em{font-style:italic;color:#d8b65b;text-shadow:none}
+.jtsAccountUtilityAuth>p,.jtsAccountNotifications>p{max-width:720px;color:#aaa9a3;line-height:1.65}
+.jtsAccountGoogleButton{margin:8px 0 2px;min-width:min(100%,280px)}
+.jtsAccountAuthFallback{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;color:#8f908b;font-size:.82rem}
+.jtsAccountAuthFallback button:disabled{opacity:.55;cursor:wait}
+.jtsAccountGuestBadge{display:inline-flex;align-items:center;padding:6px 9px;border:1px solid #49443b;border-radius:999px;color:#c5c0b5;font-size:.7rem;font-weight:850;white-space:nowrap}
+.jtsAccountNotifications{margin:0 0 18px;padding:clamp(18px,3vw,26px);background:#101112;border:1px solid #2a2c2f;border-radius:18px}
+.jtsAccountNotifications h2{font:600 clamp(1.6rem,4vw,2.2rem)/1.1 Georgia,serif;text-transform:none;letter-spacing:-.02em;margin:7px 0 0}
+.jtsAccountLiveDot{color:#bdb6a7;font-size:.7rem;white-space:nowrap}
+.jtsAccountUpdateList{display:grid;gap:0}
+.jtsAccountUpdate{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid #292a2d}
+.jtsAccountUpdate:last-child{border-bottom:0}
+.jtsAccountUpdateMark{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:#342a13;color:#e2c36b;font-size:1.2rem;line-height:1}
+.jtsAccountUpdate strong{display:block;color:#f0eee8;font-size:.9rem}
+.jtsAccountUpdate p{margin:4px 0;color:#c2c0b9;font-size:.82rem}
+.jtsAccountUpdate small{color:#858680;font-size:.7rem}
+.jtsAccountNotificationNote{font-size:.72rem!important;margin:14px 0 0;color:#898a84!important}
+.jtsAccountUtilityHero{padding:26px 0 24px}
+.jtsAccountUtilityHero p{max-width:650px}
+.jtsAccountShowBookings{margin-top:15px;padding:12px 15px;border:1px solid #4d3d18;border-radius:10px;background:#151515;color:#e5c66f;font-weight:850;cursor:pointer}
+.jtsAccountShowBookings:hover{background:#211c11;border-color:#8a6c26}
+.jtsAccountGame{margin-top:36px;padding-top:24px;border-top:1px solid #292a2d}
+.jtsAccountGame .jtsAccountStudioIntro{margin-bottom:18px}
+.jtsAccountGame .jtsAccountStudioIntro h2{font:600 clamp(1.8rem,4vw,2.6rem)/1.1 Georgia,serif;text-transform:none;letter-spacing:-.025em;margin:8px 0}
+.jtsAccountGame .jtsAccountStudioIntro p{color:#999a94;line-height:1.6;max-width:650px}
+@media(max-width:560px){
+ .jtsAccountUtilityHeading{align-items:flex-start}
+ .jtsAccountUpdate{grid-template-columns:22px minmax(0,1fr);align-items:start}
+ .jtsAccountUpdate>.jtsStyleTextLink{grid-column:2;justify-self:start}
+ .jtsAccountLiveDot{white-space:normal;text-align:right}
+ .jtsAccountAuthFallback{align-items:flex-start;flex-direction:column}
+}

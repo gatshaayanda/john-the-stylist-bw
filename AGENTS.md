@@ -493,3 +493,15 @@ The product-owner-approved Africhiko installation standard is mandatory for this
 - For routine branding work, change only genuine JTS identity/assets/metadata; do not modify protected install runtime, event handling, lifecycle, manifest behavior, service-worker registration/cache behavior or platform handling as a side effect.
 - Before any authorized install-mechanics change, explain the specific need and obtain explicit product-owner authorization. Then make the smallest isolated change, compare against the approved baseline, run identity/type/lint/build checks, inspect manifest/assets/cache behavior, and report device QA honestly.
 - Report source commit, checks, deployment state and physical-device QA separately. A commit or successful build does not prove the Vercel deployment or native prompt was tested.
+
+## Account utility dashboard — current approved behavior
+- The account page is a practical utility first: Google/account connection at the top, in-app booking updates immediately after it, next appointment, compact booking history, then inspiration.
+- Google connection is optional and must never be required to request an appointment.
+- If Firebase Auth already has an anonymous guest, use `linkWithPopup` to connect Google to that exact identity; do not silently switch accounts or split that guest's booking history. A signed-out customer may use `signInWithPopup` to establish a Google account for future bookings.
+- Handle Firebase Auth error codes with specific, actionable customer guidance. Log only the error code for diagnostics; never log tokens, credentials, email addresses, or profile data. A credential conflict must not automatically merge or discard booking records.
+- The account activity panel may show only customer-scoped booking status updates supported by the current data layer. Do not label this panel as push delivery or claim push notifications are enabled unless actual delivery is verified.
+- Booking history defaults to the three most recent entries, with an explicit control to reveal the full list. Keep reference IDs, dates, statuses and booking detail links intact.
+- Style Studio is optional enrichment, not the account's primary task. Keep it after account access, updates, next booking, booking history and other practical actions; do not let it compete with booking or account controls.
+- Preserve appointment truth: a request is not confirmed until John confirms the slot and deposit. Preserve customer privacy and existing Firestore rules.
+- Do not change the protected PWA install flow as part of account utility work.
+
