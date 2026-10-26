@@ -825,3 +825,53 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsInstallDirect{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:12px 16px;border:1px solid #3b3d40;border-radius:12px;background:#17191b;color:#f4f4f1;font-size:.75rem;font-weight:800;cursor:pointer}
 .jtsInstallDirect:hover{border-color:var(--jts-blue);background:#10212a}
 @media(max-width:520px){.jtsDateInput,.jtsBookingMain input.jtsDateInput{min-height:52px;font-size:16px}.jtsAfterBookingPanel{padding:18px}.jtsAfterBookingActions{display:grid}.jtsAfterBookingActions>*{width:100%;text-align:center}}
+
+
+/* Appointment availability calendar — clear, tappable dates and explicit closures */
+.jtsCalendar{border:1px solid #d8d2c5;background:#fffefa;padding:14px;margin:12px 0 10px}
+.jtsCalendarHeader{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;margin-bottom:14px}
+.jtsCalendarHeader strong{text-align:center;font:500 1.15rem Georgia,"Times New Roman",serif;color:#292823}
+.jtsCalendarHeader button{height:38px;border:1px solid #d8d2c5;background:#f5f1e8;color:#292823;font-size:1.5rem;cursor:pointer}
+.jtsCalendarHeader button:disabled{opacity:.35;cursor:not-allowed}
+.jtsCalendarWeekdays,.jtsCalendarDays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.jtsCalendarWeekdays{margin-bottom:6px}
+.jtsCalendarWeekdays span{text-align:center;font-size:.61rem;font-weight:800;letter-spacing:.04em;color:#817969;padding:5px 0}
+.jtsCalendarDay{position:relative;min-width:0;min-height:42px;border:1px solid #e0dbd1;background:#f7f4ed;color:#292823;font-size:.83rem;font-weight:700;cursor:pointer}
+.jtsCalendarDay:hover:not(:disabled){border-color:#9b8049;background:#eee6d4}
+.jtsCalendarDay.selected{background:#292823;border-color:#292823;color:#fff}
+.jtsCalendarDay:disabled{opacity:.38;cursor:not-allowed;background:#eeece7;color:#8d877d}
+.jtsCalendarDay.unavailable{background:#f4e8e5;color:#9b6159;text-decoration:line-through}
+.jtsCalendarDay i{position:absolute;top:0;right:3px;font-size:.58rem;font-style:normal;text-decoration:none}
+.jtsCalendarLegend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;color:#6e685d;font-size:.65rem}
+.jtsCalendarLegend span{display:flex;align-items:center;gap:6px}
+.jtsCalendarLegend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#a38a54}
+.jtsCalendarLegend i.closedDot{background:#b8786c}
+.jtsCalendarStatus,.jtsCalendarError{font-size:.78rem;line-height:1.5;padding:12px;background:#f4f0e7;color:#625a4a}
+.jtsCalendarError{background:#f8e9e6;color:#8a3930}
+.jtsNearestDate{display:flex;flex-direction:column;gap:5px;margin-top:13px;padding:12px;background:#f1ecdf;border-left:3px solid #a58a50}
+.jtsNearestDate>span{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;font-weight:900;color:#76613a}
+.jtsNearestDate button{align-self:flex-start;padding:0;border:0;background:transparent;color:#292823;font-size:.82rem;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}
+.jtsNearestDate p{margin:0;font-size:.76rem;line-height:1.5}
+.jtsSelectedDate{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:12px 13px;border:1px solid #c9b88d;background:#f3ecda;margin:10px 0}
+.jtsSelectedDate span{font-size:.59rem;font-weight:900;letter-spacing:.13em;color:#79633a}
+.jtsSelectedDate strong{font:500 1.1rem Georgia,"Times New Roman",serif;color:#292823}
+.jtsSelectedDate button{border:0;background:transparent;padding:3px 0;color:#79633a;text-decoration:underline;cursor:pointer;font-size:.7rem}
+.availabilityIntro,.availabilityFootnote{max-width:760px;color:#71695d;font-size:.85rem;line-height:1.7}
+.availabilityForm{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(220px,1fr) auto;align-items:end;gap:12px;margin:22px 0;padding:18px;border:1px solid #e3ded5;background:#faf8f3}
+.availabilityForm label{display:grid;gap:7px;font-size:.74rem;font-weight:800;color:#514b41}
+.availabilityForm label span{font-weight:400;color:#82796c}
+.availabilityForm input{width:100%;min-width:0;padding:11px;border:1px solid #d8d2c8;background:#fff;color:#282722;font:inherit}
+.availabilityForm .button{min-height:42px;white-space:nowrap;cursor:pointer}
+.availabilityFootnote{font-size:.75rem;border-top:1px solid #e8e3da;padding-top:14px;margin-top:18px}
+.jtsAccountStudioIntro{padding:38px 0 0;max-width:760px}
+.jtsAccountStudioIntro h2{font:500 clamp(2rem,5vw,3.4rem)/1 Georgia,"Times New Roman",serif;letter-spacing:-.04em;margin:10px 0}
+.jtsAccountStudioIntro p{max-width:600px;color:#6c665b;line-height:1.7;font-size:.9rem}
+.jtsStyleAccount .jtsStudioSection{margin:18px 0 36px}
+@media(max-width:760px){
+  .availabilityForm{grid-template-columns:1fr}
+  .availabilityForm .button{width:100%}
+  .jtsCalendar{padding:10px}
+  .jtsCalendarWeekdays,.jtsCalendarDays{gap:3px}
+  .jtsCalendarDay{min-height:38px;font-size:.76rem}
+  .jtsCalendarHeader{grid-template-columns:38px 1fr 38px}
+}
