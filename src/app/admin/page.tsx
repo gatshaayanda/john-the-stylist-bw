@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { collection, onSnapshot, updateDoc, doc, type Unsubscribe } from "firebase/firestore";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
-import { db } from "@/lib/firebase/client";
+import { auth, db } from "@/lib/firebase/client";
 
 type Appointment = {
   id: string;
@@ -38,11 +38,16 @@ const dateText = (value?: string) => {
   return Number.isFinite(date.getTime()) ? date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Gaborone" }) : value;
 };
 const money = (value?: number) => "P" + (Number(value) || 0).toFixed(0);
+const minBookableDate = () => { const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Gaborone", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date()); const part = (type: string) => parts.find(item => item.type === type)?.value ?? ""; return new Date(Date.UTC(Number(part("year")), Number(part("month")) - 1, Number(part("day")) + 1)).toISOString().slice(0, 10); };
 
 function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [reviews, setReviews] = useState<CustomerReview[]>([]);
-  const [tab, setTab] = useState<"appointments" | "reviews">("appointments");
+  const [tab, setTab] = useState<"appointments" | "availability" | "reviews">("appointments");
+  const [unavailableDates, setUnavailableDates] = useState<Array<{id:string;date:string;reason:string;updatedAt?:string}>>([]);
+  const [closureDate, setClosureDate] = useState("");
+  const [closureReason, setClosureReason] = useState("");
+  const [availabilityNotice, setAvailabilityNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
 
@@ -61,6 +66,37 @@ function Dashboard() {
     }, () => { setNotice("Customer reviews could not be loaded. Check Firebase access and connection."); done(); });
     return () => { stopAppointments(); stopReviews(); };
   }, []);
+
+  useEffect(() => {
+    const stop = onSnapshot(collection(db, "appointmentAvailability"), snapshot => {
+      setUnavailableDates(snapshot.docs.map(item => ({ id: item.id, date: String(item.data().date || item.id), reason: String(item.data().reason || "Unavailable"), updatedAt: String(item.data().updatedAt || "") })).sort((a,b) => a.date.localeCompare(b.date)));
+      setAvailabilityNotice("");
+    }, () => setAvailabilityNotice("Availability settings could not be loaded. Check Firebase access and connection."));
+    return () => stop();
+  }, []);
+
+  async function markDateUnavailable(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!closureDate) { setAvailabilityNotice("Choose a date first."); return; }
+    setAvailabilityNotice("");
+    try {
+      await setDoc(doc(db, "appointmentAvailability", closureDate), { date: closureDate, available: false, reason: closureReason.trim() || "Unavailable", updatedAt: new Date().toISOString() });
+      setAvailabilityNotice(closureDate + " is now marked unavailable to new appointment requests.");
+      setClosureDate(""); setClosureReason("");
+    } catch {
+      setAvailabilityNotice("That date was not saved. Check your admin permissions and try again.");
+    }
+  }
+
+  async function reopenDate(item: {id:string;date:string}) {
+    setAvailabilityNotice("");
+    try {
+      await deleteDoc(doc(db, "appointmentAvailability", item.id));
+      setAvailabilityNotice(item.date + " is available for new requests again.");
+    } catch {
+      setAvailabilityNotice("That date could not be reopened. Check your admin permissions and try again.");
+    }
+  }
 
   const openAppointments = useMemo(() => appointments.filter(item => !["Cancelled", "Completed"].includes(item.status || "")), [appointments]);
 
@@ -102,6 +138,7 @@ function Dashboard() {
     </section>
     <nav className="adminTabs" aria-label="Operations sections">
       <button className={tab === "appointments" ? "active" : ""} onClick={() => setTab("appointments")}>Appointment requests</button>
+      <button className={tab === "availability" ? "active" : ""} onClick={() => setTab("availability")}>Date availability</button>
       <button className={tab === "reviews" ? "active" : ""} onClick={() => setTab("reviews")}>Customer looks & reviews</button>
     </nav>
     {loading ? <section className="adminPanel"><p>Loading JTS operations…</p></section> : tab === "appointments" ? <section className="adminPanel">
@@ -127,6 +164,17 @@ function Dashboard() {
           </div>
         </article>)}
       </div>}
+    </section> : tab === "availability" ? <section className="adminPanel">
+      <div className="panelHeading"><div><span className="kicker">CUSTOMER BOOKING CALENDAR</span><h2>Manage unavailable dates</h2></div><span>{unavailableDates.length} closed date{unavailableDates.length===1?"":"s"}</span></div>
+      <p className="availabilityIntro">Dates you add here are blocked in the customer calendar. Customers can see the closure reason and the next nearest date they can request. This does not cancel or change existing requests already in the appointment queue.</p>
+      <form className="availabilityForm" onSubmit={markDateUnavailable}>
+        <label>Mark a date unavailable<input type="date" value={closureDate} min={minBookableDate()} onChange={event=>setClosureDate(event.target.value)} required /></label>
+        <label>Reason shown to customers <span>(optional)</span><input value={closureReason} onChange={event=>setClosureReason(event.target.value)} maxLength={120} placeholder="e.g. Fully booked, personal day, salon closed" /></label>
+        <button className="button buttonLight" type="submit">Save unavailable date</button>
+      </form>
+      {availabilityNotice && <p className="notice" role="status">{availabilityNotice}</p>}
+      {unavailableDates.length===0 ? <div className="emptyState"><h3>No unavailable dates recorded</h3><p>All future dates remain available to request, subject to John confirming the exact time.</p></div> : <div className="queue">{unavailableDates.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">UNAVAILABLE DATE</span><h3>{dateText(item.date+"T12:00:00+02:00")}</h3><p>{item.reason}</p><small>Customers cannot select this date in the booking calendar.</small></div><div className="queueActions"><button type="button" className="button buttonLight" onClick={()=>void reopenDate(item)}>Reopen date</button></div></article>)}</div>}
+      <p className="availabilityFootnote">The calendar controls which dates can be requested; it does not auto-confirm time slots. Appointment requests still need your review and confirmation.</p>
     </section> : <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">COMMUNITY STYLE FEED</span><h2>Customer photos & reviews</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       {reviews.length === 0 ? <div className="emptyState"><h3>No customer reviews yet</h3><p>Customer-submitted looks and reviews will appear here for moderation.</p></div> : <div className="queue">

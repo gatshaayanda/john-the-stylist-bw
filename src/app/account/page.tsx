@@ -3,6 +3,7 @@ import Link from "next/link";
 import { GoogleAuthProvider, browserLocalPersistence, linkWithPopup, onAuthStateChanged, setPersistence, signInAnonymously, type User } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import { auth } from "@/lib/firebase/client";
+import StyleStudio from "@/app/style-studio";
 import { getCustomerOrders, type FoodOrder } from "@/lib/firebase/data";
 
 function label(status: string) {
@@ -73,6 +74,9 @@ export default function AccountPage() {
   return <main className="jtsBookingPage jtsStyleAccount"><div className="jtsContainer jtsBookingWrap">
     <div className="jtsBookingTop"><Link href="/" className="jtsBack">← JTS Styles</Link><div className="jtsAccountTopLinks"><Link href="/feed" className="jtsGhost">Style feed ↗</Link><Link href="/order" className="jtsGhost">Book appointment</Link></div></div>
     <header className="jtsAccountHero"><span className="jtsEyebrow">YOUR JTS STYLE JOURNEY</span><h1>My style.<br /><em>My history.</em></h1><p>Your bookings, previous looks and new inspiration—ready whenever you want your next cut.</p><div className="jtsAccountHeroActions"><Link href="/order" className="jtsButton jtsButtonGold">Plan my next look ↗</Link><Link href="/feed" className="jtsGhost">Explore the JTS feed</Link></div></header>
+
+    <section className="jtsAccountStudioIntro"><span className="jtsEyebrow">YOUR PERSONAL STYLE PLAYGROUND</span><h2>Try a new direction.</h2><p>Build a look, test it against a style brief, and carry your choices into your next appointment request.</p></section>
+    <StyleStudio />
 
     <section className="jtsStyleStats" aria-label="Your style summary"><article><span>BOOKINGS</span><strong>{orders.length}</strong><small>Requests in this account</small></article><article><span>PAST DATES</span><strong>{pastOrders.length}</strong><small>Previous appointment dates</small></article><article><span>ACCOUNT</span><strong>{user && !user.isAnonymous ? "SAVED" : "GUEST"}</strong><small>{user && !user.isAnonymous ? "Connected sign-in" : "This device session"}</small></article></section>
 
