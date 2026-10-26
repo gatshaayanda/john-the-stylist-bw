@@ -58,14 +58,16 @@ export default function AccountPage() {
     return stop;
   }, []);
 
+  const userId = user?.uid;
+
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     return subscribeToCustomerOrders(
-      user.uid,
+      userId,
       nextOrders => { setOrders(nextOrders); setReady(true); },
       () => setError("Live booking updates are temporarily unavailable. You can still open each booking to refresh its status.")
     );
-  }, [user?.uid]);
+  }, [userId]);
 
   async function startGuest() {
     setError(""); setMessage("");
