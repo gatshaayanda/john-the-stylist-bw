@@ -875,3 +875,7 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
   .jtsCalendarDay{min-height:38px;font-size:.76rem}
   .jtsCalendarHeader{grid-template-columns:38px 1fr 38px}
 }
+
+/* Keep the one-word operations entry discoverable at the very bottom, including on mobile. */
+.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;border:1px solid #6f5b6e;border-radius:2px;color:#f8f0e8;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:lowercase;}
+.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:hover,.jtsEditorialHome .jtsEditFooterBottom .jtsAdminAccessLink:focus-visible{border-color:#d4af37;color:#d4af37;outline-offset:3px;}
