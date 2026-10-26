@@ -70,7 +70,7 @@ function Dashboard() {
   useEffect(() => {
     const stop = onSnapshot(doc(db, "businessSettings", "appointmentAvailability"), snapshot => {
       const entries = snapshot.exists() && Array.isArray(snapshot.data().unavailableDates) ? snapshot.data().unavailableDates : [];
-      setUnavailableDates(entries.filter((item: unknown) => !!item && typeof item === "object" && "date" in item && typeof item.date === "string").map((item: {date:string;reason?:string;updatedAt?:string}) => ({ id: item.date, date: item.date, reason: typeof item.reason === "string" ? item.reason : "Unavailable", updatedAt: item.updatedAt || "" })).sort((a,b) => a.date.localeCompare(b.date)));
+      setUnavailableDates(entries.filter((item: unknown) => !!item && typeof item === "object" && "date" in item && typeof item.date === "string").map((item: {date:string;reason?:string;updatedAt?:string}) => ({ id: item.date, date: item.date, reason: typeof item.reason === "string" ? item.reason : "Unavailable", updatedAt: item.updatedAt || "" })).sort((a: {id:string;date:string;reason:string;updatedAt?:string}, b: {id:string;date:string;reason:string;updatedAt?:string}) => a.date.localeCompare(b.date)));
       setAvailabilityNotice("");
     }, () => setAvailabilityNotice("Availability settings could not be loaded. Check Firebase access and connection."));
     return () => stop();
