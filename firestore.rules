@@ -13,8 +13,16 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedIn()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff', 'Owner', 'Staff'];
+        && (
+          (
+            request.auth.token.email_verified == true
+            && request.auth.token.email in ['gatshaayanda@gmail.com', 'chikohoraknowledge4@gmail.com']
+          )
+          || (
+            exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+            && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'staff', 'Owner', 'Staff']
+          )
+        );
     }
 
     function validOrder() {
