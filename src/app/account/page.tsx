@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { GoogleAuthProvider, browserLocalPersistence, linkWithPopup, onAuthStateChanged, setPersistence, signInAnonymously, signInWithPopup, type User } from "firebase/auth";
+import { GoogleAuthProvider, linkWithPopup, onAuthStateChanged, signInAnonymously, signInWithPopup, type User } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import { auth } from "@/lib/firebase/client";
 import StyleStudio from "@/app/style-studio";
@@ -84,7 +84,7 @@ export default function AccountPage() {
   async function connectGoogle() {
     setBusy(true); setError(""); setMessage("");
     try {
-      await setPersistence(auth, browserLocalPersistence);
+      // Launch the popup directly from the click handler; an awaited setup step here can lose the browser user gesture.
       const current = auth.currentUser;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
