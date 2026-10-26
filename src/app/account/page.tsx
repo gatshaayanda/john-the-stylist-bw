@@ -152,7 +152,7 @@ export default function AccountPage() {
       <p className="jtsAccountNotificationNote">These are in-app booking updates, not a promise of push notifications. Appointment requests remain unconfirmed until John confirms the slot and deposit.</p>
     </section>
 
-    <header className="jtsAccountHero jtsAccountUtilityHero"><span className="jtsEyebrow">YOUR JTS STYLE JOURNEY</span><p>Manage appointments, keep your booking references close, and return to your style inspiration whenever you're ready.</p><div className="jtsAccountHeroActions"><Link href="/order" className="jtsButton jtsButtonGold">Plan my next look ↗</Link><Link href="/feed" className="jtsGhost">Explore the JTS feed</Link></div></header>
+    <header className="jtsAccountHero jtsAccountUtilityHero"><span className="jtsEyebrow">YOUR JTS STYLE JOURNEY</span><p>Manage appointments, keep your booking references close, and return to your style inspiration whenever you&apos;re ready.</p><div className="jtsAccountHeroActions"><Link href="/order" className="jtsButton jtsButtonGold">Plan my next look ↗</Link><Link href="/feed" className="jtsGhost">Explore the JTS feed</Link></div></header>
 
     {nextOrder && <section className="jtsStyleNext"><div><span className="jtsEyebrow">UP NEXT</span><h2>{nextOrder.items.map(item => item.name).join(" · ")}</h2><p>{dateText(nextOrder.scheduledFor)} · {label(nextOrder.status)}</p><small>Reference #{nextOrder.id.slice(0, 8).toUpperCase()} · A request is not confirmed until John confirms the slot and deposit.</small></div><Link href={"/orders/" + nextOrder.id} className="jtsButton jtsButtonGold">View booking ↗</Link></section>}
 
@@ -164,7 +164,7 @@ export default function AccountPage() {
 
     <section className="jtsStyleFeedInvite"><div><span className="jtsEyebrow">INSPIRATION BETWEEN VISITS</span><h2>See what’s next.</h2><p>Explore John’s work, share your own photo and keep a record of how happy you are with each look.</p></div><Link href="/feed" className="jtsButton jtsButtonGold">Share a look & review ↗</Link></section>
 
-    <section className="jtsAccountGame"><section className="jtsAccountStudioIntro"><span className="jtsEyebrow">OPTIONAL · STYLE STUDIO</span><h2>Try a new direction.</h2><p>A creative playground when you're in the mood to experiment. Your bookings and account tools stay first.</p></section><StyleStudio /></section>
+    <section className="jtsAccountGame"><section className="jtsAccountStudioIntro"><span className="jtsEyebrow">OPTIONAL · STYLE STUDIO</span><h2>Try a new direction.</h2><p>A creative playground when you&apos;re in the mood to experiment. Your bookings and account tools stay first.</p></section><StyleStudio /></section>
     <div className="jtsAccountNote"><strong>Appointment truth:</strong> submitting a request does not confirm the slot or mean a deposit has been received. John confirms the appointment and deposit separately. For help, use your JTS booking history and appointment request details.</div>
   </div></main>;
 }
