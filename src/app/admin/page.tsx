@@ -157,9 +157,11 @@ function Dashboard() {
     try {
       if (styleDraft.id) await updateDoc(doc(db, "styleFeed", styleDraft.id), payload);
       else {
+        const uid = auth.currentUser?.uid;
+        if (!uid) throw new Error("Admin session expired. Sign in again.");
         const ref = doc(collection(db, "styleFeed"));
-        const { updatedAt: _updatedAt, ...newPost } = payload;
-        await setDoc(ref, { ...newPost, createdAt: now, createdBy: auth.currentUser?.uid });
+        const newPost = { title: payload.title, caption: payload.caption, imageUrl: payload.imageUrl, service: payload.service, tags: payload.tags, published: payload.published };
+        await setDoc(ref, { ...newPost, createdAt: now, createdBy: uid });
       }
       setStyleDraft(null);
       setNotice(styleDraft.published ? "John's style post saved and published to the public feed." : "Style post saved as a draft.");
