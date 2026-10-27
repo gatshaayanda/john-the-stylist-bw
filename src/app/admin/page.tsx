@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
 import { auth, db } from "@/lib/firebase/client";
+import { uploadFiles } from "@/lib/uploadthing";
 import { DEFAULT_PUBLIC_SERVICES, normalizePublicServices, type PublicService } from "@/lib/jts/public-services";
 
 type Appointment = {
@@ -34,7 +35,7 @@ type CustomerReview = {
 };
 
 type OwnerStylePost = {
-  id: string; title: string; caption: string; imageUrl: string; service: string;
+  id: string; title: string; caption: string; imageUrl: string; mediaUrl?: string; mediaType?: "image" | "video"; service: string;
   tags: string[]; published: boolean; createdAt?: string; createdBy?: string; updatedAt?: string;
 };
 
@@ -60,6 +61,7 @@ function Dashboard() {
   const [notice, setNotice] = useState("");
   const [serviceDraft, setServiceDraft] = useState<PublicService | null>(null);
   const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
+  const [mediaUploading, setMediaUploading] = useState(false);
 
   useEffect(() => {
     let ready = 0;
@@ -151,20 +153,45 @@ function Dashboard() {
     } catch { setNotice("Service could not be removed. Check admin access and Firebase rules."); }
   }
 
+  async function uploadStyleMedia(file: File) {
+    if (!styleDraft) return;
+    const isVideo = file.type.startsWith("video/");
+    const maxBytes = isVideo ? 8 * 1024 * 1024 : 4 * 1024 * 1024;
+    if ((!isVideo && !file.type.startsWith("image/")) || file.size > maxBytes) {
+      setNotice(isVideo ? "Choose an MP4/WebM video no larger than 8 MB." : "Choose an image no larger than 4 MB.");
+      return;
+    }
+    const currentUser = auth.currentUser;
+    if (!currentUser) { setNotice("Your admin session expired. Sign in again before uploading."); return; }
+    setMediaUploading(true); setNotice("");
+    try {
+      const token = await currentUser.getIdToken();
+      const uploaded = await uploadFiles("adminStyleMedia", { files: [file], headers: { Authorization: `Bearer ${token}` } });
+      const url = uploaded[0]?.ufsUrl || uploaded[0]?.url;
+      if (!url) throw new Error("Upload completed without a public media URL.");
+      setStyleDraft(current => current ? { ...current, mediaUrl: url, imageUrl: url, mediaType: isVideo ? "video" : "image" } : current);
+      setNotice("Media uploaded. Save the style post to publish the change.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Media upload failed. Check UploadThing configuration and try again.");
+    } finally { setMediaUploading(false); }
+  }
+
   async function saveStylePost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!styleDraft || !styleDraft.title.trim() || !styleDraft.imageUrl.trim()) {
-      setNotice("Add a title and an image URL before saving a style post."); return;
+    if (!styleDraft || !styleDraft.title.trim() || !(styleDraft.mediaUrl || styleDraft.imageUrl).trim()) {
+      setNotice("Add a title and upload or paste a public image/video URL before saving."); return;
     }
     const now = new Date().toISOString();
-    const payload = { title: styleDraft.title.trim(), caption: styleDraft.caption.trim(), imageUrl: styleDraft.imageUrl.trim(), service: styleDraft.service.trim() || "JTS STYLE", tags: styleDraft.tags, published: styleDraft.published, updatedAt: now };
+    const mediaUrl = (styleDraft.mediaUrl || styleDraft.imageUrl).trim();
+    const mediaType = styleDraft.mediaType || "image";
+    const payload = { title: styleDraft.title.trim(), caption: styleDraft.caption.trim(), imageUrl: mediaUrl, mediaUrl, mediaType, service: styleDraft.service.trim() || "JTS STYLE", tags: styleDraft.tags, published: styleDraft.published, updatedAt: now };
     try {
       if (styleDraft.id) await updateDoc(doc(db, "styleFeed", styleDraft.id), payload);
       else {
         const uid = auth.currentUser?.uid;
         if (!uid) throw new Error("Admin session expired. Sign in again.");
         const ref = doc(collection(db, "styleFeed"));
-        const newPost = { title: payload.title, caption: payload.caption, imageUrl: payload.imageUrl, service: payload.service, tags: payload.tags, published: payload.published };
+        const newPost = { title: payload.title, caption: payload.caption, imageUrl: payload.imageUrl, mediaUrl: payload.mediaUrl, mediaType: payload.mediaType, service: payload.service, tags: payload.tags, published: payload.published };
         await setDoc(ref, { ...newPost, createdAt: now, createdBy: uid });
       }
       setStyleDraft(null);
@@ -274,17 +301,20 @@ function Dashboard() {
       {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeService(item)}>Delete</button></div></article>)}</div>}
     </section> : tab === "styleFeed" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">JOHN&apos;S EDIT</span><h2>Public style posts</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
-      <p>Create, edit, publish or remove John&apos;s own looks. Use a public HTTPS image URL for each post.</p>
+      <p>Manage the looks customers see on the landing page and style feed. Upload finished cuts, colour transformations and short salon videos, or paste a public media URL. Only published posts appear publicly.</p>
       {styleDraft ? <form className="adminForm" onSubmit={saveStylePost}>
         <label>Post title<input value={styleDraft.title} onChange={event=>setStyleDraft({...styleDraft,title:event.target.value})} maxLength={100} required /></label>
-        <label>Image URL<input type="url" value={styleDraft.imageUrl} onChange={event=>setStyleDraft({...styleDraft,imageUrl:event.target.value})} placeholder="https://…" required /></label>
+        <label>Media type<select value={styleDraft.mediaType || "image"} onChange={event=>setStyleDraft({...styleDraft,mediaType:event.target.value as "image" | "video"})}><option value="image">Photo / finished look</option><option value="video">Video / process clip</option></select></label>
+        <label>Upload {styleDraft.mediaType === "video" ? "video" : "photo"}<input type="file" accept={styleDraft.mediaType === "video" ? "video/mp4,video/webm,video/quicktime" : "image/*"} disabled={mediaUploading} onChange={event=>{const file=event.target.files?.[0];if(file)void uploadStyleMedia(file);event.currentTarget.value="";}} /> <small>{styleDraft.mediaType === "video" ? "MP4/WebM, up to 8 MB." : "Browser-supported images, up to 4 MB."} Uploads are stored by UploadThing.</small></label>
+        <label>Or paste public media URL<input type="url" value={styleDraft.mediaUrl || styleDraft.imageUrl} onChange={event=>setStyleDraft({...styleDraft,mediaUrl:event.target.value,imageUrl:event.target.value})} placeholder="https://…" required /></label>
+        {(styleDraft.mediaUrl || styleDraft.imageUrl) && <div style={{maxWidth:260,margin:"8px 0"}}>{styleDraft.mediaType === "video" ? <video src={styleDraft.mediaUrl || styleDraft.imageUrl} controls playsInline style={{width:"100%",borderRadius:12}} /> : <img src={styleDraft.mediaUrl || styleDraft.imageUrl} alt="Style post preview" style={{width:"100%",maxHeight:300,objectFit:"cover",borderRadius:12}} />}</div>}
         <label>Caption<textarea value={styleDraft.caption} onChange={event=>setStyleDraft({...styleDraft,caption:event.target.value})} maxLength={700} rows={3} /></label>
         <label>Service / look label<input value={styleDraft.service} onChange={event=>setStyleDraft({...styleDraft,service:event.target.value})} maxLength={80} /></label>
         <label>Tags, separated by commas<input value={styleDraft.tags.join(", ")} onChange={event=>setStyleDraft({...styleDraft,tags:event.target.value.split(",").map(tag=>tag.trim().replace(/^#/,"")).filter(Boolean).slice(0,8)})} /></label>
         <label className="checkRow"><input type="checkbox" checked={styleDraft.published} onChange={event=>setStyleDraft({...styleDraft,published:event.target.checked})} /> Publish on the public feed</label>
-        <div className="queueActions"><button className="button buttonPrimary" type="submit">Save style post</button><button className="button buttonLight" type="button" onClick={()=>setStyleDraft(null)}>Cancel</button></div>
-      </form> : <button className="button buttonLight" type="button" onClick={()=>setStyleDraft({id:"",title:"",caption:"",imageUrl:"",service:"",tags:[],published:true})}>Add style post</button>}
-      {stylePosts.length===0 ? <div className="emptyState"><h3>No style posts yet</h3><p>Add a post here and publish it to the public style feed.</p></div> : <div className="queue">{stylePosts.map(item=><article className="queueRow" key={item.id}>{item.imageUrl&&<img src={item.imageUrl} alt="" loading="lazy" style={{width:100,height:120,objectFit:"cover",borderRadius:10}}/>}<div><span className="kicker">{item.published?"Published":"Draft"} · {item.service||"JTS STYLE"}</span><h3>{item.title}</h3><p>{item.caption}</p><small>{dateText(item.createdAt)}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setStyleDraft({...item,tags:item.tags||[],published:item.published!==false})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeStylePost(item)}>Delete</button></div></article>)}</div>}
+        <div className="queueActions"><button className="button buttonPrimary" type="submit" disabled={mediaUploading}>{mediaUploading ? "Uploading media…" : "Save style post"}</button><button className="button buttonLight" type="button" onClick={()=>setStyleDraft(null)}>Cancel</button></div>
+      </form> : <button className="button buttonLight" type="button" onClick={()=>setStyleDraft({id:"",title:"",caption:"",imageUrl:"",mediaUrl:"",mediaType:"image",service:"",tags:[],published:true})}>Add style post</button>}
+      {stylePosts.length===0 ? <div className="emptyState"><h3>No style posts yet</h3><p>Add a post here and publish it to the public style feed.</p></div> : <div className="queue">{stylePosts.map(item=><article className="queueRow" key={item.id}>{(item.mediaUrl || item.imageUrl) && (item.mediaType === "video" ? <video src={item.mediaUrl || item.imageUrl} controls playsInline preload="metadata" style={{width:150,height:120,objectFit:"cover",borderRadius:10}} /> : <img src={item.mediaUrl || item.imageUrl} alt="" loading="lazy" style={{width:100,height:120,objectFit:"cover",borderRadius:10}}/>)}<div><span className="kicker">{item.published?"Published":"Draft"} · {item.service||"JTS STYLE"}</span><h3>{item.title}</h3><p>{item.caption}</p><small>{dateText(item.createdAt)}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setStyleDraft({...item,tags:item.tags||[],published:item.published!==false})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeStylePost(item)}>Delete</button></div></article>)}</div>}
     </section> : <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">COMMUNITY STYLE FEED</span><h2>Customer photos & reviews</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       {reviews.length === 0 ? <div className="emptyState"><h3>No customer reviews yet</h3><p>Customer-submitted looks and reviews will appear here for moderation.</p></div> : <div className="queue">
