@@ -1076,3 +1076,14 @@ input, select, textarea, button {
 @media (max-width:420px) {
  .jtsCustomerInspirationGrid, .adminServiceMediaGrid { grid-template-columns: minmax(0,1fr); }
 }
+
+
+/* Direct customer account access: visible before catalogue browsing on desktop and mobile. */
+.jtsEditorialHome .jtsEditAccountAccess{padding:20px 0;background:#0d0d0d;border-top:1px solid #252525;border-bottom:1px solid #252525}
+.jtsEditorialHome .jtsEditAccountAccessInner{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.jtsEditorialHome .jtsEditAccountAccess h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.5rem,3vw,2.15rem);font-weight:500;letter-spacing:-.035em;line-height:1.05;margin:7px 0}
+.jtsEditorialHome .jtsEditAccountAccess p{max-width:560px;color:#a8a8a4;font-size:.84rem;line-height:1.55;margin:0}
+.jtsEditorialHome .jtsEditAccountLink{display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:48px;padding:12px 18px;border:1px solid #c7a45b;border-radius:2px;color:#e1c987;font-size:.76rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.jtsEditorialHome .jtsEditAccountLink:hover{background:#c7a45b;color:#050505}
+.jtsEditorialHome .jtsEditAccountLink span{font-size:1rem}
+@media(max-width:600px){.jtsEditorialHome .jtsEditAccountAccess{padding:19px 0}.jtsEditorialHome .jtsEditAccountAccessInner{align-items:stretch;flex-direction:column;gap:14px}.jtsEditorialHome .jtsEditAccountAccess p{font-size:.8rem}.jtsEditorialHome .jtsEditAccountLink{width:100%}}
