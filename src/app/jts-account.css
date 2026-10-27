@@ -109,7 +109,6 @@
 }
 @media(max-width:420px){
  .jtsWeatherDays{grid-template-columns:repeat(2,minmax(0,1fr))}
- .jtsWeatherDay:nth-child(n+3){display:none}
  .jtsWeatherCurrent small{font-size:.78rem}
  .jtsPersonalWelcomeActions{align-items:stretch;flex-direction:column}
  .jtsPersonalWelcomeActions>*{justify-content:center}
