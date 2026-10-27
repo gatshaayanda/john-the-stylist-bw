@@ -67,7 +67,7 @@ function Dashboard() {
   const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
   const [mediaUploading, setMediaUploading] = useState(false);
 
-  useEffect(() => onAuthStateChanged(auth, user => setAdminName(user?.displayName?.trim().split(/\\s+/)[0] || "")), []);
+  useEffect(() => onAuthStateChanged(auth, user => setAdminName(user?.displayName?.trim().split(" ")[0] || "")), []);
 
   useEffect(() => {
     let ready = 0;
