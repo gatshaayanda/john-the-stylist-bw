@@ -248,6 +248,7 @@ function Dashboard() {
     setNotice("");
     try {
       await updateDoc(doc(db, "orders", item.id), { status });
+      track("jts_admin_appointment_status_updated", { status });
       setNotice("Appointment #" + item.id.slice(0, 8).toUpperCase() + " updated to " + status + ".");
     } catch {
       setNotice("That appointment update was not saved. Check Firebase rules and try again.");
@@ -376,7 +377,7 @@ function Dashboard() {
         </article>)}
       </div>}
     </section>}
-    <JtsStyleGuide />
+    <JtsStyleGuide onNavigateAdmin={setTab} />
     <p style={{ color: "#938c82", fontSize: ".8rem", marginTop: 18 }}>A request is not confirmed until John confirms the slot and deposit. Customer photos and reviews are public only while published.</p>
   </div></main>;
 }
