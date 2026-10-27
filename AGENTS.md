@@ -505,3 +505,19 @@ The product-owner-approved Africhiko installation standard is mandatory for this
 - Preserve appointment truth: a request is not confirmed until John confirms the slot and deposit. Preserve customer privacy and existing Firestore rules.
 - Do not change the protected PWA install flow as part of account utility work.
 
+
+
+## NON-NEGOTIABLE — service catalogue media CRUD and customer visibility
+
+The service catalogue is a single connected content workflow, not text-only price records plus a disconnected portfolio.
+
+- In Admin → **Services & prices**, each service record must support full CRUD of its service fields **and multiple attached photos/videos**. An authorized owner/staff member must be able to upload, preview, remove, edit and save service-specific media in the same service editor. Do not require them to discover a separate “style feed” tab just to add media to Pixie cut, Pure white or another catalogue service.
+- Use the existing authenticated UploadThing `adminStyleMedia` route for media binaries. Keep server-side Firebase ID-token/admin authorization; do not weaken Firestore rules or expose upload credentials. Respect the configured size/type limits and show upload errors and progress honestly.
+- Store service media metadata alongside the corresponding service in `businessSettings/publicServices.services[]` using a backward-compatible optional `media` array (`url`, `type: image|video`, optional `alt`). Existing services without media remain valid and must not disappear.
+- Public home service cards must visibly render the service's own media (including playable video), with a fallback design only when the service has no media. The public `/feed` must render owner photos **and videos**, not silently treat video posts as images.
+- The customer `/account` page must also provide a responsive, usable view of public service examples and John’s published style posts, with working links to discuss/request the selected look. It must only read public published owner media and public catalogue data; never expose another customer’s private profile, drafts or unpublished content.
+- Editing service details or media must update the public catalogue, booking service choices and account inspiration from the same source of truth. Deleting a service removes it from the public catalogue and booking choices. Removing one media item must not delete unrelated media or alter the service price/identity.
+- Preserve the existing separate owner style feed CRUD and customer-submitted look/review moderation; they complement service media and must not be used as a substitute for it.
+- Keep the experience mobile-first, keyboard accessible and overflow-safe. Give upload controls visible labels, previews, per-item remove actions, empty states, save/error feedback and no hidden media-management requirement.
+- Do not seed or fabricate customer photos, before/after results, reviews or stylist portfolio assets. Only media deliberately uploaded by authorized staff should appear as John’s work.
+- Before completion, verify legacy service records normalize without media; add/edit/delete a service and its media; render photos and videos on homepage, full feed and customer account; confirm a customer cannot see drafts/unpublished media; confirm service selection in booking remains correct; run identity verification, TypeScript, lint and production build; inspect the final diff and exact Vercel commit/deployment state. Report physical-device QA separately.
