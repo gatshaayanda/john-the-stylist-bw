@@ -941,3 +941,98 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .jtsStyleLandingFooter{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-top:22px;color:#c9bdc9;font-size:.9rem}
 @media(max-width:760px){.jtsStyleLanding{padding:52px 0}.jtsStyleLandingGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.jtsStyleLandingCopy{padding:13px}.jtsStyleLandingCopy h3{font-size:1.1rem}}
 @media(max-width:480px){.jtsStyleLandingGrid{grid-template-columns:1fr}.jtsStyleLandingMedia{aspect-ratio:5/4}}
+
+
+/* Mobile overflow guard: keep every route and admin panel inside the viewport. */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+body, main, section, header, footer, nav, article, aside, form, label,
+.jtsSite, .jtsEditorialHome, .adminPage, .adminShell, .adminPanel,
+.adminHeader, .adminTabs, .queue, .queueRow, .queueRow > div,
+.adminForm, .adminTwoCol, .fieldGrid, .panelHeading, .stats,
+.jtsEditContainer, .jtsEditHeaderInner, .jtsEditHeroGrid, .jtsEditVisitGrid,
+.jtsEditKeepInner, .jtsEditFooterMain, .jtsEditFooterBottom {
+  min-width: 0;
+}
+img, video, iframe, canvas, svg {
+  max-width: 100%;
+}
+input, select, textarea, button {
+  max-width: 100%;
+}
+.adminShell, .adminPanel, .adminForm, .adminTabs, .queueRow,
+.adminTwoCol > *, .adminForm label, .adminForm input, .adminForm textarea,
+.adminForm select {
+  overflow-wrap: anywhere;
+}
+.adminTabs button {
+  min-width: 0;
+  flex: 0 1 auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.queueRow > div:first-child {
+  overflow-wrap: anywhere;
+}
+.queueRow img, .queueRow video {
+  max-width: 100%;
+}
+.adminMediaShortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #75601d;
+  border-radius: 12px;
+  background: linear-gradient(110deg, rgba(255,200,0,.09), transparent 80%), #111;
+}
+.adminMediaShortcut > div { min-width: 0; }
+.adminMediaShortcut strong { display: block; margin-bottom: 5px; color: #fffdf7; }
+.adminMediaShortcut p { margin: 0; color: #b9b2a7; font-size: .86rem; line-height: 1.5; }
+.adminUploadField input[type="file"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px dashed #75601d;
+  border-radius: 10px;
+  background: #101010;
+  color: #fffdf7;
+}
+@media (max-width: 640px) {
+  .adminPage { padding-top: 16px; }
+  .adminShell { width: calc(100% - 24px); }
+  .adminHeader { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .adminHeader h1 { font-size: clamp(2.1rem, 10vw, 3.2rem); line-height: .92; overflow-wrap: anywhere; }
+  .adminAccountBar { width: calc(100% - 24px); gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .stats { gap: 8px; }
+  .stats article { padding: 12px; min-width: 0; }
+  .stats strong { font-size: clamp(1.45rem, 8vw, 2rem); }
+  .stats span { overflow-wrap: anywhere; }
+  .adminPanel { padding: 14px; border-radius: 14px; }
+  .panelHeading { flex-wrap: wrap; }
+  .adminTabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  .adminTabs button { width: 100%; padding: 10px 8px; font-size: .72rem; line-height: 1.3; }
+  .adminTwoCol { grid-template-columns: minmax(0, 1fr); }
+  .queueRow { grid-template-columns: minmax(0, 1fr); }
+  .queueActions { justify-content: flex-start; min-width: 0; }
+  .queueActions .button, .queueActions select { max-width: 100%; }
+  .adminMediaShortcut { align-items: stretch; flex-direction: column; }
+  .adminMediaShortcut .button { width: 100%; white-space: normal; }
+  .jtsEditContainer { width: calc(100% - 28px); }
+  .jtsEditHeaderInner { flex-wrap: wrap; }
+  .jtsEditHeaderInner nav { max-width: 100%; flex-wrap: wrap; }
+  .jtsEditHeroGrid, .jtsEditVisitGrid, .jtsEditKeepInner { grid-template-columns: minmax(0, 1fr); }
+  .jtsEditArtSide { max-width: 100%; overflow: hidden; }
+  .jtsEditFooterBottom { flex-wrap: wrap; }
+}
+@media (max-width: 380px) {
+  .stats { grid-template-columns: minmax(0, 1fr); }
+  .adminTabs { grid-template-columns: minmax(0, 1fr); }
+  .jtsEditHero h1 { font-size: clamp(2.5rem, 15vw, 3.4rem); }
+}
