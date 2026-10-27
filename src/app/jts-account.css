@@ -62,6 +62,9 @@
 .jtsWeatherDay>strong{font-size:1.65rem;color:#e3c46f}
 .jtsWeatherDay>b{font-size:1rem;color:#f6f3ea}
 .jtsWeatherDay>b small,.jtsWeatherDay>small{font-size:.72rem;font-weight:500;color:#a7a59d;line-height:1.4}
+.jtsWeatherDayLink{display:inline-flex;align-items:center;margin-top:auto;padding-top:6px;color:#e6ca7b;font-size:.72rem;font-weight:850;line-height:1.35;text-decoration:none}
+.jtsWeatherDayLink:hover{text-decoration:underline}
+.jtsWeatherAttribution a{color:#d8bd73;text-underline-offset:2px}
 .jtsWeatherSuggestion{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:18px;padding-top:18px;border-top:1px solid #2d2b26}
 .jtsWeatherSuggestion p{max-width:680px;margin:0;color:#c0beb5;line-height:1.6}
 .jtsWeatherSuggestion p strong{color:#f1dfac}
