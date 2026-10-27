@@ -3,13 +3,7 @@
 import Link from "next/link";
 import JtsInstallButton from "@/app/jts-install-button";
 import StyleStudio from "@/app/style-studio";
-
-const services = [
-  { name: "Pixie cut", price: "P350–P400", note: "A shaped, precision short cut.", tag: "THE CUT" },
-  { name: "Cut + pixie cut", price: "P200", note: "A clean cut with a considered finish.", tag: "THE SHAPE" },
-  { name: "Pure white", price: "P300", note: "Bleach and colour for a high-impact finish.", tag: "THE COLOUR" },
-  { name: "Cut + bleach", price: "P250", note: "A cut paired with a bleach service.", tag: "THE CHANGE" },
-];
+import PublicServiceCards from "@/components/public-service-cards";
 
 function Logo() {
   return <Link href="/" className="jtsEditLogo" aria-label="JTS Styles home">
@@ -67,15 +61,7 @@ export default function Home() {
           <div><span className="jtsEditEyebrow">01 / THE SERVICE EDIT</span><h2>Choose the <em>starting point.</em></h2></div>
           <p>Choose a listed service and see its price before you request a time.</p>
         </div>
-        <div className="jtsEditServiceGrid">
-          {services.map((service, index) => <article className="jtsEditServiceCard" key={service.name}>
-            <div className="jtsEditServiceCardTop"><span>{service.tag}</span><span>0{index + 1}</span></div>
-            <div className={"jtsEditServiceGlyph jtsEditServiceGlyph" + index}><span>{["J", "S", "C", "↗"][index]}</span></div>
-            <h3>{service.name}</h3>
-            <p>{service.note}</p>
-            <div className="jtsEditServiceFoot"><strong>{service.price}</strong><Link href={"/order?service=" + encodeURIComponent(service.name)}>Choose service <span>↗</span></Link></div>
-          </article>)}
-        </div>
+        <PublicServiceCards />
         <div className="jtsEditAskBand">
           <div><span>YOUR IDEA ISN’T LISTED?</span><strong>Fades, bobs, tinting or a special-event look?</strong><p>Ask about the style and price before you commit. No made-up catalogue prices.</p></div>
           <Link href="/order" className="jtsEditSecondary">Request another style <span>↗</span></Link>
