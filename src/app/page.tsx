@@ -4,6 +4,7 @@ import Link from "next/link";
 import JtsInstallButton from "@/app/jts-install-button";
 import StyleStudio from "@/app/style-studio";
 import PublicServiceCards from "@/components/public-service-cards";
+import OwnerStyleLandingFeed from "@/components/owner-style-landing-feed";
 
 function Logo() {
   return <Link href="/" className="jtsEditLogo" aria-label="JTS Styles home">
@@ -69,6 +70,8 @@ export default function Home() {
       </div>
     </section>
 
+
+    <OwnerStyleLandingFeed />
 
     <section id="booking" className="jtsEditBooking">
       <div className="jtsEditContainer">
