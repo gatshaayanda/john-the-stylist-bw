@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { collection, onSnapshot, updateDoc, doc, setDoc, type Unsubscribe } from "firebase/firestore";
+import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
 import { auth, db } from "@/lib/firebase/client";
+import { DEFAULT_PUBLIC_SERVICES, normalizePublicServices, type PublicService } from "@/lib/jts/public-services";
 
 type Appointment = {
   id: string;
@@ -32,6 +33,11 @@ type CustomerReview = {
   status?: string;
 };
 
+type OwnerStylePost = {
+  id: string; title: string; caption: string; imageUrl: string; service: string;
+  tags: string[]; published: boolean; createdAt?: string; createdBy?: string; updatedAt?: string;
+};
+
 const dateText = (value?: string) => {
   if (!value) return "Date not provided";
   const date = new Date(value);
@@ -42,14 +48,14 @@ const minBookableDate = () => { const parts = new Intl.DateTimeFormat("en-GB", {
 
 function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [reviews, setReviews] = useState<CustomerReview[]>([]);
-  const [tab, setTab] = useState<"appointments" | "availability" | "reviews">("appointments");
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);\n  const [services, setServices] = useState<PublicService[]>(DEFAULT_PUBLIC_SERVICES);\n  const [stylePosts, setStylePosts] = useState<OwnerStylePost[]>([]);
+  const [tab, setTab] = useState<"appointments" | "availability" | "reviews" | "services" | "styleFeed">("appointments");
   const [unavailableDates, setUnavailableDates] = useState<Array<{id:string;date:string;reason:string;updatedAt?:string}>>([]);
   const [closureDate, setClosureDate] = useState("");
   const [closureReason, setClosureReason] = useState("");
   const [availabilityNotice, setAvailabilityNotice] = useState("");
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState("");\n  const [serviceDraft, setServiceDraft] = useState<PublicService | null>(null);\n  const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
 
   useEffect(() => {
     let ready = 0;
@@ -101,6 +107,74 @@ function Dashboard() {
     }
   }
 
+  useEffect(() => {
+    const stopServices = onSnapshot(doc(db, "businessSettings", "publicServices"), snapshot => {
+      if (!snapshot.exists()) { setServices(DEFAULT_PUBLIC_SERVICES); return; }
+      setServices(normalizePublicServices(snapshot.data().services));
+    }, () => setNotice("Public services could not be loaded. Check Firebase access and connection."));
+    const stopStylePosts = onSnapshot(collection(db, "styleFeed"), snapshot => {
+      setStylePosts(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as OwnerStylePost))
+        .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || "")));
+    }, () => setNotice("John's style feed could not be loaded. Check Firebase access and connection."));
+    return () => { stopServices(); stopStylePosts(); };
+  }, []);
+
+  async function saveService(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!serviceDraft || !serviceDraft.name.trim()) return;
+    const price = Number(serviceDraft.price);
+    const maxPrice = serviceDraft.maxPrice == null || Number(serviceDraft.maxPrice) <= price ? undefined : Number(serviceDraft.maxPrice);
+    if (!Number.isFinite(price) || price < 0 || (maxPrice !== undefined && (!Number.isFinite(maxPrice) || maxPrice < price))) {
+      setNotice("Enter a valid service price or price range."); return;
+    }
+    const name = serviceDraft.name.trim();
+    const id = serviceDraft.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const display = maxPrice ? "P" + price + "–P" + maxPrice : "P" + price;
+    const nextService: PublicService = { ...serviceDraft, id, name, price, maxPrice, display, note: serviceDraft.note.trim(), detail: serviceDraft.detail.trim(), tag: serviceDraft.tag.trim() || "THE SERVICE" };
+    const next = services.some(item => item.id === id) ? services.map(item => item.id === id ? nextService : item) : [...services, nextService];
+    try {
+      await setDoc(doc(db, "businessSettings", "publicServices"), { services: next, updatedAt: new Date().toISOString() }, { merge: true });
+      setServices(next); setServiceDraft(null);
+      setNotice("Service saved. The public services page and booking choices will update.");
+    } catch { setNotice("Service could not be saved. Check admin access and Firebase rules."); }
+  }
+
+  async function removeService(item: PublicService) {
+    const next = services.filter(service => service.id !== item.id);
+    try {
+      await setDoc(doc(db, "businessSettings", "publicServices"), { services: next, updatedAt: new Date().toISOString() }, { merge: true });
+      setServices(next); setNotice("Service removed from the public catalogue and booking choices.");
+    } catch { setNotice("Service could not be removed. Check admin access and Firebase rules."); }
+  }
+
+  async function saveStylePost(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!styleDraft || !styleDraft.title.trim() || !styleDraft.imageUrl.trim()) {
+      setNotice("Add a title and an image URL before saving a style post."); return;
+    }
+    const now = new Date().toISOString();
+    const payload = { title: styleDraft.title.trim(), caption: styleDraft.caption.trim(), imageUrl: styleDraft.imageUrl.trim(), service: styleDraft.service.trim() || "JTS STYLE", tags: styleDraft.tags, published: styleDraft.published, updatedAt: now };
+    try {
+      if (styleDraft.id) await updateDoc(doc(db, "styleFeed", styleDraft.id), payload);
+      else {
+        const ref = doc(collection(db, "styleFeed"));
+        await setDoc(ref, { ...payload, createdAt: now, createdBy: auth.currentUser?.uid });
+      }
+      setStyleDraft(null);
+      setNotice(styleDraft.published ? "John's style post saved and published to the public feed." : "Style post saved as a draft.");
+    } catch { setNotice("Style post could not be saved. Check the image URL and Firebase rules."); }
+  }
+
+  async function removeStylePost(item: OwnerStylePost) {
+    try { await deleteDoc(doc(db, "styleFeed", item.id)); setStylePosts(current => current.filter(post => post.id !== item.id)); setNotice("Style post deleted from the public feed."); }
+    catch { setNotice("Style post could not be deleted. Check admin access and Firebase rules."); }
+  }
+
+  async function removeCustomerReview(item: CustomerReview) {
+    try { await deleteDoc(doc(db, "customerStyleReviews", item.id)); setReviews(current => current.filter(review => review.id !== item.id)); setNotice("Customer review removed."); }
+    catch { setNotice("Customer review could not be removed. Check admin access and Firebase rules."); }
+  }
+
   const openAppointments = useMemo(() => appointments.filter(item => !["Cancelled", "Completed"].includes(item.status || "")), [appointments]);
 
   async function setAppointmentStatus(item: Appointment, status: string) {
@@ -143,6 +217,8 @@ function Dashboard() {
       <button className={tab === "appointments" ? "active" : ""} onClick={() => setTab("appointments")}>Appointment requests</button>
       <button className={tab === "availability" ? "active" : ""} onClick={() => setTab("availability")}>Date availability</button>
       <button className={tab === "reviews" ? "active" : ""} onClick={() => setTab("reviews")}>Customer looks & reviews</button>
+      <button className={tab === "services" ? "active" : ""} onClick={() => setTab("services")}>Services & prices</button>
+      <button className={tab === "styleFeed" ? "active" : ""} onClick={() => setTab("styleFeed")}>John&apos;s style feed</button>
     </nav>
     {loading ? <section className="adminPanel"><p>Loading JTS operations…</p></section> : tab === "appointments" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">THE APPOINTMENT QUEUE</span><h2>Customer requests</h2></div><span>{openAppointments.length} open</span></div>
@@ -179,6 +255,30 @@ function Dashboard() {
       {unavailableDates.length===0 ? <div className="emptyState"><h3>No unavailable dates recorded</h3><p>All future dates remain available to request, subject to John confirming the exact time.</p></div> : <div className="queue">{unavailableDates.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">UNAVAILABLE DATE</span><h3>{dateText(item.date+"T12:00:00+02:00")}</h3><p>{item.reason}</p><small>Customers cannot select this date in the booking calendar.</small></div><div className="queueActions"><button type="button" className="button buttonLight" onClick={()=>void reopenDate(item)}>Reopen date</button></div></article>)}</div>}
       <p className="availabilityFootnote">The calendar controls which dates can be requested; it does not auto-confirm time slots. Appointment requests still need your review and confirmation.</p>
     </section> : <section className="adminPanel">
+      <div className="panelHeading"><div><span className="kicker">PUBLIC CATALOGUE</span><h2>Services & prices</h2></div><span>{services.length} listed</span></div>
+      <p>These records drive both the public home-page service cards and the customer booking choices. Changes appear on the public site when saved.</p>
+      {serviceDraft ? <form className="adminForm" onSubmit={saveService}>
+        <label>Service name<input value={serviceDraft.name} onChange={event=>setServiceDraft({...serviceDraft,name:event.target.value})} maxLength={80} required /></label>
+        <div className="adminTwoCol"><label>Price (BWP)<input type="number" min="0" step="1" value={serviceDraft.price} onChange={event=>setServiceDraft({...serviceDraft,price:Number(event.target.value)})} required /></label><label>Optional maximum price<input type="number" min={serviceDraft.price} step="1" value={serviceDraft.maxPrice ?? ""} onChange={event=>setServiceDraft({...serviceDraft,maxPrice:event.target.value===""?undefined:Number(event.target.value)})} /></label></div>
+        <label>Short public description<input value={serviceDraft.note} onChange={event=>setServiceDraft({...serviceDraft,note:event.target.value})} maxLength={180} required /></label>
+        <div className="adminTwoCol"><label>Booking detail<input value={serviceDraft.detail} onChange={event=>setServiceDraft({...serviceDraft,detail:event.target.value})} maxLength={80} required /></label><label>Card label<input value={serviceDraft.tag} onChange={event=>setServiceDraft({...serviceDraft,tag:event.target.value})} maxLength={40} required /></label></div>
+        <div className="queueActions"><button className="button buttonPrimary" type="submit">Save service</button><button className="button buttonLight" type="button" onClick={()=>setServiceDraft(null)}>Cancel</button></div>
+      </form> : <button className="button buttonLight" type="button" onClick={()=>setServiceDraft({id:"",name:"",price:0,display:"P0",detail:"",note:"",tag:"THE SERVICE"})}>Add service</button>}
+      {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeService(item)}>Delete</button></div></article>)}</div>}
+    </section> : tab === "styleFeed" ? <section className="adminPanel">
+      <div className="panelHeading"><div><span className="kicker">JOHN&apos;S EDIT</span><h2>Public style posts</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
+      <p>Create, edit, publish or remove John&apos;s own looks. Use a public HTTPS image URL for each post.</p>
+      {styleDraft ? <form className="adminForm" onSubmit={saveStylePost}>
+        <label>Post title<input value={styleDraft.title} onChange={event=>setStyleDraft({...styleDraft,title:event.target.value})} maxLength={100} required /></label>
+        <label>Image URL<input type="url" value={styleDraft.imageUrl} onChange={event=>setStyleDraft({...styleDraft,imageUrl:event.target.value})} placeholder="https://…" required /></label>
+        <label>Caption<textarea value={styleDraft.caption} onChange={event=>setStyleDraft({...styleDraft,caption:event.target.value})} maxLength={700} rows={3} /></label>
+        <label>Service / look label<input value={styleDraft.service} onChange={event=>setStyleDraft({...styleDraft,service:event.target.value})} maxLength={80} /></label>
+        <label>Tags, separated by commas<input value={styleDraft.tags.join(", ")} onChange={event=>setStyleDraft({...styleDraft,tags:event.target.value.split(",").map(tag=>tag.trim().replace(/^#/,"")).filter(Boolean).slice(0,8)})} /></label>
+        <label className="checkRow"><input type="checkbox" checked={styleDraft.published} onChange={event=>setStyleDraft({...styleDraft,published:event.target.checked})} /> Publish on the public feed</label>
+        <div className="queueActions"><button className="button buttonPrimary" type="submit">Save style post</button><button className="button buttonLight" type="button" onClick={()=>setStyleDraft(null)}>Cancel</button></div>
+      </form> : <button className="button buttonLight" type="button" onClick={()=>setStyleDraft({id:"",title:"",caption:"",imageUrl:"",service:"",tags:[],published:true})}>Add style post</button>}
+      {stylePosts.length===0 ? <div className="emptyState"><h3>No style posts yet</h3><p>Add a post here and publish it to the public style feed.</p></div> : <div className="queue">{stylePosts.map(item=><article className="queueRow" key={item.id}>{item.imageUrl&&<img src={item.imageUrl} alt="" loading="lazy" style={{width:100,height:120,objectFit:"cover",borderRadius:10}}/>}<div><span className="kicker">{item.published?"Published":"Draft"} · {item.service||"JTS STYLE"}</span><h3>{item.title}</h3><p>{item.caption}</p><small>{dateText(item.createdAt)}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setStyleDraft({...item,tags:item.tags||[],published:item.published!==false})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeStylePost(item)}>Delete</button></div></article>)}</div>}
+    </section> : <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">COMMUNITY STYLE FEED</span><h2>Customer photos & reviews</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       {reviews.length === 0 ? <div className="emptyState"><h3>No customer reviews yet</h3><p>Customer-submitted looks and reviews will appear here for moderation.</p></div> : <div className="queue">
         {reviews.map(item => <article className="queueRow" key={item.id}>
@@ -190,7 +290,7 @@ function Dashboard() {
             <small>{item.customerName || "JTS customer"} · {item.service || "JTS Styles"} · {dateText(item.createdAt)}</small>
             {item.comparison && <small>Repeat review: {item.comparison}</small>}
           </div>
-          <div className="queueActions"><button className="button buttonLight" onClick={() => void setReviewPublished(item, item.published === false)}>{item.published === false ? "Publish" : "Hide from feed"}</button></div>
+          <div className="queueActions"><button className="button buttonLight" type="button" onClick={() => void setReviewPublished(item, item.published === false)}>{item.published === false ? "Publish" : "Hide from feed"}</button><button className="button buttonLight" type="button" onClick={() => void removeCustomerReview(item)}>Delete</button></div>
         </article>)}
       </div>}
     </section>}
