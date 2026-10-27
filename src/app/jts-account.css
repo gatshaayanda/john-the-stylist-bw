@@ -36,3 +36,83 @@
  .jtsAccountLiveDot{white-space:normal;text-align:right}
  .jtsAccountAuthFallback{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Contextual account experience: real data, useful prompts and restrained weather. */
+.jtsPersonalWelcome,.jtsAdminWelcome{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;margin:24px 0;padding:clamp(20px,4vw,34px);border:1px solid rgba(211,177,91,.32);border-radius:18px;background:radial-gradient(ellipse at 0 0,rgba(199,164,80,.12),transparent 58%),#101010;color:#f7f5ef}
+.jtsPersonalWelcome h2,.jtsAdminWelcome h2{font:600 clamp(1.8rem,4vw,2.7rem)/1.05 Georgia,serif;letter-spacing:-.025em;margin:9px 0 12px}
+.jtsPersonalWelcome p,.jtsAdminWelcome p{max-width:660px;color:#c1bfb8;line-height:1.65;margin:0}
+.jtsPersonalWelcomeActions,.jtsAdminWelcomeActions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.jtsPersonalWelcomeActions .jtsGhost{display:inline-flex;align-items:center;padding:12px 14px;border:1px solid #38352d;border-radius:10px;color:#e8e3d5;text-decoration:none}
+.jtsAdminWelcome{margin:18px 0 22px;align-items:center}
+.jtsAdminWelcomeActions{margin:0;flex-shrink:0}
+.jtsWeatherCard{margin:28px 0;padding:clamp(18px,3.5vw,30px);border:1px solid rgba(211,177,91,.28);border-radius:18px;background:linear-gradient(135deg,#15140f,#0c0c0c 70%);color:#f6f3ea;min-width:0}
+.jtsWeatherHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.jtsWeatherHeader h2{font:600 clamp(1.55rem,3vw,2.25rem)/1.12 Georgia,serif;letter-spacing:-.02em;margin:8px 0}
+.jtsWeatherHeader p{max-width:650px;color:#aaa9a2;line-height:1.6;margin:0}
+.jtsWeatherMark{display:grid;place-items:center;flex:0 0 54px;width:54px;height:54px;border:1px solid #6d5827;border-radius:50%;font-size:1.8rem;color:#e3c46f;background:#211b0d}
+.jtsWeatherCurrent{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:24px 0 18px}
+.jtsWeatherCurrent strong{font-size:clamp(2.4rem,7vw,3.5rem);font-weight:600;letter-spacing:-.06em}
+.jtsWeatherCurrent span{font-weight:750;color:#e1c77d}
+.jtsWeatherCurrent small{flex-basis:100%;color:#9f9d95;line-height:1.5}
+.jtsWeatherDays{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.jtsWeatherDay{display:flex;flex-direction:column;gap:7px;min-width:0;padding:12px 10px;border:1px solid #302f2b;border-radius:12px;background:#111}
+.jtsWeatherDayBright{border-color:#8a7137;background:linear-gradient(180deg,rgba(211,177,91,.11),#111 70%)}
+.jtsWeatherDay>span{font-size:.75rem;font-weight:800;color:#e5e1d6}
+.jtsWeatherDay>strong{font-size:1.65rem;color:#e3c46f}
+.jtsWeatherDay>b{font-size:1rem;color:#f6f3ea}
+.jtsWeatherDay>b small,.jtsWeatherDay>small{font-size:.72rem;font-weight:500;color:#a7a59d;line-height:1.4}
+.jtsWeatherDayLink{display:inline-flex;align-items:center;margin-top:auto;padding-top:6px;color:#e6ca7b;font-size:.72rem;font-weight:850;line-height:1.35;text-decoration:none}
+.jtsWeatherDayLink:hover{text-decoration:underline}
+.jtsWeatherAttribution a{color:#d8bd73;text-underline-offset:2px}
+.jtsWeatherSuggestion{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:18px;padding-top:18px;border-top:1px solid #2d2b26}
+.jtsWeatherSuggestion p{max-width:680px;margin:0;color:#c0beb5;line-height:1.6}
+.jtsWeatherSuggestion p strong{color:#f1dfac}
+.jtsWeatherSuggestion .jtsButton{flex-shrink:0}
+.jtsWeatherAttribution{display:block;margin-top:16px;color:#88877f;font-size:.72rem;line-height:1.5}
+.jtsWeatherTruth{margin:12px 0 0;color:#88877f;font-size:.75rem;line-height:1.55}
+.jtsWeatherStatus{color:#c3c0b6;line-height:1.6}
+.jtsWeatherRetry{padding:9px 13px;border:1px solid #75612e;border-radius:9px;background:#18150d;color:#e9d18d;font-weight:800;cursor:pointer}
+.jtsGuideRoot{position:relative;z-index:70}
+.jtsGuideLauncher{position:fixed;right:16px;bottom:20px;z-index:82;display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:0 16px;border:1px solid #9e8240;border-radius:999px;background:#17150f;color:#f1dfac;font-weight:800;box-shadow:0 8px 28px #0008;cursor:pointer}
+.jtsGuideLauncher.is-open{background:#272116}
+.jtsGuideBackdrop{position:fixed;inset:0;z-index:79;border:0;background:#0008}
+.jtsGuidePanel{position:fixed;right:16px;bottom:82px;z-index:81;display:flex;flex-direction:column;width:min(390px,calc(100vw - 24px));max-height:min(680px,calc(100dvh - 110px));overflow:hidden;border:1px solid #4c4228;border-radius:18px;background:#111;color:#f5f2e9;box-shadow:0 20px 65px #000b}
+.jtsGuideHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px;border-bottom:1px solid #302d26;background:#17150f}
+.jtsGuideHead h2{font:600 1.45rem/1.1 Georgia,serif;margin:7px 0}
+.jtsGuideHead p{margin:0;color:#99978f;font-size:.8rem}
+.jtsGuideHead>button{width:36px;height:36px;border:1px solid #454035;border-radius:9px;background:#111;color:#f3e3b7;font-size:1.5rem;cursor:pointer}
+.jtsGuideIntro{padding:16px 18px 10px}
+.jtsGuideIntro strong{color:#f2dfa5}
+.jtsGuideIntro p{margin:6px 0 0;color:#b9b6ad;font-size:.88rem;line-height:1.5}
+.jtsGuideActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px 14px}
+.jtsGuideActions a,.jtsGuideActions button{display:flex;align-items:center;min-height:42px;padding:10px;border:1px solid #37332a;border-radius:9px;background:transparent;color:#e6d6a4;font-family:inherit;font-size:.8rem;font-weight:750;text-align:left;text-decoration:none;cursor:pointer}
+.jtsGuideActions a:hover,.jtsGuideActions button:hover{border-color:#a1843e;background:#201b10}
+.jtsGuideThread{display:flex;flex-direction:column;gap:8px;overflow:auto;padding:0 18px}
+.jtsGuideMessage{max-width:92%;margin:0;padding:10px 12px;border-radius:12px;font-size:.85rem;line-height:1.5}
+.jtsGuideMessage-guide{align-self:flex-start;background:#242117;color:#e4dfd0}
+.jtsGuideMessage-you{align-self:flex-end;background:#d6b65f;color:#17140b}
+.jtsGuideComposer{display:flex;gap:8px;padding:14px 18px 8px}
+.jtsGuideComposer input{flex:1;min-width:0;width:0;padding:11px;border:1px solid #454035;border-radius:10px;background:#090909;color:#f7f5ef}
+.jtsGuideComposer button{width:42px;border:1px solid #987b37;border-radius:10px;background:#d5b65f;color:#16130b;font-weight:900;cursor:pointer}
+.jtsGuideComposer button:disabled{opacity:.45;cursor:not-allowed}
+.jtsGuideDisclaimer{padding:0 18px 14px;margin:0;color:#89877f;font-size:.68rem;line-height:1.45}
+@media(max-width:760px){
+ .jtsPersonalWelcome,.jtsAdminWelcome{align-items:stretch;flex-direction:column}
+ .jtsAdminWelcomeActions{margin-top:8px}
+ .jtsWeatherDays{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .jtsWeatherDay:nth-child(n+4){display:none}
+ .jtsWeatherSuggestion{align-items:stretch;flex-direction:column}
+ .jtsWeatherSuggestion .jtsButton{width:100%;justify-content:center;text-align:center}
+ .jtsGuideLauncher{right:12px;bottom:14px}
+ .jtsGuidePanel{right:12px;bottom:72px;width:calc(100vw - 24px);max-height:calc(100dvh - 90px)}
+}
+@media(max-width:420px){
+ .jtsWeatherDays{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .jtsWeatherCurrent small{font-size:.78rem}
+ .jtsPersonalWelcomeActions{align-items:stretch;flex-direction:column}
+ .jtsPersonalWelcomeActions>*{justify-content:center}
+ .jtsAdminWelcomeActions{align-items:stretch;flex-direction:column}
+ .jtsAdminWelcomeActions>*{width:100%}
+ .jtsGuideActions{grid-template-columns:1fr}
+}

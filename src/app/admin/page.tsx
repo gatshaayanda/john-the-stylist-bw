@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { track } from "@vercel/analytics";
 import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
 import AdminGate from "@/app/admin/admin-gate";
+import JtsStyleGuide from "@/components/JtsStyleGuide";
 import { auth, db } from "@/lib/firebase/client";
 import { uploadFiles } from "@/lib/uploadthing";
 import { DEFAULT_PUBLIC_SERVICES, normalizePublicServices, type PublicService, type PublicServiceMedia } from "@/lib/jts/public-services";
@@ -49,6 +52,7 @@ const minBookableDate = () => { const parts = new Intl.DateTimeFormat("en-GB", {
 
 function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [adminName, setAdminName] = useState("");
   const [reviews, setReviews] = useState<CustomerReview[]>([]);
   const [services, setServices] = useState<PublicService[]>(DEFAULT_PUBLIC_SERVICES);
   const [stylePosts, setStylePosts] = useState<OwnerStylePost[]>([]);
@@ -62,6 +66,8 @@ function Dashboard() {
   const [serviceDraft, setServiceDraft] = useState<PublicService | null>(null);
   const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
   const [mediaUploading, setMediaUploading] = useState(false);
+
+  useEffect(() => onAuthStateChanged(auth, user => setAdminName(user?.displayName?.trim().split(" ")[0] || "")), []);
 
   useEffect(() => {
     let ready = 0;
@@ -242,6 +248,7 @@ function Dashboard() {
     setNotice("");
     try {
       await updateDoc(doc(db, "orders", item.id), { status });
+      track("jts_admin_appointment_status_updated", { status });
       setNotice("Appointment #" + item.id.slice(0, 8).toUpperCase() + " updated to " + status + ".");
     } catch {
       setNotice("That appointment update was not saved. Check Firebase rules and try again.");
@@ -267,6 +274,10 @@ function Dashboard() {
       <div><span className="kicker">JTS STYLES · OPERATIONS</span><h1>Run the appointments.</h1><p>Review requests, update appointment status and moderate customer looks.</p></div>
       <Link href="/" className="button buttonLight">View customer app</Link>
     </header>
+    <section className="jtsAdminWelcome" aria-labelledby="jts-admin-welcome-title">
+      <div><span className="jtsEyebrow">A CLEAR VIEW OF THE DAY</span><h2 id="jts-admin-welcome-title">{(() => { const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Gaborone", hour: "2-digit", hourCycle: "h23" }).format(new Date())); return (hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening") + ", " + (adminName || "Boss") + "."; })()}</h2><p>{appointments.filter(item => !item.status || item.status === "New").length ? "You have " + appointments.filter(item => !item.status || item.status === "New").length + " new appointment request" + (appointments.filter(item => !item.status || item.status === "New").length === 1 ? "" : "s") + " to review." : "No new appointment requests need your attention right now. You can check availability or refresh the style catalogue."}</p></div>
+      <div className="jtsAdminWelcomeActions"><button type="button" className="button buttonPrimary" onClick={() => { setTab("appointments"); track("jts_admin_priority_action", { action: "review_appointments" }); }}>Review requests ↗</button><button type="button" className="button buttonLight" onClick={() => { setTab("services"); track("jts_admin_priority_action", { action: "manage_services" }); }}>Services &amp; prices</button></div>
+    </section>
     {notice && <div className="notice adminNotice" role="status" aria-live="polite">{notice}</div>}
     <section className="stats">
       <article><span>Appointment requests</span><strong>{appointments.length}</strong></article>
@@ -281,7 +292,7 @@ function Dashboard() {
       <button className={tab === "services" ? "active" : ""} onClick={() => setTab("services")}>Services & prices</button>
       <button className={tab === "styleFeed" ? "active" : ""} onClick={() => setTab("styleFeed")}>John&apos;s style feed · photos &amp; videos</button>
     </nav>
-    {loading ? <section className="adminPanel"><p>Loading JTS operations…</p></section> : tab === "appointments" ? <section className="adminPanel">
+    {loading ? <section className="adminPanel"><p>Loading JTS operations…</p></section> : tab === "appointments" ? <section id="admin-appointments" className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">THE APPOINTMENT QUEUE</span><h2>Customer requests</h2></div><span>{openAppointments.length} open</span></div>
       {appointments.length === 0 ? <div className="emptyState"><h3>No appointment requests yet</h3><p>New requests submitted through the JTS booking form will appear here.</p></div> : <div className="queue">
         {appointments.map(item => <article className="queueRow" key={item.id}>
@@ -304,7 +315,7 @@ function Dashboard() {
           </div>
         </article>)}
       </div>}
-    </section> : tab === "availability" ? <section className="adminPanel">
+    </section> : tab === "availability" ? <section id="admin-availability" className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">CUSTOMER BOOKING CALENDAR</span><h2>Manage unavailable dates</h2></div><span>{unavailableDates.length} closed date{unavailableDates.length===1?"":"s"}</span></div>
       <p className="availabilityIntro">Dates you add here are blocked in the customer calendar. Customers can see the closure reason and the next nearest date they can request. This does not cancel or change existing requests already in the appointment queue.</p>
       <form className="availabilityForm" onSubmit={markDateUnavailable}>
@@ -315,7 +326,7 @@ function Dashboard() {
       {availabilityNotice && <p className="notice" role="status">{availabilityNotice}</p>}
       {unavailableDates.length===0 ? <div className="emptyState"><h3>No unavailable dates recorded</h3><p>All future dates remain available to request, subject to John confirming the exact time.</p></div> : <div className="queue">{unavailableDates.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">UNAVAILABLE DATE</span><h3>{dateText(item.date+"T12:00:00+02:00")}</h3><p>{item.reason}</p><small>Customers cannot select this date in the booking calendar.</small></div><div className="queueActions"><button type="button" className="button buttonLight" onClick={()=>void reopenDate(item)}>Reopen date</button></div></article>)}</div>}
       <p className="availabilityFootnote">The calendar controls which dates can be requested; it does not auto-confirm time slots. Appointment requests still need your review and confirmation.</p>
-    </section> : tab === "services" ? <section className="adminPanel">
+    </section> : tab === "services" ? <section id="admin-services" className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">PUBLIC CATALOGUE</span><h2>Services & prices</h2></div><span>{services.length} listed</span></div>
       <p>These records drive the public service cards, booking choices and customer account inspiration. Add photos/videos directly to each service.</p>
       <div className="adminMediaShortcut">
@@ -334,7 +345,7 @@ function Dashboard() {
         <div className="queueActions"><button className="button buttonPrimary" type="submit" disabled={mediaUploading}>{mediaUploading ? "Uploading media…" : "Save service & media"}</button><button className="button buttonLight" type="button" onClick={()=>setServiceDraft(null)}>Cancel</button></div>
       </form> : <button className="button buttonLight" type="button" onClick={()=>setServiceDraft({id:"",name:"",price:0,display:"P0",detail:"",note:"",tag:"THE SERVICE",media:[]})}>Add service</button>}
       {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small><small>{item.media?.length || 0} service media item{item.media?.length === 1 ? "" : "s"} · shown on public catalogue and customer account</small>{!!item.media?.length && <div className="adminServiceMediaGrid adminServiceMediaGridCompact">{item.media.map(media=><div className="adminServiceMediaPreview" key={media.url}>{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" /> : <img src={media.url} alt={media.alt || item.name} />}</div>)}</div>}</div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item,media:item.media || []})}>Edit service &amp; media</button><button className="button buttonLight" type="button" onClick={()=>void removeService(item)}>Delete</button></div></article>)}</div>}
-    </section> : tab === "styleFeed" ? <section className="adminPanel">
+    </section> : tab === "styleFeed" ? <section id="admin-style-feed" className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">JOHN&apos;S EDIT</span><h2>Public style posts</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       <p>Manage the looks customers see on the landing page and style feed. Upload finished cuts, colour transformations and short salon videos, or paste a public media URL. Only published posts appear publicly.</p>
       {styleDraft ? <form className="adminForm" onSubmit={saveStylePost}>
@@ -366,6 +377,7 @@ function Dashboard() {
         </article>)}
       </div>}
     </section>}
+    <JtsStyleGuide onNavigateAdmin={setTab} />
     <p style={{ color: "#938c82", fontSize: ".8rem", marginTop: 18 }}>A request is not confirmed until John confirms the slot and deposit. Customer photos and reviews are public only while published.</p>
   </div></main>;
 }
