@@ -252,7 +252,7 @@ function Dashboard() {
       <button className={tab === "availability" ? "active" : ""} onClick={() => setTab("availability")}>Date availability</button>
       <button className={tab === "reviews" ? "active" : ""} onClick={() => setTab("reviews")}>Customer looks & reviews</button>
       <button className={tab === "services" ? "active" : ""} onClick={() => setTab("services")}>Services & prices</button>
-      <button className={tab === "styleFeed" ? "active" : ""} onClick={() => setTab("styleFeed")}>John&apos;s style feed</button>
+      <button className={tab === "styleFeed" ? "active" : ""} onClick={() => setTab("styleFeed")}>John&apos;s style feed · photos &amp; videos</button>
     </nav>
     {loading ? <section className="adminPanel"><p>Loading JTS operations…</p></section> : tab === "appointments" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">THE APPOINTMENT QUEUE</span><h2>Customer requests</h2></div><span>{openAppointments.length} open</span></div>
@@ -291,6 +291,10 @@ function Dashboard() {
     </section> : tab === "services" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">PUBLIC CATALOGUE</span><h2>Services & prices</h2></div><span>{services.length} listed</span></div>
       <p>These records drive both the public home-page service cards and the customer booking choices. Changes appear on the public site when saved.</p>
+      <div className="adminMediaShortcut">
+        <div><strong>Want to add a photo or video of a finished look?</strong><p>Media uploads are managed in John&apos;s style feed. Open it to upload a photo/video, add a caption and publish it to the customer-facing page.</p></div>
+        <button className="button buttonPrimary" type="button" onClick={() => { setServiceDraft(null); setStyleDraft(null); setTab("styleFeed"); }}>Open photo &amp; video uploads</button>
+      </div>
       {serviceDraft ? <form className="adminForm" onSubmit={saveService}>
         <label>Service name<input value={serviceDraft.name} onChange={event=>setServiceDraft({...serviceDraft,name:event.target.value})} maxLength={80} required /></label>
         <div className="adminTwoCol"><label>Price (BWP)<input type="number" min="0" step="1" value={serviceDraft.price} onChange={event=>setServiceDraft({...serviceDraft,price:Number(event.target.value)})} required /></label><label>Optional maximum price<input type="number" min={serviceDraft.price} step="1" value={serviceDraft.maxPrice ?? ""} onChange={event=>setServiceDraft({...serviceDraft,maxPrice:event.target.value===""?undefined:Number(event.target.value)})} /></label></div>
@@ -305,7 +309,7 @@ function Dashboard() {
       {styleDraft ? <form className="adminForm" onSubmit={saveStylePost}>
         <label>Post title<input value={styleDraft.title} onChange={event=>setStyleDraft({...styleDraft,title:event.target.value})} maxLength={100} required /></label>
         <label>Media type<select value={styleDraft.mediaType || "image"} onChange={event=>setStyleDraft({...styleDraft,mediaType:event.target.value as "image" | "video"})}><option value="image">Photo / finished look</option><option value="video">Video / process clip</option></select></label>
-        <label>Upload {styleDraft.mediaType === "video" ? "video" : "photo"}<input type="file" accept={styleDraft.mediaType === "video" ? "video/mp4,video/webm,video/quicktime" : "image/*"} disabled={mediaUploading} onChange={event=>{const file=event.target.files?.[0];if(file)void uploadStyleMedia(file);event.currentTarget.value="";}} /> <small>{styleDraft.mediaType === "video" ? "MP4/WebM, up to 8 MB." : "Browser-supported images, up to 4 MB."} Uploads are stored by UploadThing.</small></label>
+        <label className="adminUploadField">Upload {styleDraft.mediaType === "video" ? "video" : "photo"}<input type="file" accept={styleDraft.mediaType === "video" ? "video/mp4,video/webm,video/quicktime" : "image/*"} disabled={mediaUploading} onChange={event=>{const file=event.target.files?.[0];if(file)void uploadStyleMedia(file);event.currentTarget.value="";}} /> <small>{styleDraft.mediaType === "video" ? "MP4/WebM, up to 8 MB." : "Browser-supported images, up to 4 MB."} Uploads are stored by UploadThing.</small></label>
         <label>Or paste public media URL<input type="url" value={styleDraft.mediaUrl || styleDraft.imageUrl} onChange={event=>setStyleDraft({...styleDraft,mediaUrl:event.target.value,imageUrl:event.target.value})} placeholder="https://…" required /></label>
         {(styleDraft.mediaUrl || styleDraft.imageUrl) && <div style={{maxWidth:260,margin:"8px 0"}}>{styleDraft.mediaType === "video" ? <video src={styleDraft.mediaUrl || styleDraft.imageUrl} controls playsInline style={{width:"100%",borderRadius:12}} /> : <img src={styleDraft.mediaUrl || styleDraft.imageUrl} alt="Style post preview" style={{width:"100%",maxHeight:300,objectFit:"cover",borderRadius:12}} />}</div>}
         <label>Caption<textarea value={styleDraft.caption} onChange={event=>setStyleDraft({...styleDraft,caption:event.target.value})} maxLength={700} rows={3} /></label>
