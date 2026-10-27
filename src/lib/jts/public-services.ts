@@ -1,3 +1,5 @@
+export type PublicServiceMedia = { url: string; type: "image" | "video"; alt?: string };
+
 export type PublicService = {
   id: string;
   name: string;
@@ -7,6 +9,7 @@ export type PublicService = {
   detail: string;
   note: string;
   tag: string;
+  media?: PublicServiceMedia[];
 };
 
 export const DEFAULT_PUBLIC_SERVICES: PublicService[] = [

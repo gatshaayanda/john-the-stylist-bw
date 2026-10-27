@@ -6,7 +6,7 @@ import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubsc
 import AdminGate from "@/app/admin/admin-gate";
 import { auth, db } from "@/lib/firebase/client";
 import { uploadFiles } from "@/lib/uploadthing";
-import { DEFAULT_PUBLIC_SERVICES, normalizePublicServices, type PublicService } from "@/lib/jts/public-services";
+import { DEFAULT_PUBLIC_SERVICES, normalizePublicServices, type PublicService, type PublicServiceMedia } from "@/lib/jts/public-services";
 
 type Appointment = {
   id: string;
@@ -125,6 +125,33 @@ function Dashboard() {
     return () => { stopServices(); stopStylePosts(); };
   }, []);
 
+  async function uploadServiceMedia(file: File) {
+    if (!serviceDraft) return;
+    const isVideo = file.type.startsWith("video/");
+    const maxBytes = isVideo ? 8 * 1024 * 1024 : 4 * 1024 * 1024;
+    if ((!isVideo && !file.type.startsWith("image/")) || file.size > maxBytes) {
+      setNotice(isVideo ? "Choose an MP4/WebM video no larger than 8 MB." : "Choose an image no larger than 4 MB."); return;
+    }
+    const currentUser = auth.currentUser;
+    if (!currentUser) { setNotice("Your admin session expired. Sign in again before uploading."); return; }
+    setMediaUploading(true); setNotice("");
+    try {
+      const token = await currentUser.getIdToken();
+      const uploaded = await uploadFiles("adminStyleMedia", { files: [file], headers: { Authorization: `Bearer ${token}` } });
+      const url = uploaded[0]?.ufsUrl || uploaded[0]?.url;
+      if (!url) throw new Error("Upload completed without a public media URL.");
+      const media: PublicServiceMedia = { url, type: isVideo ? "video" : "image", alt: serviceDraft.name.trim() || "JTS service look" };
+      setServiceDraft(current => current ? { ...current, media: [...(current.media || []), media] } : current);
+      setNotice("Service media uploaded. Save the service to publish it.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Media upload failed. Check UploadThing configuration and try again.");
+    } finally { setMediaUploading(false); }
+  }
+
+  function removeServiceMedia(index: number) {
+    setServiceDraft(current => current ? { ...current, media: (current.media || []).filter((_, itemIndex) => itemIndex !== index) } : current);
+  }
+
   async function saveService(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!serviceDraft || !serviceDraft.name.trim()) return;
@@ -136,7 +163,7 @@ function Dashboard() {
     const name = serviceDraft.name.trim();
     const id = serviceDraft.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const display = maxPrice ? "P" + price + "–P" + maxPrice : "P" + price;
-    const nextService: PublicService = { id, name, price, display, note: serviceDraft.note.trim(), detail: serviceDraft.detail.trim(), tag: serviceDraft.tag.trim() || "THE SERVICE", ...(maxPrice !== undefined ? { maxPrice } : {}) };
+    const nextService: PublicService = { id, name, price, display, note: serviceDraft.note.trim(), detail: serviceDraft.detail.trim(), tag: serviceDraft.tag.trim() || "THE SERVICE", media: serviceDraft.media || [], ...(maxPrice !== undefined ? { maxPrice } : {}) };
     const next = services.some(item => item.id === id) ? services.map(item => item.id === id ? nextService : item) : [...services, nextService];
     try {
       await setDoc(doc(db, "businessSettings", "publicServices"), { services: next, updatedAt: new Date().toISOString() }, { merge: true });
@@ -290,7 +317,7 @@ function Dashboard() {
       <p className="availabilityFootnote">The calendar controls which dates can be requested; it does not auto-confirm time slots. Appointment requests still need your review and confirmation.</p>
     </section> : tab === "services" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">PUBLIC CATALOGUE</span><h2>Services & prices</h2></div><span>{services.length} listed</span></div>
-      <p>These records drive both the public home-page service cards and the customer booking choices. Changes appear on the public site when saved.</p>
+      <p>These records drive the public service cards, booking choices and customer account inspiration. Add photos/videos directly to each service.</p>
       <div className="adminMediaShortcut">
         <div><strong>Want to add a photo or video of a finished look?</strong><p>Media uploads are managed in John&apos;s style feed. Open it to upload a photo/video, add a caption and publish it to the customer-facing page.</p></div>
         <button className="button buttonPrimary" type="button" onClick={() => setTab("styleFeed")}>Open photo &amp; video uploads</button>
@@ -300,9 +327,13 @@ function Dashboard() {
         <div className="adminTwoCol"><label>Price (BWP)<input type="number" min="0" step="1" value={serviceDraft.price} onChange={event=>setServiceDraft({...serviceDraft,price:Number(event.target.value)})} required /></label><label>Optional maximum price<input type="number" min={serviceDraft.price} step="1" value={serviceDraft.maxPrice ?? ""} onChange={event=>setServiceDraft({...serviceDraft,maxPrice:event.target.value===""?undefined:Number(event.target.value)})} /></label></div>
         <label>Short public description<input value={serviceDraft.note} onChange={event=>setServiceDraft({...serviceDraft,note:event.target.value})} maxLength={180} required /></label>
         <div className="adminTwoCol"><label>Booking detail<input value={serviceDraft.detail} onChange={event=>setServiceDraft({...serviceDraft,detail:event.target.value})} maxLength={80} required /></label><label>Card label<input value={serviceDraft.tag} onChange={event=>setServiceDraft({...serviceDraft,tag:event.target.value})} maxLength={40} required /></label></div>
-        <div className="queueActions"><button className="button buttonPrimary" type="submit">Save service</button><button className="button buttonLight" type="button" onClick={()=>setServiceDraft(null)}>Cancel</button></div>
-      </form> : <button className="button buttonLight" type="button" onClick={()=>setServiceDraft({id:"",name:"",price:0,display:"P0",detail:"",note:"",tag:"THE SERVICE"})}>Add service</button>}
-      {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeService(item)}>Delete</button></div></article>)}</div>}
+        <div className="adminServiceMedia"><div><strong>Service photos &amp; videos</strong><p>Upload finished results or short process clips for this specific service. They appear publicly after you save.</p></div>
+          <label className="adminUploadField">Add photo or video<input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" disabled={mediaUploading} onChange={event=>{const file=event.target.files?.[0];if(file)void uploadServiceMedia(file);event.currentTarget.value="";}} /><small>Images up to 4 MB · videos up to 8 MB. UploadThing stores the media.</small></label>
+          {(serviceDraft.media || []).length > 0 && <div className="adminServiceMediaGrid">{(serviceDraft.media || []).map((media,index)=><article key={media.url}><div className="adminServiceMediaPreview">{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" /> : <img src={media.url} alt={media.alt || serviceDraft.name} />}</div><button type="button" className="button buttonLight" onClick={()=>removeServiceMedia(index)}>Remove media</button></article>)}</div>}
+        </div>
+        <div className="queueActions"><button className="button buttonPrimary" type="submit" disabled={mediaUploading}>{mediaUploading ? "Uploading media…" : "Save service & media"}</button><button className="button buttonLight" type="button" onClick={()=>setServiceDraft(null)}>Cancel</button></div>
+      </form> : <button className="button buttonLight" type="button" onClick={()=>setServiceDraft({id:"",name:"",price:0,display:"P0",detail:"",note:"",tag:"THE SERVICE",media:[]})}>Add service</button>}
+      {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small><small>{item.media?.length || 0} service media item{item.media?.length === 1 ? "" : "s"} · shown on public catalogue and customer account</small>{!!item.media?.length && <div className="adminServiceMediaGrid adminServiceMediaGridCompact">{item.media.map(media=><div className="adminServiceMediaPreview" key={media.url}>{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" /> : <img src={media.url} alt={media.alt || item.name} />}</div>)}</div>}</div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item,media:item.media || []})}>Edit service &amp; media</button><button className="button buttonLight" type="button" onClick={()=>void removeService(item)}>Delete</button></div></article>)}</div>}
     </section> : tab === "styleFeed" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">JOHN&apos;S EDIT</span><h2>Public style posts</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       <p>Manage the looks customers see on the landing page and style feed. Upload finished cuts, colour transformations and short salon videos, or paste a public media URL. Only published posts appear publicly.</p>
