@@ -158,7 +158,8 @@ function Dashboard() {
       if (styleDraft.id) await updateDoc(doc(db, "styleFeed", styleDraft.id), payload);
       else {
         const ref = doc(collection(db, "styleFeed"));
-        await setDoc(ref, { ...payload, createdAt: now, createdBy: auth.currentUser?.uid });
+        const { updatedAt: _updatedAt, ...newPost } = payload;
+        await setDoc(ref, { ...newPost, createdAt: now, createdBy: auth.currentUser?.uid });
       }
       setStyleDraft(null);
       setNotice(styleDraft.published ? "John's style post saved and published to the public feed." : "Style post saved as a draft.");
