@@ -83,8 +83,8 @@
 .jtsGuideIntro strong{color:#f2dfa5}
 .jtsGuideIntro p{margin:6px 0 0;color:#b9b6ad;font-size:.88rem;line-height:1.5}
 .jtsGuideActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 18px 14px}
-.jtsGuideActions a{display:flex;align-items:center;min-height:42px;padding:10px;border:1px solid #37332a;border-radius:9px;color:#e6d6a4;font-size:.8rem;font-weight:750;text-decoration:none}
-.jtsGuideActions a:hover{border-color:#a1843e;background:#201b10}
+.jtsGuideActions a,.jtsGuideActions button{display:flex;align-items:center;min-height:42px;padding:10px;border:1px solid #37332a;border-radius:9px;background:transparent;color:#e6d6a4;font-family:inherit;font-size:.8rem;font-weight:750;text-align:left;text-decoration:none;cursor:pointer}
+.jtsGuideActions a:hover,.jtsGuideActions button:hover{border-color:#a1843e;background:#201b10}
 .jtsGuideThread{display:flex;flex-direction:column;gap:8px;overflow:auto;padding:0 18px}
 .jtsGuideMessage{max-width:92%;margin:0;padding:10px 12px;border-radius:12px;font-size:.85rem;line-height:1.5}
 .jtsGuideMessage-guide{align-self:flex-start;background:#242117;color:#e4dfd0}
