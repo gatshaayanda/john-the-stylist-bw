@@ -261,7 +261,7 @@ function Dashboard() {
       {availabilityNotice && <p className="notice" role="status">{availabilityNotice}</p>}
       {unavailableDates.length===0 ? <div className="emptyState"><h3>No unavailable dates recorded</h3><p>All future dates remain available to request, subject to John confirming the exact time.</p></div> : <div className="queue">{unavailableDates.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">UNAVAILABLE DATE</span><h3>{dateText(item.date+"T12:00:00+02:00")}</h3><p>{item.reason}</p><small>Customers cannot select this date in the booking calendar.</small></div><div className="queueActions"><button type="button" className="button buttonLight" onClick={()=>void reopenDate(item)}>Reopen date</button></div></article>)}</div>}
       <p className="availabilityFootnote">The calendar controls which dates can be requested; it does not auto-confirm time slots. Appointment requests still need your review and confirmation.</p>
-    </section> : <section className="adminPanel">
+    </section> : tab === "services" ? <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">PUBLIC CATALOGUE</span><h2>Services & prices</h2></div><span>{services.length} listed</span></div>
       <p>These records drive both the public home-page service cards and the customer booking choices. Changes appear on the public site when saved.</p>
       {serviceDraft ? <form className="adminForm" onSubmit={saveService}>
