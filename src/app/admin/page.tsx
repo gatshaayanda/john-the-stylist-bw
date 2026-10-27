@@ -48,14 +48,18 @@ const minBookableDate = () => { const parts = new Intl.DateTimeFormat("en-GB", {
 
 function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [reviews, setReviews] = useState<CustomerReview[]>([]);\n  const [services, setServices] = useState<PublicService[]>(DEFAULT_PUBLIC_SERVICES);\n  const [stylePosts, setStylePosts] = useState<OwnerStylePost[]>([]);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
+  const [services, setServices] = useState<PublicService[]>(DEFAULT_PUBLIC_SERVICES);
+  const [stylePosts, setStylePosts] = useState<OwnerStylePost[]>([]);
   const [tab, setTab] = useState<"appointments" | "availability" | "reviews" | "services" | "styleFeed">("appointments");
   const [unavailableDates, setUnavailableDates] = useState<Array<{id:string;date:string;reason:string;updatedAt?:string}>>([]);
   const [closureDate, setClosureDate] = useState("");
   const [closureReason, setClosureReason] = useState("");
   const [availabilityNotice, setAvailabilityNotice] = useState("");
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState("");\n  const [serviceDraft, setServiceDraft] = useState<PublicService | null>(null);\n  const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
+  const [notice, setNotice] = useState("");
+  const [serviceDraft, setServiceDraft] = useState<PublicService | null>(null);
+  const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
 
   useEffect(() => {
     let ready = 0;
