@@ -2,9 +2,12 @@
 import Link from "next/link";
 import { GoogleAuthProvider, linkWithPopup, onAuthStateChanged, signInAnonymously, signInWithPopup, type User } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
+import { track } from "@vercel/analytics";
 import { auth } from "@/lib/firebase/client";
 import StyleStudio from "@/app/style-studio";
 import CustomerStyleInspiration from "@/components/customer-style-inspiration";
+import JtsWeather from "@/components/JtsWeather";
+import JtsStyleGuide from "@/components/JtsStyleGuide";
 import { getCustomerOrders, subscribeToCustomerOrders, type FoodOrder } from "@/lib/firebase/data";
 
 const INITIAL_BOOKINGS_VISIBLE = 3;
@@ -73,6 +76,12 @@ export default function AccountPage() {
   const userId = user?.uid;
 
   useEffect(() => {
+    if (!ready) return;
+    track("jts_account_viewed", { session_type: !user ? "no_session" : user.isAnonymous ? "guest" : "connected" });
+  }, [ready, user]);
+
+
+  useEffect(() => {
     if (!userId) return;
     return subscribeToCustomerOrders(
       userId,
@@ -104,12 +113,15 @@ export default function AccountPage() {
         const result = await linkWithPopup(current, provider);
         setUser(result.user);
         setMessage("Google is connected to this booking identity. Your existing guest booking history stays with this account.");
+        track("jts_google_account_connected", { method: "guest_link" });
       } else if (current) {
         setMessage("Your JTS account is already connected. Keep using this Google sign-in when you return.");
+        track("jts_google_account_connected", { method: "already_connected" });
       } else {
         const result = await signInWithPopup(auth, provider);
         setUser(result.user);
         setMessage("You're signed in with Google. New bookings can be saved to this account.");
+        track("jts_google_account_connected", { method: "new_sign_in" });
       }
     } catch (cause) {
       const code = firebaseErrorCode(cause);
@@ -141,6 +153,13 @@ export default function AccountPage() {
   return <main className="jtsBookingPage jtsStyleAccount"><div className="jtsContainer jtsBookingWrap">
     <div className="jtsBookingTop"><Link href="/" className="jtsBack">← JTS Styles</Link><div className="jtsAccountTopLinks"><Link href="/feed" className="jtsGhost">Style feed ↗</Link><Link href="/order" className="jtsGhost">Book appointment</Link></div></div>
 
+    <section className="jtsPersonalWelcome" aria-labelledby="jts-personal-welcome-title">
+      <span className="jtsEyebrow">YOUR JTS STYLE JOURNEY</span>
+      <h2 id="jts-personal-welcome-title">{(() => { const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Gaborone", hour: "2-digit", hourCycle: "h23" }).format(new Date())); const time = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"; const firstName = user && !user.isAnonymous ? user.displayName?.trim().split(/\s+/)[0] : ""; return firstName ? time + ", " + firstName + "." : "Dumela. Your next look starts here."; })()}</h2>
+      <p>{nextOrder ? "You have a booking request coming up. Check its status below, or browse a fresh style idea while you plan." : orders.length ? "Your booking history and style references are together here, ready whenever you want to plan your next visit." : "Explore John’s work, check the week’s forecast, and request a day that fits your plans. No pressure to book before you’re ready."}</p>
+      <div className="jtsPersonalWelcomeActions"><Link href="/order" className="jtsButton jtsButtonGold" onClick={() => track("jts_account_primary_action", { action: "request_appointment" })}>Plan my next look ↗</Link><Link href="/feed" className="jtsGhost" onClick={() => track("jts_account_primary_action", { action: "browse_style_feed" })}>Find inspiration</Link></div>
+    </section>
+
     <section className="jtsStylePanel jtsAccountUtilityAuth" aria-labelledby="account-connection-title">
       <div className="jtsAccountUtilityHeading"><span className="jtsEyebrow">01 · ACCOUNT ACCESS</span><span className={user && !user.isAnonymous ? "jtsStyleConnected" : "jtsAccountGuestBadge"}>{user && !user.isAnonymous ? "✓ Connected" : user ? "Guest session" : "Optional"}</span></div>
       <h1 id="account-connection-title">Your account.<br /><em>Your history.</em></h1>
@@ -151,6 +170,8 @@ export default function AccountPage() {
           : <><p>Sign in with Google to save new bookings to your account. If you already have a guest booking session on this device, it will be preserved when it is available to link.</p><button className="googleSignInButton jtsAccountGoogleButton" type="button" onClick={() => void connectGoogle()} disabled={!ready || busy}><GoogleBrandMark />{busy ? "Connecting…" : "Continue with Google"}</button><div className="jtsAccountAuthFallback"><span>Prefer not to sign in?</span><button type="button" className="jtsStyleTextLink" onClick={() => void startGuest()} disabled={!ready || busy}>Open guest booking history</button></div></>}
       {(error || message) && <p className={error ? "jtsFormError" : "jtsStyleStatus"} role="status" aria-live="polite">{error || message}</p>}
     </section>
+
+    <JtsWeather />
 
     <section className="jtsAccountNotifications" aria-labelledby="account-notifications-title">
       <div className="jtsAccountUtilityHeading"><div><span className="jtsEyebrow">02 · NOTIFICATIONS & UPDATES</span><h2 id="account-notifications-title">Your latest activity.</h2></div><span className="jtsAccountLiveDot">Live when connected</span></div>
@@ -177,6 +198,7 @@ export default function AccountPage() {
     <section className="jtsStyleFeedInvite"><div><span className="jtsEyebrow">INSPIRATION BETWEEN VISITS</span><h2>See what’s next.</h2><p>Explore John’s work, share your own photo and keep a record of how happy you are with each look.</p></div><Link href="/feed" className="jtsButton jtsButtonGold">Share a look & review ↗</Link></section>
 
     <CustomerStyleInspiration />
+    <JtsStyleGuide />
 
     <section className="jtsAccountGame"><section className="jtsAccountStudioIntro"><span className="jtsEyebrow">OPTIONAL · STYLE STUDIO</span><h2>Try a new direction.</h2><p>A creative playground when you&apos;re in the mood to experiment. Your bookings and account tools stay first.</p></section><StyleStudio /></section>
     <div className="jtsAccountNote"><strong>Appointment truth:</strong> submitting a request does not confirm the slot or mean a deposit has been received. John confirms the appointment and deposit separately. For help, use your JTS booking history and appointment request details.</div>
