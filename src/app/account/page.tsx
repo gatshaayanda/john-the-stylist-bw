@@ -4,6 +4,7 @@ import { GoogleAuthProvider, linkWithPopup, onAuthStateChanged, signInAnonymousl
 import { useEffect, useMemo, useState } from "react";
 import { auth } from "@/lib/firebase/client";
 import StyleStudio from "@/app/style-studio";
+import CustomerStyleInspiration from "@/components/customer-style-inspiration";
 import { getCustomerOrders, subscribeToCustomerOrders, type FoodOrder } from "@/lib/firebase/data";
 
 const INITIAL_BOOKINGS_VISIBLE = 3;
@@ -174,6 +175,8 @@ export default function AccountPage() {
     </section>
 
     <section className="jtsStyleFeedInvite"><div><span className="jtsEyebrow">INSPIRATION BETWEEN VISITS</span><h2>See what’s next.</h2><p>Explore John’s work, share your own photo and keep a record of how happy you are with each look.</p></div><Link href="/feed" className="jtsButton jtsButtonGold">Share a look & review ↗</Link></section>
+
+    <CustomerStyleInspiration />
 
     <section className="jtsAccountGame"><section className="jtsAccountStudioIntro"><span className="jtsEyebrow">OPTIONAL · STYLE STUDIO</span><h2>Try a new direction.</h2><p>A creative playground when you&apos;re in the mood to experiment. Your bookings and account tools stay first.</p></section><StyleStudio /></section>
     <div className="jtsAccountNote"><strong>Appointment truth:</strong> submitting a request does not confirm the slot or mean a deposit has been received. John confirms the appointment and deposit separately. For help, use your JTS booking history and appointment request details.</div>
