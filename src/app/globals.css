@@ -926,3 +926,18 @@ h1 em{font-style:normal;color:var(--boemo-gold);text-shadow:0 0 22px rgba(255,20
 .adminSignInError{overflow-wrap:anywhere;line-height:1.55}
 .adminSignInSecurity{margin:22px 0 0;padding-top:15px;border-top:1px solid #34302a;color:#9e9689;font-size:.72rem;line-height:1.5;text-align:center}
 @media(max-width:520px){.adminSignInPage{padding:18px 0 30px}.adminSignInShell{width:calc(100% - 20px)}.adminSignInPanel{padding:22px 18px}.adminSignInBrand{margin-bottom:23px}.adminSignInBrand img{width:54px;height:54px}}
+
+
+/* JTS owner-managed landing-page style edit */
+.jtsStyleLanding{padding:76px 0;background:#100f12;border-top:1px solid #312a31;border-bottom:1px solid #312a31}
+.jtsStyleLandingGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:30px}
+.jtsStyleLandingCard{min-width:0;background:#19161b;border:1px solid #39303b;border-radius:14px;overflow:hidden}
+.jtsStyleLandingMedia{aspect-ratio:4/5;background:#211b23;overflow:hidden}
+.jtsStyleLandingMedia img,.jtsStyleLandingMedia video{display:block;width:100%;height:100%;object-fit:cover}
+.jtsStyleLandingCopy{padding:18px}
+.jtsStyleLandingCopy h3{font-size:1.35rem;line-height:1.05;margin:10px 0}
+.jtsStyleLandingCopy p{color:#c9bdc9;line-height:1.6;font-size:.92rem}
+.jtsStyleLandingCopy>a,.jtsStyleLandingFooter>a{display:inline-flex;margin-top:8px;color:#f0c6ee;font-weight:800}
+.jtsStyleLandingFooter{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-top:22px;color:#c9bdc9;font-size:.9rem}
+@media(max-width:760px){.jtsStyleLanding{padding:52px 0}.jtsStyleLandingGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.jtsStyleLandingCopy{padding:13px}.jtsStyleLandingCopy h3{font-size:1.1rem}}
+@media(max-width:480px){.jtsStyleLandingGrid{grid-template-columns:1fr}.jtsStyleLandingMedia{aspect-ratio:5/4}}
