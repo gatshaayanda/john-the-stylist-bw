@@ -34,13 +34,13 @@ export default function JtsStyleGuide({ onNavigateAdmin }: { onNavigateAdmin?: (
 
   if (!admin && !account) return null;
   function answer(text: string) {
-    setMessages(current => [...current, { id: Date.now() + Math.random(), from: "guide", text }].slice(-8));
+    setMessages(current => [...current, { id: Date.now() + Math.random(), from: "guide" as const, text }].slice(-8));
   }
   function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = input.trim();
     if (!text) return;
-    setMessages(current => [...current, { id: Date.now(), from: "you", text }].slice(-8));
+    setMessages(current => [...current, { id: Date.now(), from: "you" as const, text }].slice(-8));
     setInput("");
     const query = text.toLowerCase();
     if (/weather|rain|hot|wind|sun|forecast/.test(query)) answer("The Gaborone forecast gives current conditions and the next few days. It can help you plan your visit, but it does not show appointment availability. John confirms the requested slot.");
