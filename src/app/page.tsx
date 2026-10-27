@@ -30,7 +30,7 @@ export default function Home() {
           <a href="#booking">Before you book</a>
         </nav>
         <div className="jtsEditHeaderActions">
-          <Link href="/account" className="jtsEditTextLink">My bookings ↗</Link>
+          <Link href="/account" className="jtsEditTextLink">My JTS account ↗</Link>
         </div>
       </div>
     </header>
@@ -53,6 +53,17 @@ export default function Home() {
           <div className="jtsEditArtSide">CUT · COLOUR · CHARACTER · CUT · COLOUR · CHARACTER ·</div>
           <div className="jtsEditArtBottom"><span>JOHN THE STYLIST BW</span><span>GABORONE, BOTSWANA</span></div>
         </div>
+      </div>
+    </section>
+
+    <section className="jtsEditAccountAccess" aria-label="Customer account shortcut">
+      <div className="jtsEditContainer jtsEditAccountAccessInner">
+        <div>
+          <span className="jtsEditEyebrow">ALREADY BOOKED WITH JTS?</span>
+          <h2>Your JTS account.</h2>
+          <p>Return to your appointment requests, booking updates, history and customer looks.</p>
+        </div>
+        <Link href="/account" className="jtsEditAccountLink">Open my account <span>↗</span></Link>
       </div>
     </section>
 
@@ -122,7 +133,7 @@ export default function Home() {
     <footer className="jtsEditFooter">
       <div className="jtsEditContainer">
         <div className="jtsEditFooterMain"><Logo /><p>Beauty · Colour · Cuts · Barbering<br />Gaborone, Botswana</p></div>
-        <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My bookings</Link><Link href="/admin" className="jtsAdminAccessLink" aria-label="Admin login">admin</Link></div></div>
+        <div className="jtsEditFooterBottom"><span>© JTS STYLES · JOHN THE STYLIST BW</span><div><Link href="/account">My JTS account</Link><Link href="/admin" className="jtsAdminAccessLink" aria-label="Admin login">admin</Link></div></div>
       </div>
     </footer>
     <div className="jtsMobileCta jtsEditMobileCta"><Link href="/order" className="jtsEditPrimary">Book an appointment <span>↗</span></Link></div>
