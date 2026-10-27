@@ -134,7 +134,7 @@ function Dashboard() {
     const name = serviceDraft.name.trim();
     const id = serviceDraft.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const display = maxPrice ? "P" + price + "–P" + maxPrice : "P" + price;
-    const nextService: PublicService = { ...serviceDraft, id, name, price, maxPrice, display, note: serviceDraft.note.trim(), detail: serviceDraft.detail.trim(), tag: serviceDraft.tag.trim() || "THE SERVICE" };
+    const nextService: PublicService = { id, name, price, display, note: serviceDraft.note.trim(), detail: serviceDraft.detail.trim(), tag: serviceDraft.tag.trim() || "THE SERVICE", ...(maxPrice !== undefined ? { maxPrice } : {}) };
     const next = services.some(item => item.id === id) ? services.map(item => item.id === id ? nextService : item) : [...services, nextService];
     try {
       await setDoc(doc(db, "businessSettings", "publicServices"), { services: next, updatedAt: new Date().toISOString() }, { merge: true });
