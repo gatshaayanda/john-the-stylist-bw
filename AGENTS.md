@@ -521,3 +521,40 @@ The service catalogue is a single connected content workflow, not text-only pric
 - Keep the experience mobile-first, keyboard accessible and overflow-safe. Give upload controls visible labels, previews, per-item remove actions, empty states, save/error feedback and no hidden media-management requirement.
 - Do not seed or fabricate customer photos, before/after results, reviews or stylist portfolio assets. Only media deliberately uploaded by authorized staff should appear as John’s work.
 - Before completion, verify legacy service records normalize without media; add/edit/delete a service and its media; render photos and videos on homepage, full feed and customer account; confirm a customer cannot see drafts/unpublished media; confirm service selection in booking remains correct; run identity verification, TypeScript, lint and production build; inspect the final diff and exact Vercel commit/deployment state. Report physical-device QA separately.
+
+
+## Contextual customer accounts, forecast cues and engagement signals
+
+The account should feel like a personal JTS style studio, not a generic dashboard. Add useful context without replacing or interrupting booking, customer identity, appointment history, reviews, service CRUD, PWA installation, or notifications.
+
+### Customer account experience
+- Use a restrained, time-aware greeting and a first name only when Firebase Auth actually supplies a non-anonymous display name. Never infer a name from email, invent a customer history, or overuse their name.
+- Give one useful next step based on real state: existing upcoming request, existing booking history, or no bookings yet. Keep booking primary but allow customers to browse inspiration or continue as guests.
+- Use Gaborone weather and a short daily forecast as a planning cue. The forecast may say conditions look clearer, but must never imply that a date/time is available, reserve a slot, or promise weather. Always state that customers must request a date at least one day ahead and John separately confirms the slot and deposit.
+- The weather widget must have loading, failure/retry, timestamp/timezone, units, provider attribution and responsive behavior. If weather is unavailable, booking and account features remain usable.
+- Adapt the contextual guide pattern from Africhiko: a small dismissible/closable scripted helper with useful links and page-aware responses. It must clearly say it is scripted, not a live person/AI, and cannot send messages or change booking status. All shortcuts must lead to a real page/action. Do not create a second chatbot or fake AI service.
+- Keep the JTS editorial identity: black, metallic gold, white and silver. The guide must not cover booking controls or the protected installation UI. No auto-open modal or forced account creation.
+
+### Admin experience
+- Address authorized staff warmly as “Boss” by default, with time-aware morning/afternoon/evening wording. A verified non-anonymous display name may be used where appropriate.
+- Prioritize real Firestore-backed work: number of new appointment requests needing review and direct shortcuts to the appointment queue, unavailable dates, services/prices and style-feed publishing.
+- Do not invent urgency, booking availability, popularity or customer counts. Keep the request-vs-confirmation and deposit rules intact.
+
+### Weather API and licensing
+- The current demo implementation uses Open-Meteo's standard no-key forecast endpoint for Gaborone coordinates (-24.6282, 25.9231), timezone Africa/Gaborone, current temperature/apparent temperature/humidity/wind/weather code and a seven-day daily forecast.
+- Cache server responses for 30 minutes; never let forecast failures block booking.
+- Attribute the provider as “Weather data by Open-Meteo (CC BY 4.0)” and link users to the provider where appropriate. Official API documentation: https://open-meteo.com/en/docs and https://open-meteo.com/.
+- IMPORTANT LICENSING CHECKPOINT: Open-Meteo's standard no-key API is offered for non-commercial use. JTS is a real salon business and may be commercially operated; before using this no-key endpoint for commercial/live business use, confirm the licence is appropriate or switch the route to the licensed customer API with a server-only API key. Never imply the free non-commercial endpoint is cleared for commercial use.
+- Do not store precise customer location or ask for location permission just to show Gaborone salon weather. This is the salon-area forecast, not a customer/device or appointment-site forecast.
+
+### Engagement analytics and research-informed design
+- Reuse the existing Vercel Analytics integration. Track only coarse, non-identifying events such as account view (session category only), Google account connection method, weather booking CTA click, guide opened/shortcut selected, admin priority shortcut, and successfully updated appointment status.
+- Never send names, emails, phone numbers, auth UIDs, appointment IDs, free-text notes, media URLs, or any private customer data to analytics. Tracking must never block account, auth, booking or admin operations. Do not add an analytics vendor.
+- Research basis: Self-Determination Theory supports autonomy, competence and relatedness; use choice and helpful information rather than pressure or guilt. The digital behaviour-change research review warns against optimizing app engagement for its own sake. Action-planning research supports timely, relevant cues paired with a concrete next step, but does not guarantee that any one UI feature increases bookings.
+- References: Ryan & Deci, Self-Determination Theory (https://pubmed.ncbi.nlm.nih.gov/11392867/); Designing for Sustained Motivation: A Review of Self-Determination Theory in Behaviour Change Technologies (https://academic.oup.com/iwc/article/38/3/447/7760010); Gollwitzer & Sheeran, implementation intentions overview (https://www.socmot.uni-konstanz.de/publications/implementation-intentions-health-behavior-constructs-theory-measurement-and-research).
+
+### Protected behavior and verification
+- Preserve the existing PWA installation flow, embedded-browser gate, service-worker/cache behavior, Firebase Auth/session/linking, Firestore ownership/rules, appointment status semantics, deposit wording, service CRUD and customer media moderation. Do not refactor these as part of account engagement work.
+- Test weather route success, provider failure and retry; forecast dates use Gaborone local time and exclude today from future-day suggestions; CTA does not imply availability.
+- Test anonymous, connected Google customer, no-bookings, existing-history, upcoming-request and authorized admin states. Confirm only real names/data appear, guide links work, analytics properties contain no PII, and narrow mobile widths do not overflow.
+- Run npx tsc --noEmit, npm run lint, npm run verify:identity and npm run build. Report deployment readiness separately from code checks and report physical-device QA only when performed.
