@@ -293,7 +293,7 @@ function Dashboard() {
       <p>These records drive both the public home-page service cards and the customer booking choices. Changes appear on the public site when saved.</p>
       <div className="adminMediaShortcut">
         <div><strong>Want to add a photo or video of a finished look?</strong><p>Media uploads are managed in John&apos;s style feed. Open it to upload a photo/video, add a caption and publish it to the customer-facing page.</p></div>
-        <button className="button buttonPrimary" type="button" onClick={() => { setServiceDraft(null); setStyleDraft(null); setTab("styleFeed"); }}>Open photo &amp; video uploads</button>
+        <button className="button buttonPrimary" type="button" onClick={() => setTab("styleFeed")}>Open photo &amp; video uploads</button>
       </div>
       {serviceDraft ? <form className="adminForm" onSubmit={saveService}>
         <label>Service name<input value={serviceDraft.name} onChange={event=>setServiceDraft({...serviceDraft,name:event.target.value})} maxLength={80} required /></label>
