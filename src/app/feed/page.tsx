@@ -10,7 +10,9 @@ type StylePost = {
   id: string;
   title: string;
   caption: string;
-  imageUrl: string;
+  imageUrl?: string;
+  mediaUrl?: string;
+  mediaType?: "image" | "video";
   service?: string;
   tags?: string[];
   createdAt: string;
@@ -92,7 +94,7 @@ export default function JtsFeedPage() {
             </div>
           ) : <div className="jtsFeedGrid">{posts.map(post => (
             <article className="jtsFeedCard" key={post.kind + "-" + post.id}>
-              <div className="jtsFeedImage">{post.imageUrl ? <img src={post.imageUrl} alt={post.title || "JTS Styles look"} loading="lazy" /> : <span>JTS ✳</span>}</div>
+              <div className="jtsFeedImage">{(post.mediaUrl || post.imageUrl) ? ((post.mediaType === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(post.mediaUrl || post.imageUrl || "")) ? <video src={post.mediaUrl || post.imageUrl} controls playsInline preload="metadata" aria-label={post.title || "JTS style video"} /> : <img src={post.mediaUrl || post.imageUrl} alt={post.title || "JTS Styles look"} loading="lazy" />) : <span>JTS ✳</span>}</div>
               <div className="jtsFeedCardBody">
                 <span className="jtsJourneyEyebrow">{post.kind === "customer" ? "CUSTOMER LOOK" : (post.service || "JTS STYLE")}</span>
                 <h3>{post.title || "A JTS look"}</h3>
