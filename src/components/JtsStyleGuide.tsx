@@ -34,7 +34,8 @@ export default function JtsStyleGuide({ onNavigateAdmin }: { onNavigateAdmin?: (
 
   if (!admin && !account) return null;
   function answer(text: string) {
-    setMessages(current => [...current, { id: Date.now() + Math.random(), from: "guide" as const, text }].slice(-8));
+    const guideMessage: Message = { id: Date.now() + Math.random(), from: "guide", text };
+    setMessages(current => [...current, guideMessage].slice(-8));
   }
   function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
