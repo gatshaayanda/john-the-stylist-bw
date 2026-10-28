@@ -17,6 +17,13 @@ function friendlyAuthError(err:unknown){
  return err instanceof Error?err.message:"We could not sign you in. Please try Google sign-in again.";
 }
 
+async function provisionApprovedGoogleAdmin(user:User){
+ const token=await user.getIdToken();
+ const response=await fetch("/api/admin-session",{method:"POST",headers:{Authorization:`Bearer ${token}`},cache:"no-store"});
+ const payload=await response.json().catch(()=>({})) as {error?:string};
+ if(!response.ok) throw new Error(payload.error??"JTS Operations could not verify this admin account. Try the one-word Enter access or contact the owner.");
+}
+
 export default function AdminGate({children}:{children:React.ReactNode}){
  const[user,setUser]=useState<User|null>(null),[checking,setChecking]=useState(true),[authorized,setAuthorized]=useState(false),[offline,setOffline]=useState(false),[error,setError]=useState(""),[busy,setBusy]=useState(false),[accessWord,setAccessWord]=useState("");
 
@@ -29,8 +36,17 @@ export default function AdminGate({children}:{children:React.ReactNode}){
    setOffline(false);
    if(!next){setAuthorized(false);setChecking(false);return}
    if(next.emailVerified&&ADMIN_GOOGLE_EMAILS.has((next.email??"").trim().toLowerCase())){
-    setAuthorized(true);
-    setChecking(false);
+    setAuthorized(false);
+    void provisionApprovedGoogleAdmin(next).then(()=>{
+     setAuthorized(true);
+     setOffline(false);
+     setError("");
+     setChecking(false);
+    }).catch(err=>{
+     setAuthorized(false);
+     setError(friendlyAuthError(err));
+     setChecking(false);
+    });
     return;
    }
    stopAdmin=onSnapshot(doc(db,"admins",next.uid),snapshot=>{
@@ -57,8 +73,10 @@ export default function AdminGate({children}:{children:React.ReactNode}){
     await signOut(auth);
     return;
    }
+   await provisionApprovedGoogleAdmin(next);
    setAuthorized(true);
    setOffline(false);
+   setError("");
    return;
 
   }catch(err){setError(friendlyAuthError(err))}
