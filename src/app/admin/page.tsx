@@ -68,12 +68,20 @@ function Dashboard() {
   const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
   const [mediaUploading, setMediaUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const mediaUploadingRef = useRef(false);
   const serviceEditorOpen = Boolean(serviceDraft);
   const deleteDialogOpen = Boolean(deleteTarget);
 
   useEffect(() => { mediaUploadingRef.current = mediaUploading; }, [mediaUploading]);
+
+  // Success and informational notices fade after reading time; errors stay until dismissed.
+  useEffect(() => {
+    if (!notice || mediaUploading || /could not|not saved|failed|denied|expired|choose |exceeds|must be an image|enter a valid|temporarily unavailable|try again|no media was uploaded|upload failed|not be saved/i.test(notice)) return;
+    const timeout = window.setTimeout(() => setNotice(current => current === notice ? "" : current), 6500);
+    return () => window.clearTimeout(timeout);
+  }, [notice, mediaUploading]);
 
   useEffect(() => onAuthStateChanged(auth, user => setAdminName(user?.displayName?.trim().split(" ")[0] || "")), []);
 
@@ -198,11 +206,16 @@ function Dashboard() {
           ? file
           : new File([file], file.name, { type: inferredType });
         setUploadProgress("Uploading " + (index + 1) + " of " + accepted.length + ": " + file.name);
+        setUploadPercent(0);
         try {
           const token = await currentUser.getIdToken();
           const result = await uploadFiles("adminStyleMedia", {
             files: [uploadFile],
             headers: { Authorization: `Bearer ${token}` },
+            uploadProgressGranularity: "fine",
+            onUploadProgress: ({ progress }: { file: string; progress: number }) => {
+              setUploadPercent(Math.max(0, Math.min(100, Math.round(progress))));
+            },
           });
           const url = result[0]?.ufsUrl || result[0]?.url;
           if (!url) throw new Error("UploadThing returned no public media URL.");
@@ -231,6 +244,7 @@ function Dashboard() {
     } finally {
       setMediaUploading(false);
       setUploadProgress("");
+      setUploadPercent(0);
     }
   }
 
@@ -277,16 +291,25 @@ function Dashboard() {
     const currentUser = auth.currentUser;
     if (!currentUser) { setNotice("Your admin session expired. Sign in again before uploading."); return; }
     setMediaUploading(true); setNotice("");
+    setUploadProgress("Uploading style media: " + file.name);
+    setUploadPercent(0);
     try {
       const token = await currentUser.getIdToken();
-      const uploaded = await uploadFiles("adminStyleMedia", { files: [file], headers: { Authorization: `Bearer ${token}` } });
+      const uploaded = await uploadFiles("adminStyleMedia", {
+        files: [file],
+        headers: { Authorization: `Bearer ${token}` },
+        uploadProgressGranularity: "fine",
+        onUploadProgress: ({ progress }: { file: string; progress: number }) => {
+          setUploadPercent(Math.max(0, Math.min(100, Math.round(progress))));
+        },
+      });
       const url = uploaded[0]?.ufsUrl || uploaded[0]?.url;
       if (!url) throw new Error("Upload completed without a public media URL.");
       setStyleDraft(current => current ? { ...current, mediaUrl: url, imageUrl: url, mediaType: isVideo ? "video" : "image" } : current);
       setNotice("Media uploaded. Save the style post to publish the change.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Media upload failed. Check UploadThing configuration and try again.");
-    } finally { setMediaUploading(false); }
+    } finally { setMediaUploading(false); setUploadProgress(""); setUploadPercent(0); }
   }
 
   async function saveStylePost(event: FormEvent<HTMLFormElement>) {
@@ -374,7 +397,7 @@ function Dashboard() {
       <div><span className="jtsEyebrow">A CLEAR VIEW OF THE DAY</span><h2 id="jts-admin-welcome-title">{(() => { const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Gaborone", hour: "2-digit", hourCycle: "h23" }).format(new Date())); return (hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening") + ", " + (adminName || "Boss") + "."; })()}</h2><p>{appointments.filter(item => !item.status || item.status === "New").length ? "You have " + appointments.filter(item => !item.status || item.status === "New").length + " new appointment request" + (appointments.filter(item => !item.status || item.status === "New").length === 1 ? "" : "s") + " to review." : "No new appointment requests need your attention right now. You can check availability or refresh the style catalogue."}</p></div>
       <div className="jtsAdminWelcomeActions"><button type="button" className="button buttonPrimary" onClick={() => { setTab("appointments"); track("jts_admin_priority_action", { action: "review_appointments" }); }}>Review requests ↗</button><button type="button" className="button buttonLight" onClick={() => { setTab("services"); track("jts_admin_priority_action", { action: "manage_services" }); }}>Services &amp; prices</button></div>
     </section>
-    {notice && <div className={"notice adminNotice adminNotice-" + (/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "error" : /saved|uploaded|updated|removed|published|available for|marked unavailable|reopened/i.test(notice) ? "success" : "info")} role={/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "alert" : "status"} aria-live="polite"><span className="adminNoticeIcon" aria-hidden="true">{/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "!" : /saved|uploaded|updated|removed|published|available for|marked unavailable|reopened/i.test(notice) ? "✓" : "i"}</span><span className="adminNoticeText">{notice}</span><button type="button" className="adminNoticeDismiss" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
+    {notice && <div className={"notice adminNotice adminNotice-" + (/could not|not saved|failed|denied|expired|choose |exceeds|must be an image|enter a valid|temporarily unavailable|try again|no media was uploaded|upload failed|not be saved/i.test(notice) ? "error" : /saved|uploaded|updated|removed|published|available for|marked unavailable|reopened/i.test(notice) ? "success" : "info")} role={/could not|not saved|failed|denied|expired|choose |exceeds|must be an image|enter a valid|temporarily unavailable|try again|no media was uploaded|upload failed|not be saved/i.test(notice) ? "alert" : "status"} aria-live="polite"><span className="adminNoticeIcon" aria-hidden="true">{/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "!" : /saved|uploaded|updated|removed|published|available for|marked unavailable|reopened/i.test(notice) ? "✓" : "i"}</span><span className="adminNoticeText">{notice}</span><button type="button" className="adminNoticeDismiss" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     <section className="stats">
       <article><span>Appointment requests</span><strong>{appointments.length}</strong></article>
       <article><span>Needs attention</span><strong>{appointments.filter(item => !item.status || item.status === "New").length}</strong></article>
@@ -436,7 +459,8 @@ function Dashboard() {
         <div className="adminTwoCol"><label>Booking detail<input value={serviceDraft.detail} onChange={event=>setServiceDraft({...serviceDraft,detail:event.target.value})} maxLength={80} required /></label><label>Card label<input value={serviceDraft.tag} onChange={event=>setServiceDraft({...serviceDraft,tag:event.target.value})} maxLength={40} required /></label></div>
         <div className="adminServiceMedia">
           <div><strong>Service photos &amp; videos</strong><p>Attach the finished looks or short process clips customers should see on this service card. Select multiple files if you want to add more than one.</p></div>
-          <label className="adminUploadField">Add photos or videos<input type="file" multiple accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v" disabled={mediaUploading} onChange={event=>{const files=Array.from(event.currentTarget.files || []);if(files.length)void uploadServiceMedia(files);event.currentTarget.value="";}} /><small>{mediaUploading ? uploadProgress || "Uploading media…" : "Images up to 4 MB · videos up to 8 MB. UploadThing stores the files securely."}</small></label>
+          <label className="adminUploadField">Add photos or videos<input type="file" multiple accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v" disabled={mediaUploading} onChange={event=>{const files=Array.from(event.currentTarget.files || []);if(files.length)void uploadServiceMedia(files);event.currentTarget.value="";}} /><small>{mediaUploading ? uploadProgress || "Preparing upload…" : "Images up to 4 MB · videos up to 8 MB. UploadThing stores the files securely."}</small></label>
+          {mediaUploading && <div className="adminUploadProgress" role="group" aria-label="Service media upload progress"><div className="adminUploadProgressMeta"><span>{uploadProgress || "Preparing secure upload…"}</span><strong>{uploadPercent}%</strong></div><div className="adminUploadProgressTrack" role="progressbar" aria-label="Current file upload" aria-valuemin={0} aria-valuemax={100} aria-valuenow={uploadPercent}><span style={{ width: uploadPercent + "%" }} /></div><small>Keep this editor open until the upload finishes.</small></div>
           {(serviceDraft.media || []).length > 0 ? <div className="adminServiceMediaGrid">{(serviceDraft.media || []).map((media,index)=><article key={media.url}><div className="adminServiceMediaPreview">{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" aria-label={serviceDraft.name + " video " + (index + 1)} /> : <img src={media.url} alt={media.alt || serviceDraft.name} loading="lazy" />}</div><button type="button" className="button buttonLight" disabled={mediaUploading} onClick={()=>removeServiceMedia(index)}>Remove item {index + 1}</button></article>)}</div> : <div className="adminMediaEmpty"><span aria-hidden="true">＋</span><strong>No service media yet</strong><p>Uploaded items will appear here for review before you save.</p></div>}
         </div>
         <div className="adminEditorFootnote">Save publishes the service details and attached media to the public catalogue. Cancel discards unsaved edits.</div>
@@ -450,6 +474,7 @@ function Dashboard() {
         <label>Post title<input value={styleDraft.title} onChange={event=>setStyleDraft({...styleDraft,title:event.target.value})} maxLength={100} required /></label>
         <label>Media type<select value={styleDraft.mediaType || "image"} onChange={event=>setStyleDraft({...styleDraft,mediaType:event.target.value as "image" | "video"})}><option value="image">Photo / finished look</option><option value="video">Video / process clip</option></select></label>
         <label className="adminUploadField">Upload {styleDraft.mediaType === "video" ? "video" : "photo"}<input type="file" accept={styleDraft.mediaType === "video" ? "video/mp4,video/webm,video/quicktime" : "image/*"} disabled={mediaUploading} onChange={event=>{const file=event.target.files?.[0];if(file)void uploadStyleMedia(file);event.currentTarget.value="";}} /> <small>{styleDraft.mediaType === "video" ? "MP4/WebM, up to 8 MB." : "Browser-supported images, up to 4 MB."} Uploads are stored by UploadThing.</small></label>
+        {mediaUploading && <div className="adminUploadProgress" role="group" aria-label="Style media upload progress"><div className="adminUploadProgressMeta"><span>{uploadProgress || "Preparing secure upload…"}</span><strong>{uploadPercent}%</strong></div><div className="adminUploadProgressTrack" role="progressbar" aria-label="Current file upload" aria-valuemin={0} aria-valuemax={100} aria-valuenow={uploadPercent}><span style={{ width: uploadPercent + "%" }} /></div><small>Keep this editor open until the upload finishes.</small></div>}
         <label>Or paste public media URL<input type="url" value={styleDraft.mediaUrl || styleDraft.imageUrl} onChange={event=>setStyleDraft({...styleDraft,mediaUrl:event.target.value,imageUrl:event.target.value})} placeholder="https://…" required /></label>
         {(styleDraft.mediaUrl || styleDraft.imageUrl) && <div style={{maxWidth:260,margin:"8px 0"}}>{styleDraft.mediaType === "video" ? <video src={styleDraft.mediaUrl || styleDraft.imageUrl} controls playsInline style={{width:"100%",borderRadius:12}} /> : <img src={styleDraft.mediaUrl || styleDraft.imageUrl} alt="Style post preview" style={{width:"100%",maxHeight:300,objectFit:"cover",borderRadius:12}} />}</div>}
         <label>Caption<textarea value={styleDraft.caption} onChange={event=>setStyleDraft({...styleDraft,caption:event.target.value})} maxLength={700} rows={3} /></label>
