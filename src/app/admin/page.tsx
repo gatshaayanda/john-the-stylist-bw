@@ -169,8 +169,9 @@ function Dashboard() {
     const rejected: string[] = [];
     for (const file of files) {
       const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+      const isImage = file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|avif|heic)$/i.test(file.name);
       const maxBytes = isVideo ? 8 * 1024 * 1024 : 4 * 1024 * 1024;
-      if ((!isVideo && !file.type.startsWith("image/")) || file.size > maxBytes) {
+      if ((!isVideo && !isImage) || file.size > maxBytes) {
         rejected.push(file.name + (isVideo ? " exceeds the 8 MB video limit or is not a supported video." : " must be an image no larger than 4 MB."));
       } else {
         accepted.push(file);
@@ -189,11 +190,18 @@ function Dashboard() {
       for (let index = 0; index < accepted.length; index += 1) {
         const file = accepted[index];
         const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+        const extension = file.name.toLowerCase().split(".").pop() || "";
+        const inferredType = isVideo
+          ? extension === "webm" ? "video/webm" : extension === "mov" || extension === "m4v" ? "video/quicktime" : "video/mp4"
+          : extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "gif" ? "image/gif" : extension === "avif" ? "image/avif" : extension === "heic" ? "image/heic" : "image/jpeg";
+        const uploadFile = file.type.startsWith(isVideo ? "video/" : "image/")
+          ? file
+          : new File([file], file.name, { type: inferredType });
         setUploadProgress("Uploading " + (index + 1) + " of " + accepted.length + ": " + file.name);
         try {
           const token = await currentUser.getIdToken();
           const result = await uploadFiles("adminStyleMedia", {
-            files: [file],
+            files: [uploadFile],
             headers: { Authorization: `Bearer ${token}` },
           });
           const url = result[0]?.ufsUrl || result[0]?.url;
