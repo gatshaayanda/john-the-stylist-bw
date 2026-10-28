@@ -1128,3 +1128,5 @@ input, select, textarea, button {
 /* Keep the one-word Enter path visibly usable beneath Google sign-in. */
 .adminSignInForm{display:grid;gap:12px}
 .adminSignInForm label{display:grid;gap:8px}
+
+.adminEditorModal{max-height:91vh;max-height:min(91dvh,920px)}
