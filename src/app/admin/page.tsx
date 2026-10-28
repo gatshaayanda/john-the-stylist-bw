@@ -78,7 +78,7 @@ function Dashboard() {
 
   // Success and informational notices fade after reading time; errors stay until dismissed.
   useEffect(() => {
-    if (!notice || mediaUploading || /could not|not saved|failed|denied|expired|choose |exceeds|must be an image|enter a valid|temporarily unavailable|try again|no media was uploaded|upload failed|not be saved/i.test(notice)) return;
+    if (!notice || mediaUploading || /could not|not saved|failed|denied|expired|choose |exceeds|must be an image|enter a valid|temporarily unavailable|try again|no media was uploaded|upload failed|not be saved|could not be loaded|could not be removed|could not be deleted|could not be reopened|was not saved|was not published/i.test(notice)) return;
     const timeout = window.setTimeout(() => setNotice(current => current === notice ? "" : current), 6500);
     return () => window.clearTimeout(timeout);
   }, [notice, mediaUploading]);
