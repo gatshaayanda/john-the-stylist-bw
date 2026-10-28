@@ -1124,3 +1124,7 @@ input, select, textarea, button {
 .buttonDanger:hover{background:#9d332b!important}
 .adminModalBackdrop button:focus-visible,.adminModalBackdrop input:focus-visible,.adminModalBackdrop textarea:focus-visible,.adminModalBackdrop select:focus-visible{outline:3px solid #e0c37e;outline-offset:3px}
 @media(max-width:600px){.adminModalBackdrop{align-items:end;padding:0}.adminEditorModal{width:100%;max-height:94dvh;border-radius:18px 18px 0 0;padding:18px 14px calc(18px + env(safe-area-inset-bottom));border-bottom:0}.adminEditorModal .adminForm .queueActions{flex-direction:column}.adminEditorModal .adminForm .queueActions .button{width:100%;min-height:46px}.adminDeleteBackdrop{align-items:center;padding:14px}.adminDeleteDialog{padding:19px}.adminDeleteActions{flex-direction:column}.adminServiceMediaGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Keep the one-word Enter path visibly usable beneath Google sign-in. */
+.adminSignInForm{display:grid;gap:12px}
+.adminSignInForm label{display:grid;gap:8px}
