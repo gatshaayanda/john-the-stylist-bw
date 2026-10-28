@@ -1087,3 +1087,46 @@ input, select, textarea, button {
 .jtsEditorialHome .jtsEditAccountLink:hover{background:#c7a45b;color:#050505}
 .jtsEditorialHome .jtsEditAccountLink span{font-size:1rem}
 @media(max-width:600px){.jtsEditorialHome .jtsEditAccountAccess{padding:19px 0}.jtsEditorialHome .jtsEditAccountAccessInner{align-items:stretch;flex-direction:column;gap:14px}.jtsEditorialHome .jtsEditAccountAccess p{font-size:.8rem}.jtsEditorialHome .jtsEditAccountLink{width:100%}}
+
+
+/* JTS Operations: compact, accessible editing and clear action feedback. */
+.adminModalBackdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);overflow-y:auto}
+.adminEditorModal{width:min(740px,100%);max-height:min(91dvh,920px);overflow:auto;padding:clamp(16px,3vw,26px);border:1px solid rgba(212,175,103,.48);border-radius:18px;background:#121212;color:#fffdf7;box-shadow:0 24px 90px rgba(0,0,0,.65)}
+.adminModalHeading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid #39352f}
+.adminModalHeading h2{margin:5px 0;font-size:clamp(1.4rem,4vw,1.9rem)}
+.adminModalHeading p,.adminServiceIntro{margin:5px 0 0;color:#b9b2a7;font-size:.88rem;line-height:1.55}
+.adminModalClose{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid #514a42;border-radius:50%;background:#1b1b1b;color:#fff;font-size:1.65rem;cursor:pointer}
+.adminModalClose:disabled{opacity:.5;cursor:not-allowed}
+.adminEditorModal .adminForm{gap:17px}
+.adminEditorModal .adminForm .queueActions{position:sticky;bottom:-1px;z-index:2;display:flex;gap:10px;padding:14px 0 0;background:linear-gradient(180deg,rgba(18,18,18,.88),#121212 28%)}
+.adminEditorModal .adminForm .queueActions .button{width:auto;min-height:46px;flex:1}
+.adminServiceIntro{margin:0 0 16px}
+.adminServiceMedia{min-width:0}
+.adminUploadField input[type=file]{display:block;width:100%;min-width:0;padding:12px;border:1px dashed #7c6840;border-radius:10px;background:#0c0c0c;color:#e7e1d7;font-size:.82rem}
+.adminUploadField small{display:block;color:#b9b2a7;font-size:.78rem;font-weight:500;line-height:1.45}
+.adminMediaEmpty{display:grid;justify-items:center;gap:5px;padding:24px 14px;border:1px dashed #514a42;border-radius:12px;text-align:center;color:#c7bfb3}
+.adminMediaEmpty>span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#262117;color:#e0c37e;font-size:1.4rem}
+.adminMediaEmpty p{margin:0;font-size:.8rem}
+.adminEditorFootnote{color:#b9b2a7;font-size:.78rem;line-height:1.5}
+.adminNotice{display:flex;align-items:flex-start;gap:10px;max-width:100%;padding:13px 14px;border-radius:12px}
+.adminNoticeIcon{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border:1px solid currentColor;border-radius:50%;font-size:.78rem;font-weight:1000}
+.adminNoticeText{min-width:0;flex:1;line-height:1.45;overflow-wrap:anywhere}
+.adminNoticeDismiss{flex:0 0 30px;width:30px;height:30px;margin:-4px -5px 0 0;border:0;border-radius:8px;background:transparent;color:inherit;font-size:1.35rem;cursor:pointer}
+.adminNotice-error{background:#281716;border-color:#a94e47;color:#ffd2cd}
+.adminNotice-success{background:#14251b;border-color:#427c54;color:#c7f3d0}
+.adminNotice-info{background:#241d0d;border-color:#6d5413;color:#f6df94}
+.adminDeleteDialog{width:min(480px,100%);padding:24px;border:1px solid rgba(212,175,103,.48);border-radius:16px;background:#151515;box-shadow:0 24px 90px rgba(0,0,0,.65)}
+.adminDeleteDialog h2{margin:8px 0;font-size:1.45rem}
+.adminDeleteDialog p{color:#c6beb3;line-height:1.55;overflow-wrap:anywhere}
+.adminDeleteActions{display:flex;gap:10px;margin-top:20px}
+.adminDeleteActions .button{flex:1;min-height:44px}
+.buttonDanger{border:1px solid #b85b52!important;background:#7f2822!important;color:#fff!important;border-radius:9px;padding:10px 14px;font-weight:900;cursor:pointer}
+.buttonDanger:hover{background:#9d332b!important}
+.adminModalBackdrop button:focus-visible,.adminModalBackdrop input:focus-visible,.adminModalBackdrop textarea:focus-visible,.adminModalBackdrop select:focus-visible{outline:3px solid #e0c37e;outline-offset:3px}
+@media(max-width:600px){.adminModalBackdrop{align-items:end;padding:0}.adminEditorModal{width:100%;max-height:94dvh;border-radius:18px 18px 0 0;padding:18px 14px calc(18px + env(safe-area-inset-bottom));border-bottom:0}.adminEditorModal .adminForm .queueActions{flex-direction:column}.adminEditorModal .adminForm .queueActions .button{width:100%;min-height:46px}.adminDeleteBackdrop{align-items:center;padding:14px}.adminDeleteDialog{padding:19px}.adminDeleteActions{flex-direction:column}.adminServiceMediaGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Keep the one-word Enter path visibly usable beneath Google sign-in. */
+.adminSignInForm{display:grid;gap:12px}
+.adminSignInForm label{display:grid;gap:8px}
+
+.adminEditorModal{max-height:91vh;max-height:min(91dvh,920px)}

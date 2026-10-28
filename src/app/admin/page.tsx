@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { track } from "@vercel/analytics";
 import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
@@ -41,6 +41,7 @@ type OwnerStylePost = {
   id: string; title: string; caption: string; imageUrl: string; mediaUrl?: string; mediaType?: "image" | "video"; service: string;
   tags: string[]; published: boolean; createdAt?: string; createdBy?: string; updatedAt?: string;
 };
+type DeleteTarget = { kind: "service" | "stylePost" | "customerReview"; id: string; name: string };
 
 const dateText = (value?: string) => {
   if (!value) return "Date not provided";
@@ -66,8 +67,33 @@ function Dashboard() {
   const [serviceDraft, setServiceDraft] = useState<PublicService | null>(null);
   const [styleDraft, setStyleDraft] = useState<OwnerStylePost | null>(null);
   const [mediaUploading, setMediaUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const mediaUploadingRef = useRef(false);
+  const serviceEditorOpen = Boolean(serviceDraft);
+  const deleteDialogOpen = Boolean(deleteTarget);
+
+  useEffect(() => { mediaUploadingRef.current = mediaUploading; }, [mediaUploading]);
 
   useEffect(() => onAuthStateChanged(auth, user => setAdminName(user?.displayName?.trim().split(" ")[0] || "")), []);
+
+  useEffect(() => {
+    if (!serviceEditorOpen && !deleteDialogOpen) return;
+    const focusTarget = window.setTimeout(() => {
+      const selector = deleteDialogOpen ? ".adminDeleteDialog button" : ".adminEditorModal input:not([type=file])";
+      document.querySelector<HTMLElement>(selector)?.focus();
+    }, 0);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || mediaUploadingRef.current) return;
+      if (deleteDialogOpen) setDeleteTarget(null);
+      else setServiceDraft(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(focusTarget);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [serviceEditorOpen, deleteDialogOpen]);
 
   useEffect(() => {
     let ready = 0;
@@ -131,27 +157,81 @@ function Dashboard() {
     return () => { stopServices(); stopStylePosts(); };
   }, []);
 
-  async function uploadServiceMedia(file: File) {
-    if (!serviceDraft) return;
-    const isVideo = file.type.startsWith("video/");
-    const maxBytes = isVideo ? 8 * 1024 * 1024 : 4 * 1024 * 1024;
-    if ((!isVideo && !file.type.startsWith("image/")) || file.size > maxBytes) {
-      setNotice(isVideo ? "Choose an MP4/WebM video no larger than 8 MB." : "Choose an image no larger than 4 MB."); return;
-    }
+  async function uploadServiceMedia(files: File[]) {
+    if (!serviceDraft || files.length === 0) return;
     const currentUser = auth.currentUser;
-    if (!currentUser) { setNotice("Your admin session expired. Sign in again before uploading."); return; }
-    setMediaUploading(true); setNotice("");
+    if (!currentUser) {
+      setNotice("Your admin session expired. Sign in again before uploading.");
+      return;
+    }
+
+    const accepted: File[] = [];
+    const rejected: string[] = [];
+    for (const file of files) {
+      const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+      const isImage = file.type.startsWith("image/") || /\.(jpe?g|png|webp|gif|avif|heic)$/i.test(file.name);
+      const maxBytes = isVideo ? 8 * 1024 * 1024 : 4 * 1024 * 1024;
+      if ((!isVideo && !isImage) || file.size > maxBytes) {
+        rejected.push(file.name + (isVideo ? " exceeds the 8 MB video limit or is not a supported video." : " must be an image no larger than 4 MB."));
+      } else {
+        accepted.push(file);
+      }
+    }
+    if (accepted.length === 0) {
+      setNotice(rejected.join(" ") || "Choose an image or video to upload.");
+      return;
+    }
+
+    setMediaUploading(true);
+    setNotice("");
+    let uploadedCount = 0;
+    const failures: string[] = [];
     try {
-      const token = await currentUser.getIdToken();
-      const uploaded = await uploadFiles("adminStyleMedia", { files: [file], headers: { Authorization: `Bearer ${token}` } });
-      const url = uploaded[0]?.ufsUrl || uploaded[0]?.url;
-      if (!url) throw new Error("Upload completed without a public media URL.");
-      const media: PublicServiceMedia = { url, type: isVideo ? "video" : "image", alt: serviceDraft.name.trim() || "JTS service look" };
-      setServiceDraft(current => current ? { ...current, media: [...(current.media || []), media] } : current);
-      setNotice("Service media uploaded. Save the service to publish it.");
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Media upload failed. Check UploadThing configuration and try again.");
-    } finally { setMediaUploading(false); }
+      for (let index = 0; index < accepted.length; index += 1) {
+        const file = accepted[index];
+        const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+        const extension = file.name.toLowerCase().split(".").pop() || "";
+        const inferredType = isVideo
+          ? extension === "webm" ? "video/webm" : extension === "mov" || extension === "m4v" ? "video/quicktime" : "video/mp4"
+          : extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "gif" ? "image/gif" : extension === "avif" ? "image/avif" : extension === "heic" ? "image/heic" : "image/jpeg";
+        const uploadFile = file.type.startsWith(isVideo ? "video/" : "image/")
+          ? file
+          : new File([file], file.name, { type: inferredType });
+        setUploadProgress("Uploading " + (index + 1) + " of " + accepted.length + ": " + file.name);
+        try {
+          const token = await currentUser.getIdToken();
+          const result = await uploadFiles("adminStyleMedia", {
+            files: [uploadFile],
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const url = result[0]?.ufsUrl || result[0]?.url;
+          if (!url) throw new Error("UploadThing returned no public media URL.");
+          const media: PublicServiceMedia = {
+            url,
+            type: isVideo ? "video" : "image",
+            alt: serviceDraft.name.trim() || "JTS service look",
+          };
+          setServiceDraft(current => current
+            ? { ...current, media: [...(current.media || []), media] }
+            : current);
+          uploadedCount += 1;
+        } catch (error) {
+          failures.push(file.name + ": " + (error instanceof Error ? error.message : "upload failed"));
+        }
+      }
+
+      const issues = [...rejected, ...failures];
+      if (uploadedCount && !issues.length) {
+        setNotice(uploadedCount + " media item" + (uploadedCount === 1 ? "" : "s") + " uploaded. Preview below, then save the service to publish the changes.");
+      } else if (uploadedCount) {
+        setNotice(uploadedCount + " media item" + (uploadedCount === 1 ? "" : "s") + " uploaded. " + issues.join(" "));
+      } else {
+        setNotice(issues.join(" ") || "No media was uploaded. Try again.");
+      }
+    } finally {
+      setMediaUploading(false);
+      setUploadProgress("");
+    }
   }
 
   function removeServiceMedia(index: number) {
@@ -244,6 +324,22 @@ function Dashboard() {
 
   const openAppointments = useMemo(() => appointments.filter(item => !["Cancelled", "Completed"].includes(item.status || "")), [appointments]);
 
+  async function confirmDeleteTarget() {
+    const target = deleteTarget;
+    if (!target) return;
+    setDeleteTarget(null);
+    if (target.kind === "service") {
+      const item = services.find(service => service.id === target.id);
+      if (item) await removeService(item);
+    } else if (target.kind === "stylePost") {
+      const item = stylePosts.find(post => post.id === target.id);
+      if (item) await removeStylePost(item);
+    } else {
+      const item = reviews.find(review => review.id === target.id);
+      if (item) await removeCustomerReview(item);
+    }
+  }
+
   async function setAppointmentStatus(item: Appointment, status: string) {
     setNotice("");
     try {
@@ -278,7 +374,7 @@ function Dashboard() {
       <div><span className="jtsEyebrow">A CLEAR VIEW OF THE DAY</span><h2 id="jts-admin-welcome-title">{(() => { const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Gaborone", hour: "2-digit", hourCycle: "h23" }).format(new Date())); return (hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening") + ", " + (adminName || "Boss") + "."; })()}</h2><p>{appointments.filter(item => !item.status || item.status === "New").length ? "You have " + appointments.filter(item => !item.status || item.status === "New").length + " new appointment request" + (appointments.filter(item => !item.status || item.status === "New").length === 1 ? "" : "s") + " to review." : "No new appointment requests need your attention right now. You can check availability or refresh the style catalogue."}</p></div>
       <div className="jtsAdminWelcomeActions"><button type="button" className="button buttonPrimary" onClick={() => { setTab("appointments"); track("jts_admin_priority_action", { action: "review_appointments" }); }}>Review requests ↗</button><button type="button" className="button buttonLight" onClick={() => { setTab("services"); track("jts_admin_priority_action", { action: "manage_services" }); }}>Services &amp; prices</button></div>
     </section>
-    {notice && <div className="notice adminNotice" role="status" aria-live="polite">{notice}</div>}
+    {notice && <div className={"notice adminNotice adminNotice-" + (/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "error" : /saved|uploaded|updated|removed|published|available for|marked unavailable|reopened/i.test(notice) ? "success" : "info")} role={/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "alert" : "status"} aria-live="polite"><span className="adminNoticeIcon" aria-hidden="true">{/could not|not saved|failed|denied|expired|choose |enter a valid|temporarily unavailable/i.test(notice) ? "!" : /saved|uploaded|updated|removed|published|available for|marked unavailable|reopened/i.test(notice) ? "✓" : "i"}</span><span className="adminNoticeText">{notice}</span><button type="button" className="adminNoticeDismiss" aria-label="Dismiss notification" onClick={() => setNotice("")}>×</button></div>}
     <section className="stats">
       <article><span>Appointment requests</span><strong>{appointments.length}</strong></article>
       <article><span>Needs attention</span><strong>{appointments.filter(item => !item.status || item.status === "New").length}</strong></article>
@@ -329,22 +425,24 @@ function Dashboard() {
     </section> : tab === "services" ? <section id="admin-services" className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">PUBLIC CATALOGUE</span><h2>Services & prices</h2></div><span>{services.length} listed</span></div>
       <p>These records drive the public service cards, booking choices and customer account inspiration. Add photos/videos directly to each service.</p>
-      <div className="adminMediaShortcut">
-        <div><strong>Want to add a photo or video of a finished look?</strong><p>Media uploads are managed in John&apos;s style feed. Open it to upload a photo/video, add a caption and publish it to the customer-facing page.</p></div>
-        <button className="button buttonPrimary" type="button" onClick={() => setTab("styleFeed")}>Open photo &amp; video uploads</button>
-      </div>
-      {serviceDraft ? <form className="adminForm" onSubmit={saveService}>
+      <p className="adminServiceIntro">Manage the service, price, booking label and its own public photos/videos together. For separate editorial portfolio posts, use John&apos;s style feed.</p>
+      {serviceDraft ? <div className="adminModalBackdrop" onMouseDown={event => { if (event.target === event.currentTarget && !mediaUploading) setServiceDraft(null); }}>
+        <section className="adminEditorModal" role="dialog" aria-modal="true" aria-labelledby="admin-service-editor-title">
+          <div className="adminModalHeading"><div><span className="kicker">{serviceDraft.id ? "EDIT PUBLIC SERVICE" : "NEW PUBLIC SERVICE"}</span><h2 id="admin-service-editor-title">{serviceDraft.id ? "Edit service" : "Add a service"}</h2><p>Changes here update the public catalogue and booking choices.</p></div><button type="button" className="adminModalClose" aria-label="Close service editor" disabled={mediaUploading} onClick={() => setServiceDraft(null)}>×</button></div>
+          <form className="adminForm" onSubmit={saveService}>
         <label>Service name<input value={serviceDraft.name} onChange={event=>setServiceDraft({...serviceDraft,name:event.target.value})} maxLength={80} required /></label>
         <div className="adminTwoCol"><label>Price (BWP)<input type="number" min="0" step="1" value={serviceDraft.price} onChange={event=>setServiceDraft({...serviceDraft,price:Number(event.target.value)})} required /></label><label>Optional maximum price<input type="number" min={serviceDraft.price} step="1" value={serviceDraft.maxPrice ?? ""} onChange={event=>setServiceDraft({...serviceDraft,maxPrice:event.target.value===""?undefined:Number(event.target.value)})} /></label></div>
         <label>Short public description<input value={serviceDraft.note} onChange={event=>setServiceDraft({...serviceDraft,note:event.target.value})} maxLength={180} required /></label>
         <div className="adminTwoCol"><label>Booking detail<input value={serviceDraft.detail} onChange={event=>setServiceDraft({...serviceDraft,detail:event.target.value})} maxLength={80} required /></label><label>Card label<input value={serviceDraft.tag} onChange={event=>setServiceDraft({...serviceDraft,tag:event.target.value})} maxLength={40} required /></label></div>
-        <div className="adminServiceMedia"><div><strong>Service photos &amp; videos</strong><p>Upload finished results or short process clips for this specific service. They appear publicly after you save.</p></div>
-          <label className="adminUploadField">Add photo or video<input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" disabled={mediaUploading} onChange={event=>{const file=event.target.files?.[0];if(file)void uploadServiceMedia(file);event.currentTarget.value="";}} /><small>Images up to 4 MB · videos up to 8 MB. UploadThing stores the media.</small></label>
-          {(serviceDraft.media || []).length > 0 && <div className="adminServiceMediaGrid">{(serviceDraft.media || []).map((media,index)=><article key={media.url}><div className="adminServiceMediaPreview">{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" /> : <img src={media.url} alt={media.alt || serviceDraft.name} />}</div><button type="button" className="button buttonLight" onClick={()=>removeServiceMedia(index)}>Remove media</button></article>)}</div>}
+        <div className="adminServiceMedia">
+          <div><strong>Service photos &amp; videos</strong><p>Attach the finished looks or short process clips customers should see on this service card. Select multiple files if you want to add more than one.</p></div>
+          <label className="adminUploadField">Add photos or videos<input type="file" multiple accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v" disabled={mediaUploading} onChange={event=>{const files=Array.from(event.currentTarget.files || []);if(files.length)void uploadServiceMedia(files);event.currentTarget.value="";}} /><small>{mediaUploading ? uploadProgress || "Uploading media…" : "Images up to 4 MB · videos up to 8 MB. UploadThing stores the files securely."}</small></label>
+          {(serviceDraft.media || []).length > 0 ? <div className="adminServiceMediaGrid">{(serviceDraft.media || []).map((media,index)=><article key={media.url}><div className="adminServiceMediaPreview">{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" aria-label={serviceDraft.name + " video " + (index + 1)} /> : <img src={media.url} alt={media.alt || serviceDraft.name} loading="lazy" />}</div><button type="button" className="button buttonLight" disabled={mediaUploading} onClick={()=>removeServiceMedia(index)}>Remove item {index + 1}</button></article>)}</div> : <div className="adminMediaEmpty"><span aria-hidden="true">＋</span><strong>No service media yet</strong><p>Uploaded items will appear here for review before you save.</p></div>}
         </div>
-        <div className="queueActions"><button className="button buttonPrimary" type="submit" disabled={mediaUploading}>{mediaUploading ? "Uploading media…" : "Save service & media"}</button><button className="button buttonLight" type="button" onClick={()=>setServiceDraft(null)}>Cancel</button></div>
-      </form> : <button className="button buttonLight" type="button" onClick={()=>setServiceDraft({id:"",name:"",price:0,display:"P0",detail:"",note:"",tag:"THE SERVICE",media:[]})}>Add service</button>}
-      {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small><small>{item.media?.length || 0} service media item{item.media?.length === 1 ? "" : "s"} · shown on public catalogue and customer account</small>{!!item.media?.length && <div className="adminServiceMediaGrid adminServiceMediaGridCompact">{item.media.map(media=><div className="adminServiceMediaPreview" key={media.url}>{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" /> : <img src={media.url} alt={media.alt || item.name} />}</div>)}</div>}</div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item,media:item.media || []})}>Edit service &amp; media</button><button className="button buttonLight" type="button" onClick={()=>void removeService(item)}>Delete</button></div></article>)}</div>}
+        <div className="adminEditorFootnote">Save publishes the service details and attached media to the public catalogue. Cancel discards unsaved edits.</div>
+        <div className="queueActions"><button className="button buttonPrimary" type="submit" disabled={mediaUploading}>{mediaUploading ? "Uploading media…" : serviceDraft.id ? "Save changes" : "Add service"}</button><button className="button buttonLight" type="button" disabled={mediaUploading} onClick={() => setServiceDraft(null)}>Cancel</button></div>
+      </form></section></div> : <button className="button buttonLight" type="button" onClick={()=>setServiceDraft({id:"",name:"",price:0,display:"P0",detail:"",note:"",tag:"THE SERVICE",media:[]})}>Add service</button>}
+      {services.length===0 ? <div className="emptyState"><h3>No public services</h3><p>Add a service to make it available on the public site and booking form.</p></div> : <div className="queue">{services.map(item=><article className="queueRow" key={item.id}><div><span className="kicker">{item.tag}</span><h3>{item.name}</h3><strong>{item.display}</strong><p>{item.note}</p><small>Booking label: {item.detail}</small><small>{item.media?.length || 0} service media item{item.media?.length === 1 ? "" : "s"} · shown on public catalogue and customer account</small>{!!item.media?.length && <div className="adminServiceMediaGrid adminServiceMediaGridCompact">{item.media.map(media=><div className="adminServiceMediaPreview" key={media.url}>{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" /> : <img src={media.url} alt={media.alt || item.name} />}</div>)}</div>}</div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setServiceDraft({...item,media:item.media || []})}>Edit service &amp; media</button><button className="button buttonLight" type="button" onClick={()=>setDeleteTarget({kind:"service",id:item.id,name:item.name})}>Delete</button></div></article>)}</div>}
     </section> : tab === "styleFeed" ? <section id="admin-style-feed" className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">JOHN&apos;S EDIT</span><h2>Public style posts</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       <p>Manage the looks customers see on the landing page and style feed. Upload finished cuts, colour transformations and short salon videos, or paste a public media URL. Only published posts appear publicly.</p>
@@ -360,7 +458,7 @@ function Dashboard() {
         <label className="checkRow"><input type="checkbox" checked={styleDraft.published} onChange={event=>setStyleDraft({...styleDraft,published:event.target.checked})} /> Publish on the public feed</label>
         <div className="queueActions"><button className="button buttonPrimary" type="submit" disabled={mediaUploading}>{mediaUploading ? "Uploading media…" : "Save style post"}</button><button className="button buttonLight" type="button" onClick={()=>setStyleDraft(null)}>Cancel</button></div>
       </form> : <button className="button buttonLight" type="button" onClick={()=>setStyleDraft({id:"",title:"",caption:"",imageUrl:"",mediaUrl:"",mediaType:"image",service:"",tags:[],published:true})}>Add style post</button>}
-      {stylePosts.length===0 ? <div className="emptyState"><h3>No style posts yet</h3><p>Add a post here and publish it to the public style feed.</p></div> : <div className="queue">{stylePosts.map(item=><article className="queueRow" key={item.id}>{(item.mediaUrl || item.imageUrl) && (item.mediaType === "video" ? <video src={item.mediaUrl || item.imageUrl} controls playsInline preload="metadata" style={{width:150,height:120,objectFit:"cover",borderRadius:10}} /> : <img src={item.mediaUrl || item.imageUrl} alt="" loading="lazy" style={{width:100,height:120,objectFit:"cover",borderRadius:10}}/>)}<div><span className="kicker">{item.published?"Published":"Draft"} · {item.service||"JTS STYLE"}</span><h3>{item.title}</h3><p>{item.caption}</p><small>{dateText(item.createdAt)}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setStyleDraft({...item,tags:item.tags||[],published:item.published!==false})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>void removeStylePost(item)}>Delete</button></div></article>)}</div>}
+      {stylePosts.length===0 ? <div className="emptyState"><h3>No style posts yet</h3><p>Add a post here and publish it to the public style feed.</p></div> : <div className="queue">{stylePosts.map(item=><article className="queueRow" key={item.id}>{(item.mediaUrl || item.imageUrl) && (item.mediaType === "video" ? <video src={item.mediaUrl || item.imageUrl} controls playsInline preload="metadata" style={{width:150,height:120,objectFit:"cover",borderRadius:10}} /> : <img src={item.mediaUrl || item.imageUrl} alt="" loading="lazy" style={{width:100,height:120,objectFit:"cover",borderRadius:10}}/>)}<div><span className="kicker">{item.published?"Published":"Draft"} · {item.service||"JTS STYLE"}</span><h3>{item.title}</h3><p>{item.caption}</p><small>{dateText(item.createdAt)}</small></div><div className="queueActions"><button className="button buttonLight" type="button" onClick={()=>setStyleDraft({...item,tags:item.tags||[],published:item.published!==false})}>Edit</button><button className="button buttonLight" type="button" onClick={()=>setDeleteTarget({kind:"stylePost",id:item.id,name:item.title})}>Delete</button></div></article>)}</div>}
     </section> : <section className="adminPanel">
       <div className="panelHeading"><div><span className="kicker">COMMUNITY STYLE FEED</span><h2>Customer photos & reviews</h2></div><Link href="/feed" className="button buttonLight">View public feed</Link></div>
       {reviews.length === 0 ? <div className="emptyState"><h3>No customer reviews yet</h3><p>Customer-submitted looks and reviews will appear here for moderation.</p></div> : <div className="queue">
@@ -373,10 +471,18 @@ function Dashboard() {
             <small>{item.customerName || "JTS customer"} · {item.service || "JTS Styles"} · {dateText(item.createdAt)}</small>
             {item.comparison && <small>Repeat review: {item.comparison}</small>}
           </div>
-          <div className="queueActions"><button className="button buttonLight" type="button" onClick={() => void setReviewPublished(item, item.published === false)}>{item.published === false ? "Publish" : "Hide from feed"}</button><button className="button buttonLight" type="button" onClick={() => void removeCustomerReview(item)}>Delete</button></div>
+          <div className="queueActions"><button className="button buttonLight" type="button" onClick={() => void setReviewPublished(item, item.published === false)}>{item.published === false ? "Publish" : "Hide from feed"}</button><button className="button buttonLight" type="button" onClick={() => setDeleteTarget({kind:"customerReview",id:item.id,name:item.title || item.customerName || "Customer look"})}>Delete</button></div>
         </article>)}
       </div>}
     </section>}
+    {deleteTarget && <div className="adminModalBackdrop adminDeleteBackdrop" onMouseDown={event => { if (event.target === event.currentTarget) setDeleteTarget(null); }}>
+      <section className="adminDeleteDialog" role="alertdialog" aria-modal="true" aria-labelledby="admin-delete-title" aria-describedby="admin-delete-description">
+        <span className="kicker">CONFIRM DELETE</span>
+        <h2 id="admin-delete-title">Delete this {deleteTarget.kind === "service" ? "service" : deleteTarget.kind === "stylePost" ? "style post" : "customer look"}?</h2>
+        <p id="admin-delete-description"><strong>{deleteTarget.name}</strong> will be removed from the operations list and its public display where applicable. This action cannot be undone from this screen.</p>
+        <div className="adminDeleteActions"><button type="button" className="button buttonLight" onClick={() => setDeleteTarget(null)}>Keep item</button><button type="button" className="button buttonDanger" onClick={() => void confirmDeleteTarget()}>Delete permanently</button></div>
+      </section>
+    </div>}
     <JtsStyleGuide onNavigateAdmin={setTab} />
     <p style={{ color: "#938c82", fontSize: ".8rem", marginTop: 18 }}>A request is not confirmed until John confirms the slot and deposit. Customer photos and reviews are public only while published.</p>
   </div></main>;
