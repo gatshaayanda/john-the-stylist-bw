@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { track } from "@vercel/analytics";
 import { collection, onSnapshot, updateDoc, doc, setDoc, deleteDoc, type Unsubscribe } from "firebase/firestore";
@@ -69,18 +69,23 @@ function Dashboard() {
   const [mediaUploading, setMediaUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const mediaUploadingRef = useRef(false);
+  const serviceEditorOpen = Boolean(serviceDraft);
+  const deleteDialogOpen = Boolean(deleteTarget);
+
+  useEffect(() => { mediaUploadingRef.current = mediaUploading; }, [mediaUploading]);
 
   useEffect(() => onAuthStateChanged(auth, user => setAdminName(user?.displayName?.trim().split(" ")[0] || "")), []);
 
   useEffect(() => {
-    if (!serviceDraft && !deleteTarget) return;
+    if (!serviceEditorOpen && !deleteDialogOpen) return;
     const focusTarget = window.setTimeout(() => {
-      const selector = deleteTarget ? ".adminDeleteDialog button" : ".adminEditorModal input:not([type=file])";
+      const selector = deleteDialogOpen ? ".adminDeleteDialog button" : ".adminEditorModal input:not([type=file])";
       document.querySelector<HTMLElement>(selector)?.focus();
     }, 0);
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || mediaUploading) return;
-      if (deleteTarget) setDeleteTarget(null);
+      if (event.key !== "Escape" || mediaUploadingRef.current) return;
+      if (deleteDialogOpen) setDeleteTarget(null);
       else setServiceDraft(null);
     };
     window.addEventListener("keydown", onKeyDown);
@@ -88,7 +93,7 @@ function Dashboard() {
       window.clearTimeout(focusTarget);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [Boolean(serviceDraft), Boolean(deleteTarget), mediaUploading]);
+  }, [serviceEditorOpen, deleteDialogOpen]);
 
   useEffect(() => {
     let ready = 0;
