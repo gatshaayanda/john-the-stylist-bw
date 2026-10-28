@@ -558,3 +558,10 @@ The account should feel like a personal JTS style studio, not a generic dashboar
 - Test weather route success, provider failure and retry; forecast dates use Gaborone local time and exclude today from future-day suggestions; CTA does not imply availability.
 - Test anonymous, connected Google customer, no-bookings, existing-history, upcoming-request and authorized admin states. Confirm only real names/data appear, guide links work, analytics properties contain no PII, and narrow mobile widths do not overflow.
 - Run npx tsc --noEmit, npm run lint, npm run verify:identity and npm run build. Report deployment readiness separately from code checks and report physical-device QA only when performed.
+
+## Operations admin usability and authorization consistency
+- Keep the one-word **Enter** sign-in available through the existing server-side `ADMIN_PASSWORD` environment variable; never hard-code or expose its value.
+- Approved Google admin sessions must have a matching `admins/{uid}` owner/staff record before the dashboard mounts, so the client gate and Firestore rules agree on authorization.
+- Service edits use a compact, keyboard-dismissable modal. Service-specific photo/video uploads stay in that editor, support multiple files with per-file progress/errors, and only publish after saving the service record.
+- Confirm destructive service, portfolio-post and customer-look deletions. Provide visible, dismissible status feedback; errors must explain the next useful step.
+- Keep the public catalogue, booking choices and customer account inspiration reading the same `businessSettings/publicServices.services[]` source of truth. Do not change protected PWA install/handoff behavior.
