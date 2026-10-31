@@ -71,23 +71,23 @@ Research basis:
 - NN/g error guidance: place actionable errors near their source and prevent errors where possible.
 
 ## Current supplied services/prices
-Bookable catalogue currently supplied by the business:
-- Pixie Cut: BWP 350–400
-- Cut + Pixie Cut: BWP 200
-- Pure White (Bleach/Color): BWP 300
-- Cut + Bleach: BWP 250
+The owner-supplied bookable catalogue is the 17-service list in `src/lib/jts/public-services.ts`. It is the source of truth for customer-facing service names and prices. Keep the homepage finder, booking selector and admin catalogue aligned with this list:
+- Haircuts: Kids Cut P100; Fade P100; Fade + Tint P200; Ladies Cut Only P120; Ladies Cut + Tint P200; Ladies Cut + Enecto Tint P200.
+- Bleach services: Blonde P250; Pure White + Cut P300; Grey P350.
+- S Curls & Curl Styles: Cut + S Curl P200; Cut + S Curl + Tint P280; Cut + Finger Coils P300; Cut + Ice Curls P250.
+- Bobs & Pixie Cuts: Bob/Pixie Cut (Without Tint) P350; Bob/Pixie Cut (With Tint) P400; Pixie Cut with Colors P450; Pixie Cut with Queen Cazard Hair Relaxer P450.
 
-Other supplied specialties:
-- precision cuts
-- hair tinting
-- bobs
-- pixie cuts
-- hair coloring
-- bleaching
-- fades
-- special-event styles
+All prices are BWP. Do not invent additional catalogue prices. For unlisted styles, provide an enquiry route and make clear that John must confirm the price before the customer commits.
 
-Do not invent prices for services where the owner has not supplied a price. Those can be presented as enquire/ask rather than silently made bookable.
+## Service discovery UX
+- The homepage and booking form must both use the same live Firestore catalogue with the local 17-service list as fallback.
+- Provide visible text search and category filters; do not force visitors to scroll a long undifferentiated list.
+- Show the exact price alongside every result, and preserve the selected service when moving from the homepage to booking.
+- On the homepage, show a compact preview and a clear way to reveal all services. On booking, show a compact selectable list and an unmistakable selected-service summary.
+- Empty search results must offer a clear way to clear search or ask about an unlisted style.
+- Do not hide all services behind search: the initial state must show discoverable options.
+- Keep category filters touch-friendly, horizontally scrollable on small screens, and keyboard accessible. Search and category filters combine; selecting a category must not erase the search.
+- Never convert an unpriced enquiry into a bookable service or invent a price.
 
 ## Deposit/payment
 The customer is instructed to pay the 50% deposit through Orange Money:
