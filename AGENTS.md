@@ -80,14 +80,17 @@ The owner-supplied bookable catalogue is the 17-service list in `src/lib/jts/pub
 All prices are BWP. Do not invent additional catalogue prices. For unlisted styles, provide an enquiry route and make clear that John must confirm the price before the customer commits.
 
 ## Service presentation — protected customer experience
-- The homepage's approved primary presentation is the three editorial service cards: THE CUT, THE COLOUR and THE CHANGE. Preserve their exact owner-managed content, descriptions, prices, order, layout and styling; they are not to be replaced by a searchable catalogue.
-- Preserve owner-uploaded service image/video support on those cards. Do not replace real salon imagery with generated placeholders or decorative glyphs when media is supplied.
-- Do not add search fields, category filters, result counters or a new colour-coded catalogue UI to the homepage or booking form.
-- Keep the booking service selector simple and consistent with the current live curated services. Preserve the existing date/time/customer details flow and selection deep links.
-- The complete 17-service owner-supplied price list is secondary information, revealed only by the clearly labelled “View full price list” action in one accessible, dismissible modal. Group by the supplied categories; do not add a second search/filter layer.
-- The full list is reference information and must not silently replace the curated homepage cards or change which services are currently bookable in the existing booking flow. Keep any differences explicit and ask the owner before changing the live bookable set.
-- Keep all text high-contrast and readable on the black, silver/white and restrained gold JTS palette. Do not introduce decorative extra colours to distinguish service categories.
-- This is progressive disclosure: three primary cards first, the full 17-item reference list on request. Do not regress to the search/filter interface.
+- The supplied 17-service catalogue in `src/lib/jts/public-services.ts` is the customer-facing source of truth for names, prices, service selection and booking.
+- The homepage may retain the three editorial featured cards (THE CUT, THE COLOUR and THE CHANGE) as the concise first presentation. Preserve their approved content, descriptions, prices, order, layout and owner-uploaded media.
+- The “View full price list” modal must show all 17 services in the four supplied categories. Every service row is a real booking link; selecting one navigates to `/order?service=<service-id>` and preselects that exact service.
+- The booking form must always offer all 17 supplied services, whether opened from a homepage card, the full price list, or directly. A stale or partial Firestore publicServices document must never silently remove bookable services from the booking selector.
+- The selected service must remain selected while the customer chooses date/time and enters their details; the booking summary and 50% deposit calculation must reflect that exact service and price.
+- Keep the homepage first view concise using progressive disclosure, but never make the full catalogue a dead-end reference list.
+- Do not add search fields, category filters, result counters or a colour-coded catalogue UI. Group the full list under the supplied categories only.
+- Preserve owner-uploaded service image/video support on the featured cards. Do not replace real salon imagery with generated placeholders or decorative glyphs when media is supplied.
+- Keep all text high-contrast and readable on the black, white/silver and restrained gold JTS palette. No decorative plum, purple, lime, neon-blue, pink or orange text treatments. Use text and borders—not colour alone—to communicate selection and status.
+- Keep the booking date/time/customer-details flow intact. Do not weaken availability checks, deposit rules, guest booking or request-vs-confirmation language.
+- This is one coherent task: choose a service → see its price and deposit → choose date/time → provide contact details → submit an appointment request.
 
 ## Deposit/payment
 The customer is instructed to pay the 50% deposit through Orange Money:

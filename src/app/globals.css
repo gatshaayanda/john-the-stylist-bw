@@ -1299,3 +1299,29 @@ input, select, textarea, button {
 .jtsPriceModalFoot a{flex:0 0 auto;color:#e4d4ad;font-size:.78rem;font-weight:800}
 .jtsPriceModal button:focus-visible,.jtsFullPriceListLink button:focus-visible,.jtsPriceModal a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 @media(max-width:560px){.jtsPriceModalBackdrop{align-items:end;padding:0}.jtsPriceModal{width:100%;max-height:90dvh;border-width:1px 0 0;border-radius:14px 14px 0 0}.jtsPriceModalHead{padding:19px 16px 14px}.jtsPriceModalContent{padding:4px 16px 16px}.jtsPriceModalFoot{align-items:flex-start;flex-direction:column;padding:13px 16px}.jtsPriceModalFoot a{font-size:.82rem}}
+
+
+/* JTS booking catalogue: all 17 supplied services are directly selectable. */
+.jtsPriceGroup li { padding: 0; }
+.jtsPriceGroup li > a {
+ display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:14px;
+ min-height:48px; padding:10px 8px; margin:0 -8px; border-bottom:1px solid #343434;
+ color:#fff; text-decoration:none; border-radius:3px;
+}
+.jtsPriceGroup li > a:hover,.jtsPriceGroup li > a:focus-visible { background:#1b1b1b; outline:2px solid #d8bd79; outline-offset:1px; }
+.jtsPriceGroup li > a > span:first-child,.jtsPriceGroup li > a > strong { color:#fff; }
+.jtsPriceGroup li > a > strong { font-size:.95rem; }
+.jtsPriceChoose { color:#e3d2a8; font-size:.72rem; font-weight:800; white-space:nowrap; }
+.jtsPriceGroup h3 { color:#e8e8e8; font-size:.82rem; letter-spacing:.09em; }
+.jtsPriceGroup li { font-size:1rem; }
+.jtsPriceModalFoot span { color:#e0e0e0; font-size:.82rem; }
+.jtsPriceModalFoot a { color:#fff; text-decoration:underline; text-underline-offset:3px; }
+.jtsBookingPage .jtsBookingStep p,.jtsBookingPage .jtsDateField > p,.jtsBookingPage .jtsBookingMain small,.jtsBookingPage .jtsTimeHint,.jtsBookingPage .jtsTimeSelectionSummary small,.jtsBookingPage .jtsSummary > p,.jtsBookingPage .jtsDepositCard p,.jtsBookingPage .jtsLocationMini p { color:#d0d0d0; opacity:1; }
+.jtsBookingPage .jtsChoice { background:#101010; border-color:#666; color:#fff; }
+.jtsBookingPage .jtsChoice > span { color:#dedede; opacity:1; }
+.jtsBookingPage .jtsChoice strong { color:#fff; }
+.jtsBookingPage .jtsChoice b { color:#e3d2a8; }
+.jtsBookingPage .jtsChoice:hover,.jtsBookingPage .jtsChoice.selected { border-color:#d8bd79; background:#1b1b1b; box-shadow:0 0 0 1px #d8bd79; }
+.jtsBookingPage .jtsChoice i { color:#e3d2a8; }
+.jtsBookingPage .jtsChoice:focus-visible,.jtsBookingPage .jtsTimeOpen:focus-visible,.jtsBookingPage .jtsCalendar button:focus-visible { outline:3px solid #e3d2a8; outline-offset:3px; }
+@media(max-width:420px) { .jtsPriceGroup li > a { grid-template-columns:minmax(0,1fr) auto; gap:6px 10px; } .jtsPriceChoose { grid-column:1 / -1; } }
