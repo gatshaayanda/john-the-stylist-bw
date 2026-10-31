@@ -2,44 +2,43 @@
 
 import Link from "next/link";
 import {doc,onSnapshot} from "firebase/firestore";
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useState} from "react";
 import {db} from "@/lib/firebase/client";
 import {DEFAULT_PUBLIC_SERVICES,normalizePublicServices,type PublicService} from "@/lib/jts/public-services";
 
-const ALL = "ALL SERVICES";
 export default function PublicServiceCards(){
  const [services,setServices]=useState<PublicService[]>(DEFAULT_PUBLIC_SERVICES);
- const [query,setQuery]=useState("");
- const [category,setCategory]=useState(ALL);
- const [showAll,setShowAll]=useState(false);
+ const [showPriceList,setShowPriceList]=useState(false);
  useEffect(()=>{
   const stop=onSnapshot(doc(db,"businessSettings","publicServices"),snapshot=>{
    if(snapshot.exists())setServices(normalizePublicServices(snapshot.data().services));
   },()=>{});
   return()=>stop();
  },[]);
- const categories=useMemo(()=>[ALL,...Array.from(new Set(services.map(item=>item.tag)))],[services]);
- const filtered=useMemo(()=>{
-  const term=query.trim().toLowerCase();
-  return services.filter(item=>(category===ALL||item.tag===category)&&(!term||[item.name,item.detail,item.note,item.tag].join(" ").toLowerCase().includes(term)));
- },[services,category,query]);
- const visible=showAll||query.trim()||category!==ALL?filtered:filtered.slice(0,6);
- return <div className="jtsServiceFinder">
-  <div className="jtsServiceFinderTools">
-   <label className="jtsServiceSearch"><span className="srOnly">Search services</span><span aria-hidden="true">⌕</span><input value={query} onChange={e=>{setQuery(e.target.value);setShowAll(true)}} placeholder="Search cuts, fades, tint, curls…" type="search"/></label>
-   {query&&<button type="button" className="jtsServiceClear" onClick={()=>setQuery("")}>Clear search</button>}
-  </div>
-  <div className="jtsServiceFilters" aria-label="Filter services by category">
-   {categories.map(item=><button type="button" key={item} className={category===item?"active":""} aria-pressed={category===item} onClick={()=>{setCategory(item);setShowAll(true)}}>{item}</button>)}
-  </div>
-  <div className="jtsServiceResultsMeta"><span>{filtered.length} {filtered.length===1?"service":"services"}</span><span>Published prices · BWP</span></div>
-  <div className="jtsServiceCompactList">
-   {visible.map((service,index)=><article className="jtsServiceCompactRow" key={service.id}>
-    <div className="jtsServiceCompactIdentity"><span className="jtsServiceCompactNumber">{String(services.indexOf(service)+1).padStart(2,"0")}</span><div><small>{service.tag}</small><strong>{service.name}</strong><p>{service.note}</p></div></div>
-    <div className="jtsServiceCompactAction"><b>{service.display}</b><Link href={"/order?service="+encodeURIComponent(service.id)}>Choose <span>↗</span></Link></div>
+ useEffect(()=>{
+  if(!showPriceList)return;
+  const close=(event:KeyboardEvent)=>{if(event.key==="Escape")setShowPriceList(false)};
+  window.addEventListener("keydown",close);
+  return()=>window.removeEventListener("keydown",close);
+ },[showPriceList]);
+ const groups=Array.from(new Set(DEFAULT_PUBLIC_SERVICES.map(service=>service.tag)));
+ return <>
+  <div className="jtsEditServiceGrid">
+   {services.map((service,index)=><article className="jtsEditServiceCard" key={service.id}>
+    <div className="jtsEditServiceCardTop"><span>{service.tag}</span><span>{String(index+1).padStart(2,"0")}</span></div>
+    {service.media?.length ? <div className="jtsServiceMediaGallery">{service.media.slice(0,3).map((media,mediaIndex)=><div className="jtsServiceMediaItem" key={media.url}>{media.type === "video" ? <video src={media.url} controls playsInline preload="metadata" aria-label={service.name+" video "+(mediaIndex+1)} /> : <img src={media.url} alt={media.alt || service.name+" finished look"} loading="lazy" />}</div>)}</div> : <div className={"jtsEditServiceGlyph jtsEditServiceGlyph"+(index%4)}><span>{["J","S","C","↗"][index%4]}</span></div>}
+    <h3>{service.name}</h3><p>{service.note}</p>
+    <div className="jtsEditServiceFoot"><strong>{service.display}</strong><Link href={"/order?service="+encodeURIComponent(service.id)}>Choose service <span>↗</span></Link></div>
    </article>)}
-   {filtered.length===0&&<div className="jtsServiceNoResults"><strong>No exact match yet.</strong><p>Try another word or ask John about a custom style and price.</p><Link href="/order">Ask about another style ↗</Link></div>}
+   {services.length===0&&<div className="jtsJourneyEmpty">The service list is being updated. Contact John to ask about your look.</div>}
   </div>
-  {!query.trim()&&category===ALL&&filtered.length>6&&<button type="button" className="jtsServiceShowAll" onClick={()=>setShowAll(value=>!value)}>{showAll?"Show fewer services":"View all 17 services"} <span>{showAll?"↑":"↓"}</span></button>}
- </div>;
+  <div className="jtsFullPriceListLink"><button type="button" onClick={()=>setShowPriceList(true)}>View full price list <span>↗</span></button></div>
+  {showPriceList&&<div className="jtsPriceModalBackdrop" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setShowPriceList(false)}}>
+   <section className="jtsPriceModal" role="dialog" aria-modal="true" aria-labelledby="jts-price-modal-title" aria-describedby="jts-price-modal-description">
+    <div className="jtsPriceModalHead"><div><span className="jtsEditEyebrow">JTS STYLES · SERVICE MENU</span><h2 id="jts-price-modal-title">The full price list.</h2><p id="jts-price-modal-description">All listed services and prices in Botswana pula.</p></div><button type="button" className="jtsPriceModalClose" onClick={()=>setShowPriceList(false)} aria-label="Close full price list">×</button></div>
+    <div className="jtsPriceModalContent">{groups.map(group=><section className="jtsPriceGroup" key={group}><h3>{group}</h3><ul>{DEFAULT_PUBLIC_SERVICES.filter(service=>service.tag===group).map(service=><li key={service.id}><span>{service.name}</span><strong>{service.display}</strong></li>)}</ul></section>)}</div>
+    <div className="jtsPriceModalFoot"><span>Have a reference image? Share it with John when you request your look.</span><Link href="/order">Request an appointment ↗</Link></div>
+   </section>
+  </div>}
+ </>;
 }

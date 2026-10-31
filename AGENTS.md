@@ -79,15 +79,15 @@ The owner-supplied bookable catalogue is the 17-service list in `src/lib/jts/pub
 
 All prices are BWP. Do not invent additional catalogue prices. For unlisted styles, provide an enquiry route and make clear that John must confirm the price before the customer commits.
 
-## Service discovery UX
-- The homepage and booking form must both use the same live Firestore catalogue with the local 17-service list as fallback.
-- Provide visible text search and category filters; do not force visitors to scroll a long undifferentiated list.
-- Show the exact price alongside every result, and preserve the selected service when moving from the homepage to booking.
-- On the homepage, show a compact preview and a clear way to reveal all services. On booking, show a compact selectable list and an unmistakable selected-service summary.
-- Empty search results must offer a clear way to clear search or ask about an unlisted style.
-- Do not hide all services behind search: the initial state must show discoverable options.
-- Keep category filters touch-friendly, horizontally scrollable on small screens, and keyboard accessible. Search and category filters combine; selecting a category must not erase the search.
-- Never convert an unpriced enquiry into a bookable service or invent a price.
+## Service presentation — protected customer experience
+- The homepage's approved primary presentation is the three editorial service cards: THE CUT, THE COLOUR and THE CHANGE. Preserve their exact owner-managed content, descriptions, prices, order, layout and styling; they are not to be replaced by a searchable catalogue.
+- Preserve owner-uploaded service image/video support on those cards. Do not replace real salon imagery with generated placeholders or decorative glyphs when media is supplied.
+- Do not add search fields, category filters, result counters or a new colour-coded catalogue UI to the homepage or booking form.
+- Keep the booking service selector simple and consistent with the current live curated services. Preserve the existing date/time/customer details flow and selection deep links.
+- The complete 17-service owner-supplied price list is secondary information, revealed only by the clearly labelled “View full price list” action in one accessible, dismissible modal. Group by the supplied categories; do not add a second search/filter layer.
+- The full list is reference information and must not silently replace the curated homepage cards or change which services are currently bookable in the existing booking flow. Keep any differences explicit and ask the owner before changing the live bookable set.
+- Keep all text high-contrast and readable on the black, silver/white and restrained gold JTS palette. Do not introduce decorative extra colours to distinguish service categories.
+- This is progressive disclosure: three primary cards first, the full 17-item reference list on request. Do not regress to the search/filter interface.
 
 ## Deposit/payment
 The customer is instructed to pay the 50% deposit through Orange Money:
