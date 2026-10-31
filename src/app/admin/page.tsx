@@ -212,7 +212,7 @@ function Dashboard() {
           const result = await uploadFiles("adminStyleMedia", {
             files: [uploadFile],
             headers: { Authorization: `Bearer ${token}` },
-            onUploadProgress: ({ progress }: { file: string; progress: number }) => {
+            onUploadProgress: ({ progress }) => {
               setUploadPercent(Math.max(0, Math.min(100, Math.round(progress))));
             },
           });
@@ -297,7 +297,7 @@ function Dashboard() {
       const uploaded = await uploadFiles("adminStyleMedia", {
         files: [file],
         headers: { Authorization: `Bearer ${token}` },
-        onUploadProgress: ({ progress }: { file: string; progress: number }) => {
+        onUploadProgress: ({ progress }) => {
           setUploadPercent(Math.max(0, Math.min(100, Math.round(progress))));
         },
       });
